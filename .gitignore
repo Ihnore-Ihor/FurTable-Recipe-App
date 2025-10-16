@@ -1,45 +1,99 @@
-# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
-.DS_Store
-.atom/
-.build/
-.buildlog/
-.history
-.svn/
-.swiftpm/
-migrate_working_dir/
+# ===================================================================
+# === General Generated Files (Flutter & Dart)
+# ===================================================================
 
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
-.idea/
-
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
-.dart_tool/
-.flutter-plugins-dependencies
-.pub-cache/
-.pub/
+# Files and directories created by the build process.
 /build/
-/coverage/
+/.dart_tool/
+/.packages
+/.flutter-plugins
+/.flutter-plugins-dependencies
 
-# Symbolication related
-app.*.symbols
+# The pubspec.lock file should be committed for applications.
+# It ensures all developers use the same dependency versions.
+# pubspec.lock
 
-# Obfuscation related
-app.*.map.json
+# ===================================================================
+# === IDE & Editor Specific Files
+# ===================================================================
 
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
+# IntelliJ & Android Studio
+/.idea/
+*.iml
+
+# Visual Studio Code
+/.vscode/
+
+# ===================================================================
+# === Sensitive Data & Configuration (CRITICAL FOR SECURITY)
+# ===================================================================
+
+# Firebase configuration files contain API keys and should NOT be committed to a public repo.
+# Each developer should add their own from the Firebase console.
+/android/app/google-services.json
+/ios/Runner/GoogleService-Info.plist
+/lib/firebase_options.dart # This is often generated and contains project IDs. Best to ignore.
+
+# A common pattern for storing environment variables and secrets.
+# Commit a template file (e.g., .env.example) instead.
+*.env
+.env
+
+# ===================================================================
+# === Platform Specific Generated Files
+# ===================================================================
+
+# Android
+/android/.gradle/
+/android/local.properties
+/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+
+# iOS
+/ios/Pods/
+/ios/Podfile.lock
+/ios/.symlinks/
+/ios/Flutter/App.framework
+/ios/Flutter/engine
+/ios/Flutter/flutter_assets
+/ios/Flutter/.last_build_id
+/ios/Runner/GeneratedPluginRegistrant.h
+/ios/Runner/GeneratedPluginRegistrant.m
+/ios/Runner.xcworkspace/contents.xcworkspacedata
+/ios/Runner.xcworkspace/xcshareddata/
+/ios/Runner.xcodeproj/project.xcworkspace/
+/ios/Runner.xcodeproj/xcshareddata/
+/ios/Runner.xcodeproj/xcuserdata/
+
+# macOS
+/macos/Flutter/GeneratedPluginRegistrant.swift
+/macos/Pods/
+/macos/Podfile.lock
+/macos/.symlinks/
+/macos/Runner.xcworkspace/contents.xcworkspacedata
+/macos/Runner.xcworkspace/xcshareddata/
+/macos/Runner.xcodeproj/project.xcworkspace/
+/macos/Runner.xcodeproj/xcshareddata/
+/macos/Runner.xcodeproj/xcuserdata/
+
+# ===================================================================
+# === Operating System Specific Files
+# ===================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+
+# ===================================================================
+# === Logs and Crash Dumps
+# ===================================================================
+
+*.log
+*.dmp
+coverage/
