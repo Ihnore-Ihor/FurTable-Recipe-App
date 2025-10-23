@@ -11,9 +11,8 @@ A minimalist Progressive Web App (PWA) for creating and discovering recipes, fea
 
 FurTable allows users to create, share, and organize their favorite recipes in a clean, artistic interface. The layout is inspired by modern content-browsing apps, while the aesthetic is drawn from high-contrast manga art.
 
-*(**Порада:** Запишіть короткий GIF, що демонструє роботу застосунку, і вставте сюди. Це виглядає дуже професійно!)*
 
-![FurTable App Preview](URL_ДО_ВАШОГО_GIF_АБО_СКРИНШОТУ)
+![FurTable App Preview](<img width="215" height="377" alt="image" src="https://github.com/user-attachments/assets/9b8b52af-f27c-4f5f-9e3d-efa7744503a1" />)
 
 ### Key Features:
 *   🔐 **Authentication:** Secure user registration and login using Firebase Authentication.
