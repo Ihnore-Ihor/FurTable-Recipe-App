@@ -50,8 +50,9 @@ class _AuthScreenState extends State<AuthScreen> {
             'FurTable',
             style: TextStyle(
               fontSize: 28,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w900,
               fontFamily: 'Inter',
+              color: AppTheme.darkCharcoal,
             ),
           ),
           const SizedBox(height: 24),

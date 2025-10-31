@@ -64,6 +64,7 @@ flutter:
   assets:
     - assets/images/legoshi_eating_auth.png
     - assets/images/legoshi_loading.png
+    - assets/images/gohin_empty.png
     - assets/images/burger.png
     - assets/images/salmon.png
     - assets/images/pasta.png

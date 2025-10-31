@@ -2,12 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/features/explore/widgets/recipe_card.dart';
+import 'package:furtable/features/favorites/screens/favorites_screen.dart';
 
 class ExploreScreen extends StatelessWidget {
   const ExploreScreen({super.key});
 
+  int _getCrossAxisCount(double screenWidth) {
+    if (screenWidth > 1920) {
+      return 6;
+    } else if (screenWidth > 1200) {
+      return 5;
+    } else if (screenWidth > 1024) {
+      return 4;
+    } else if (screenWidth > 767) {
+      return 3;
+    } else if (screenWidth > 480) {
+      return 2;
+    } else {
+      return 1;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    final crossAxisCount = _getCrossAxisCount(screenWidth);
+
     final List<Map<String, String>> recipes = [
       {
         'image': 'assets/images/salmon.png',
@@ -58,7 +79,12 @@ class ExploreScreen extends StatelessWidget {
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const Placeholder()),
+              );
+            },
             icon: const Icon(
               Icons.person_outline,
               color: AppTheme.darkCharcoal,
@@ -69,7 +95,7 @@ class ExploreScreen extends StatelessWidget {
       ),
       body: AlignedGridView.count(
         padding: const EdgeInsets.all(16),
-        crossAxisCount: 2,
+        crossAxisCount: crossAxisCount,
         crossAxisSpacing: 16,
         mainAxisSpacing: 24,
 
@@ -102,23 +128,36 @@ class ExploreScreen extends StatelessWidget {
           fontFamily: 'Inter',
         ),
         currentIndex: 0,
-        items: const [
-          BottomNavigationBarItem(
+        onTap: (index) {
+          if (index == 2) {
+            Navigator.push(
+              context,
+              MaterialPageRoute<void>(
+                builder: (context) => const FavoritesScreen(),
+              ),
+            );
+          }
+        },
+        items: [
+          const BottomNavigationBarItem(
             icon: Icon(Icons.explore_outlined),
             activeIcon: Icon(Icons.explore),
             label: 'Explore',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.book_outlined),
             activeIcon: Icon(Icons.book),
             label: 'My Recipes',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.favorite_border),
             activeIcon: Icon(Icons.favorite),
             label: 'Favorites',
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.search),
+            label: 'Search',
+          ),
         ],
       ),
     );

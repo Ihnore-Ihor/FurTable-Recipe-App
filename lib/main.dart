@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:furtable/core/app_theme.dart';
-import 'package:furtable/features/auth/screens/auth_screen.dart'; // Ми створимо цей екран далі
+import 'package:furtable/features/auth/screens/auth_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,8 +14,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'FurTable',
       theme: AppTheme.theme,
-      debugShowCheckedModeBanner: false, // Прибирає банер "Debug"
-      home: const AuthScreen(), // Починаємо з екрана логіну
+      debugShowCheckedModeBanner: false,
+      home: const AuthScreen(),
     );
   }
 }
