@@ -11,27 +11,81 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
+  final _formKey = GlobalKey<FormState>();
+
   bool _isLoginView = false;
+  bool _isPasswordVisible = false;
+
+  // ВИПРАВЛЕНО: Повертаємо цю змінну. Вона - ключ до правильної поведінки.
+  AutovalidateMode _autovalidateMode = AutovalidateMode.disabled;
+
+  final _emailController = TextEditingController();
+  final _nicknameController = TextEditingController();
+  final _passwordController = TextEditingController();
 
   void _handleAuthentication() {
+    // 1. Перевіряємо валідність форми
+    final bool isValid = _formKey.currentState?.validate() ?? false;
+
+    // 2. Якщо форма НЕ валідна...
+    if (!isValid) {
+      // ...і ми ще не в режимі інтерактивної валідації...
+      if (_autovalidateMode == AutovalidateMode.disabled) {
+        // ...то вмикаємо його. Тепер помилки будуть з'являтися/зникати при введенні.
+        setState(() {
+          _autovalidateMode = AutovalidateMode.onUserInteraction;
+        });
+      }
+      // Виходимо з функції, оскільки є помилки.
+      return;
+    }
+
+    // 3. Якщо форма валідна, продовжуємо з навігацією.
     Navigator.of(context).push(
       PageRouteBuilder(
-        pageBuilder: (context, animation1, animation2) => const LoadingScreen(),
+        pageBuilder: (_, __, ___) => const LoadingScreen(),
         transitionDuration: Duration.zero,
-        reverseTransitionDuration: Duration.zero,
       ),
     );
-
     Future.delayed(const Duration(seconds: 2), () {
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => const ExploreScreen()),
-        (Route<dynamic> route) => false,
+        (route) => false,
       );
     });
   }
 
+  void _togglePasswordVisibility() {
+    setState(() {
+      _isPasswordVisible = !_isPasswordVisible;
+    });
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _nicknameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  void _switchTab(bool isLogin) {
+    if (_isLoginView != isLogin) {
+      setState(() {
+        _isLoginView = isLogin;
+        _formKey.currentState?.reset();
+        _autovalidateMode =
+            AutovalidateMode.disabled; // Скидаємо режим валідації
+        _emailController.clear();
+        _nicknameController.clear();
+        _passwordController.clear();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // ВИПРАВЛЕНО: Прибираємо розрахунок isButtonEnabled, кнопка тепер завжди активна
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -82,60 +136,49 @@ class _AuthScreenState extends State<AuthScreen> {
         ],
       ),
       padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildAuthTabs(),
-          const SizedBox(height: 32),
-          if (_isLoginView) ...[
-            const Text(
-              'Welcome Back',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Inter',
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Fill out the information below to access your account.',
-              style: TextStyle(
-                color: AppTheme.mediumGray,
-                fontSize: 16,
-                fontFamily: 'Inter',
-              ),
-            ),
+      child: Form(
+        key: _formKey,
+        // ВИПРАВЛЕНО: Режим валідації тепер керується нашою змінною стану
+        autovalidateMode: _autovalidateMode,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildAuthTabs(),
             const SizedBox(height: 32),
-            _buildLoginForm(),
-          ] else ...[
-            const Text(
-              'Create Account',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Inter',
+            if (_isLoginView) ...[
+              const Text(
+                'Welcome Back',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Let\'s get started by filling out the form below.',
-              style: TextStyle(
-                color: AppTheme.mediumGray,
-                fontSize: 16,
-                fontFamily: 'Inter',
+              const SizedBox(height: 8),
+              const Text(
+                'Fill out the information below...',
+                style: TextStyle(color: AppTheme.mediumGray, fontSize: 16),
               ),
-            ),
-            const SizedBox(height: 32),
-            _buildRegistrationForm(),
+              const SizedBox(height: 32),
+              _buildLoginForm(),
+            ] else ...[
+              const Text(
+                'Create Account',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Let\'s get started...',
+                style: TextStyle(color: AppTheme.mediumGray, fontSize: 16),
+              ),
+              const SizedBox(height: 32),
+              _buildRegistrationForm(),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildAuthTabs() {
     final noSplashButtonStyle = ButtonStyle(
-      overlayColor: MaterialStateProperty.all(Colors.transparent),
+      overlayColor: WidgetStateProperty.all(Colors.transparent),
       splashFactory: NoSplash.splashFactory,
     );
     return Container(
@@ -149,13 +192,13 @@ class _AuthScreenState extends State<AuthScreen> {
             'Create Account',
             !_isLoginView,
             buttonStyle: noSplashButtonStyle,
-            onTap: () => setState(() => _isLoginView = false),
+            onTap: () => _switchTab(false),
           ),
           _buildTab(
             'Log In',
             _isLoginView,
             buttonStyle: noSplashButtonStyle,
-            onTap: () => setState(() => _isLoginView = true),
+            onTap: () => _switchTab(true),
           ),
         ],
       ),
@@ -198,9 +241,20 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget _buildLoginForm() {
     return Column(
       children: [
-        _buildTextField(hintText: 'Email or Login'),
+        _buildTextField(
+          controller: _emailController,
+          hintText: 'Email or Login',
+          validator: (val) =>
+              (val?.isEmpty ?? true) ? 'Please fill in this field' : null,
+        ),
         const SizedBox(height: 16),
-        _buildTextField(hintText: 'Password', isPassword: true),
+        _buildTextField(
+          controller: _passwordController,
+          hintText: 'Password',
+          isPassword: true,
+          validator: (val) =>
+              (val?.isEmpty ?? true) ? 'Please fill in this field' : null,
+        ),
         const SizedBox(height: 32),
         _buildAuthButton(text: 'Sign In', onPressed: _handleAuthentication),
       ],
@@ -210,22 +264,72 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget _buildRegistrationForm() {
     return Column(
       children: [
-        _buildTextField(hintText: 'Email'),
+        _buildTextField(
+          controller: _emailController,
+          hintText: 'Email',
+          validator: (value) {
+            if (value == null || !RegExp(r'\S+@\S+\.\S+').hasMatch(value)) {
+              return 'Please enter a valid email address';
+            }
+            return null;
+          },
+        ),
         const SizedBox(height: 16),
-        _buildTextField(hintText: 'Nickname'),
+        _buildTextField(
+          controller: _nicknameController,
+          hintText: 'Nickname',
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please fill in all required fields';
+            }
+            return null;
+          },
+        ),
         const SizedBox(height: 16),
-        _buildTextField(hintText: 'Password', isPassword: true),
+        _buildTextField(
+          controller: _passwordController,
+          hintText: 'Password',
+          isPassword: true,
+          validator: (value) {
+            if (value == null || value.length < 8) {
+              return 'Minimum 8 characters required';
+            }
+            if (!value.contains(RegExp(r'[0-9]'))) {
+              return 'Must contain at least one number';
+            }
+            if (!value.contains(RegExp(r'[a-zA-Z]'))) {
+              return 'Must contain at least one letter';
+            }
+            return null;
+          },
+        ),
         const SizedBox(height: 32),
         _buildAuthButton(text: 'Get Started', onPressed: _handleAuthentication),
       ],
     );
   }
 
-  Widget _buildTextField({required String hintText, bool isPassword = false}) {
-    return TextField(
-      obscureText: isPassword,
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hintText,
+    bool isPassword = false,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      obscureText: isPassword && !_isPasswordVisible,
+      validator: validator,
       decoration: InputDecoration(
         hintText: hintText,
+        errorStyle: const TextStyle(color: Color(0xFFDC2626), fontSize: 14),
+        errorBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(50)),
+          borderSide: BorderSide(color: Color(0xFFDC2626), width: 1.5),
+        ),
+        focusedErrorBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(50)),
+          borderSide: BorderSide(color: Color(0xFFDC2626), width: 1.5),
+        ),
         border: const OutlineInputBorder(
           borderRadius: BorderRadius.all(Radius.circular(50)),
           borderSide: BorderSide(color: Color(0xFFE0E3E7)),
@@ -239,11 +343,16 @@ class _AuthScreenState extends State<AuthScreen> {
           vertical: 14,
         ),
         suffixIcon: isPassword
-            ? const Padding(
-                padding: EdgeInsets.only(right: 12.0),
-                child: Icon(
-                  Icons.visibility_off_outlined,
-                  color: AppTheme.mediumGray,
+            ? GestureDetector(
+                onTap: _togglePasswordVisibility,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 12.0),
+                  child: Icon(
+                    _isPasswordVisible
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
+                    color: AppTheme.mediumGray,
+                  ),
                 ),
               )
             : null,
@@ -258,10 +367,10 @@ class _AuthScreenState extends State<AuthScreen> {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: onPressed,
+        onPressed: onPressed, // Завжди викликає _handleAuthentication
         style:
             ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.darkCharcoal,
+              backgroundColor: AppTheme.darkCharcoal, // Завжди чорна
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
@@ -269,7 +378,7 @@ class _AuthScreenState extends State<AuthScreen> {
               ),
             ).merge(
               ButtonStyle(
-                overlayColor: MaterialStateProperty.all(Colors.transparent),
+                overlayColor: WidgetStateProperty.all(Colors.transparent),
                 splashFactory: NoSplash.splashFactory,
               ),
             ),
