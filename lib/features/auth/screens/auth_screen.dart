@@ -1,7 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/features/explore/screens/explore_screen.dart';
-import 'package:furtable/features/loading/screens/loading_screen.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -13,46 +15,174 @@ class AuthScreen extends StatefulWidget {
 class _AuthScreenState extends State<AuthScreen> {
   final _formKey = GlobalKey<FormState>();
 
+  // НОВЕ: Створюємо екземпляр FirebaseAuth
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
+
   bool _isLoginView = false;
   bool _isPasswordVisible = false;
-
-  // ВИПРАВЛЕНО: Повертаємо цю змінну. Вона - ключ до правильної поведінки.
   AutovalidateMode _autovalidateMode = AutovalidateMode.disabled;
+
+  // НОВЕ: Стан для відстеження завантаження
+  bool _isLoading = false;
 
   final _emailController = TextEditingController();
   final _nicknameController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  void _handleAuthentication() {
-    // 1. Перевіряємо валідність форми
+  // НОВЕ: Реєструємо перегляд екрана при його ініціалізації
+  @override
+  void initState() {
+    super.initState();
+    print("ANALYTICS: Logging AuthScreen view...");
+    _analytics.logScreenView(screenName: 'AuthScreen');
+  }
+
+  // ЗМІНЕНО: Повністю оновлена функція
+  Future<void> _handleAuthentication() async {
     final bool isValid = _formKey.currentState?.validate() ?? false;
 
-    // 2. Якщо форма НЕ валідна...
     if (!isValid) {
-      // ...і ми ще не в режимі інтерактивної валідації...
       if (_autovalidateMode == AutovalidateMode.disabled) {
-        // ...то вмикаємо його. Тепер помилки будуть з'являтися/зникати при введенні.
         setState(() {
           _autovalidateMode = AutovalidateMode.onUserInteraction;
         });
       }
-      // Виходимо з функції, оскільки є помилки.
       return;
     }
 
-    // 3. Якщо форма валідна, продовжуємо з навігацією.
-    Navigator.of(context).push(
-      PageRouteBuilder(
-        pageBuilder: (_, __, ___) => const LoadingScreen(),
-        transitionDuration: Duration.zero,
-      ),
-    );
-    Future.delayed(const Duration(seconds: 2), () {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const ExploreScreen()),
-        (route) => false,
-      );
+    // Вмикаємо індикатор завантаження
+    setState(() {
+      _isLoading = true;
     });
+
+    try {
+      final email = _emailController.text.trim();
+      final password = _passwordController.text.trim();
+
+      if (_isLoginView) {
+        await _auth.signInWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+        // ЗМІНЕНО: Логуємо подію входу
+        await _analytics.logLogin(loginMethod: 'email_password');
+      } else {
+        final UserCredential userCredential = await _auth
+            .createUserWithEmailAndPassword(email: email, password: password);
+        if (userCredential.user != null) {
+          await userCredential.user!.updateDisplayName(
+            _nicknameController.text.trim(),
+          );
+        }
+        // ЗМІНЕНО: Логуємо подію реєстрації
+        await _analytics.logSignUp(signUpMethod: 'email_password');
+      }
+
+      // Якщо автентифікація успішна, виконуємо навігацію
+      // ЗМІНЕНО: Пряма навігація після успішної дії
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const ExploreScreen()),
+          (route) => false,
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      // Обробка помилок від Firebase
+      String message = 'An error occurred. Please check your credentials.';
+      if (e.code == 'weak-password') {
+        message = 'The password provided is too weak.';
+      } else if (e.code == 'email-already-in-use') {
+        message = 'An account already exists for that email.';
+      } else if (e.code == 'user-not-found' || e.code == 'wrong-password') {
+        message = 'Invalid email or password.';
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message), backgroundColor: Colors.redAccent),
+        );
+      }
+    } catch (e) {
+      // Обробка інших помилок
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Something went wrong. Please try again.'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    } finally {
+      // Вимикаємо індикатор завантаження в будь-якому випадку
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  // НОВЕ: Функція для автентифікації через Google
+  // ЗМІНЕНО: Повністю переписана функція з правильним API
+  // ЗМІНЕНО: Повністю переписана функція для роботи у вебі.
+  Future<void> _signInWithGoogle() async {
+    setState(() => _isLoading = true);
+
+    try {
+      // 1. Створюємо провайдера для Google.
+      GoogleAuthProvider googleProvider = GoogleAuthProvider();
+
+      // 2. Викликаємо signInWithPopup - це спеціальний метод для вебу.
+      // Він відкриє спливаюче вікно для вибору акаунта Google.
+      final UserCredential userCredential = await _auth.signInWithPopup(
+        googleProvider,
+      );
+
+      // ЗМІНЕНО: Логуємо подію входу через Google
+      await _analytics.logLogin(loginMethod: 'google');
+
+      // 3. Якщо вхід успішний (користувач існує), переходимо на головний екран.
+      if (mounted && userCredential.user != null) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const ExploreScreen()),
+          (route) => false,
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      // Обробляємо випадок, коли користувач просто закрив спливаюче вікно.
+      // Це не помилка, тому не показуємо сповіщення.
+      if (e.code == 'popup-closed-by-user') {
+        // Просто зупиняємо завантаження.
+        setState(() => _isLoading = false);
+        return;
+      }
+      // Для інших помилок показуємо повідомлення
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              e.message ?? "An error occurred with Google Sign-In.",
+            ),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    } catch (e) {
+      // Обробка будь-яких інших помилок
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to sign in with Google. Please try again.'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   void _togglePasswordVisibility() {
@@ -74,8 +204,7 @@ class _AuthScreenState extends State<AuthScreen> {
       setState(() {
         _isLoginView = isLogin;
         _formKey.currentState?.reset();
-        _autovalidateMode =
-            AutovalidateMode.disabled; // Скидаємо режим валідації
+        _autovalidateMode = AutovalidateMode.disabled;
         _emailController.clear();
         _nicknameController.clear();
         _passwordController.clear();
@@ -85,7 +214,6 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // ВИПРАВЛЕНО: Прибираємо розрахунок isButtonEnabled, кнопка тепер завжди активна
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -138,7 +266,6 @@ class _AuthScreenState extends State<AuthScreen> {
       padding: const EdgeInsets.all(24),
       child: Form(
         key: _formKey,
-        // ВИПРАВЛЕНО: Режим валідації тепер керується нашою змінною стану
         autovalidateMode: _autovalidateMode,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,6 +297,11 @@ class _AuthScreenState extends State<AuthScreen> {
               const SizedBox(height: 32),
               _buildRegistrationForm(),
             ],
+            // ЗМІНЕНО: Додаємо новий блок з кнопкою Google
+            const SizedBox(height: 24),
+            _buildDivider(),
+            const SizedBox(height: 24),
+            _buildGoogleSignInButton(),
           ],
         ),
       ),
@@ -243,7 +375,7 @@ class _AuthScreenState extends State<AuthScreen> {
       children: [
         _buildTextField(
           controller: _emailController,
-          hintText: 'Email or Login',
+          hintText: 'Email', // Змінив на Email для ясності
           validator: (val) =>
               (val?.isEmpty ?? true) ? 'Please fill in this field' : null,
         ),
@@ -256,7 +388,12 @@ class _AuthScreenState extends State<AuthScreen> {
               (val?.isEmpty ?? true) ? 'Please fill in this field' : null,
         ),
         const SizedBox(height: 32),
-        _buildAuthButton(text: 'Sign In', onPressed: _handleAuthentication),
+        // ЗМІНЕНО: Передаємо _isLoading
+        _buildAuthButton(
+          text: 'Sign In',
+          onPressed: _handleAuthentication,
+          isLoading: _isLoading,
+        ),
       ],
     );
   }
@@ -279,8 +416,8 @@ class _AuthScreenState extends State<AuthScreen> {
           controller: _nicknameController,
           hintText: 'Nickname',
           validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Please fill in all required fields';
+            if (value == null || value.length < 3) {
+              return 'Nickname must be at least 3 characters';
             }
             return null;
           },
@@ -294,17 +431,16 @@ class _AuthScreenState extends State<AuthScreen> {
             if (value == null || value.length < 8) {
               return 'Minimum 8 characters required';
             }
-            if (!value.contains(RegExp(r'[0-9]'))) {
-              return 'Must contain at least one number';
-            }
-            if (!value.contains(RegExp(r'[a-zA-Z]'))) {
-              return 'Must contain at least one letter';
-            }
             return null;
           },
         ),
         const SizedBox(height: 32),
-        _buildAuthButton(text: 'Get Started', onPressed: _handleAuthentication),
+        // ЗМІНЕНО: Передаємо _isLoading
+        _buildAuthButton(
+          text: 'Get Started',
+          onPressed: _handleAuthentication,
+          isLoading: _isLoading,
+        ),
       ],
     );
   }
@@ -360,32 +496,96 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
+  // НОВЕ: Віджет для розділювача "OR"
+  Widget _buildDivider() {
+    return const Row(
+      children: [
+        Expanded(child: Divider(color: Colors.black26)),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            'OR',
+            style: TextStyle(
+              color: AppTheme.mediumGray,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        Expanded(child: Divider(color: Colors.black26)),
+      ],
+    );
+  }
+
+  // НОВЕ: Віджет для кнопки входу через Google
+  Widget _buildGoogleSignInButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: _isLoading ? null : _signInWithGoogle,
+        icon: SvgPicture.asset('assets/icons/google_logo.svg', height: 20),
+        label: const Text(
+          'Continue with Google',
+          style: TextStyle(
+            color: AppTheme.darkCharcoal,
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        style: OutlinedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          side: const BorderSide(color: Color(0xFFE0E3E7), width: 1.5),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(50),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ЗМІНЕНО: Додано параметр isLoading
   Widget _buildAuthButton({
     required String text,
     required VoidCallback onPressed,
+    required bool isLoading,
   }) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: onPressed, // Завжди викликає _handleAuthentication
+        // ЗМІНЕНО: Кнопка неактивна під час завантаження
+        onPressed: isLoading ? null : onPressed,
         style:
             ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.darkCharcoal, // Завжди чорна
+              backgroundColor: AppTheme.darkCharcoal,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(50),
               ),
+              // ЗМІНЕНО: Стиль для неактивної кнопки
+              disabledBackgroundColor: AppTheme.darkCharcoal.withValues(),
             ).merge(
               ButtonStyle(
                 overlayColor: WidgetStateProperty.all(Colors.transparent),
                 splashFactory: NoSplash.splashFactory,
               ),
             ),
-        child: Text(
-          text,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-        ),
+        // ЗМІНЕНО: Показуємо індикатор завантаження або текст
+        child: isLoading
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.0,
+                  color: Colors.white,
+                ),
+              )
+            : Text(
+                text,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
       ),
     );
   }

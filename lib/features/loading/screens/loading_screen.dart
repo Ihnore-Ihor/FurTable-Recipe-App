@@ -14,7 +14,7 @@ class LoadingScreen extends StatelessWidget {
 
           children: [
             const Text(
-              'Loading...',
+              'In progress...',
               style: TextStyle(
                 fontFamily: 'Inter',
                 fontSize: 18,

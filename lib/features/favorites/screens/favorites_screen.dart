@@ -3,6 +3,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/features/explore/widgets/recipe_card.dart';
 import 'package:furtable/features/explore/screens/explore_screen.dart';
+import 'package:furtable/features/loading/screens/loading_screen.dart';
 
 class FavoritesScreen extends StatelessWidget {
   const FavoritesScreen({super.key});
@@ -38,7 +39,7 @@ class FavoritesScreen extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const Placeholder()),
+                MaterialPageRoute(builder: (context) => const LoadingScreen()),
               );
             },
             icon: const Icon(Icons.person_outline),
@@ -81,14 +82,14 @@ class FavoritesScreen extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute<void>(
-                builder: (context) => const Placeholder(),
+                builder: (context) => const LoadingScreen(),
               ),
             );
           } else if (index == 4) {
             Navigator.push(
               context,
               MaterialPageRoute<void>(
-                builder: (context) => const Placeholder(),
+                builder: (context) => const LoadingScreen(),
               ),
             );
           }

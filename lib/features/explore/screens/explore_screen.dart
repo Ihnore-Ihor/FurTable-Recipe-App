@@ -1,11 +1,27 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/features/explore/widgets/recipe_card.dart';
 import 'package:furtable/features/favorites/screens/favorites_screen.dart';
+import 'package:furtable/features/loading/screens/loading_screen.dart';
 
-class ExploreScreen extends StatelessWidget {
+// ЗМІНЕНО: Конвертуємо у StatefulWidget
+class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
+
+  @override
+  State<ExploreScreen> createState() => _ExploreScreenState();
+}
+
+class _ExploreScreenState extends State<ExploreScreen> {
+  // НОВЕ: Логуємо подію в initState
+  @override
+  void initState() {
+    super.initState();
+    print("ANALYTICS: Logging ExploreScreen view...");
+    FirebaseAnalytics.instance.logScreenView(screenName: 'ExploreScreen');
+  }
 
   int _getCrossAxisCount(double screenWidth) {
     if (screenWidth > 1920) {
@@ -82,7 +98,7 @@ class ExploreScreen extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const Placeholder()),
+                MaterialPageRoute(builder: (context) => const LoadingScreen()),
               );
             },
             icon: const Icon(
@@ -93,22 +109,47 @@ class ExploreScreen extends StatelessWidget {
           const SizedBox(width: 8),
         ],
       ),
-      body: AlignedGridView.count(
-        padding: const EdgeInsets.all(16),
-        crossAxisCount: crossAxisCount,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 24,
+      body: Column(
+        children: [
+          // НОВЕ: Кнопка для генерації помилки
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+              ),
+              onPressed: () {
+                // Цей рядок згенерує помилку, яку Sentry має перехопити
+                throw Exception(
+                  'Це тестова помилка від Sentry! Час: ${DateTime.now()}',
+                );
+              },
+              child: const Text(
+                'Згенерувати тестову помилку для Sentry',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ),
+          Expanded(
+            child: AlignedGridView.count(
+              padding: const EdgeInsets.all(16),
+              crossAxisCount: crossAxisCount,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 24,
 
-        itemCount: recipes.length,
-        itemBuilder: (context, index) {
-          final recipe = recipes[index];
-          return RecipeCard(
-            imageUrl: recipe['image']!,
-            title: recipe['title']!,
-            author: recipe['author']!,
-            likes: recipe['likes']!,
-          );
-        },
+              itemCount: recipes.length,
+              itemBuilder: (context, index) {
+                final recipe = recipes[index];
+                return RecipeCard(
+                  imageUrl: recipe['image']!,
+                  title: recipe['title']!,
+                  author: recipe['author']!,
+                  likes: recipe['likes']!,
+                );
+              },
+            ),
+          ),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
