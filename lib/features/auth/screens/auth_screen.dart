@@ -15,7 +15,6 @@ class AuthScreen extends StatefulWidget {
 class _AuthScreenState extends State<AuthScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  // НОВЕ: Створюємо екземпляр FirebaseAuth
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
 
@@ -23,14 +22,12 @@ class _AuthScreenState extends State<AuthScreen> {
   bool _isPasswordVisible = false;
   AutovalidateMode _autovalidateMode = AutovalidateMode.disabled;
 
-  // НОВЕ: Стан для відстеження завантаження
   bool _isLoading = false;
 
   final _emailController = TextEditingController();
   final _nicknameController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  // НОВЕ: Реєструємо перегляд екрана при його ініціалізації
   @override
   void initState() {
     super.initState();
@@ -38,7 +35,6 @@ class _AuthScreenState extends State<AuthScreen> {
     _analytics.logScreenView(screenName: 'AuthScreen');
   }
 
-  // ЗМІНЕНО: Повністю оновлена функція
   Future<void> _handleAuthentication() async {
     final bool isValid = _formKey.currentState?.validate() ?? false;
 
@@ -51,7 +47,6 @@ class _AuthScreenState extends State<AuthScreen> {
       return;
     }
 
-    // Вмикаємо індикатор завантаження
     setState(() {
       _isLoading = true;
     });
@@ -65,7 +60,6 @@ class _AuthScreenState extends State<AuthScreen> {
           email: email,
           password: password,
         );
-        // ЗМІНЕНО: Логуємо подію входу
         await _analytics.logLogin(loginMethod: 'email_password');
       } else {
         final UserCredential userCredential = await _auth
@@ -75,12 +69,9 @@ class _AuthScreenState extends State<AuthScreen> {
             _nicknameController.text.trim(),
           );
         }
-        // ЗМІНЕНО: Логуємо подію реєстрації
         await _analytics.logSignUp(signUpMethod: 'email_password');
       }
 
-      // Якщо автентифікація успішна, виконуємо навігацію
-      // ЗМІНЕНО: Пряма навігація після успішної дії
       if (mounted) {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const ExploreScreen()),
@@ -88,7 +79,6 @@ class _AuthScreenState extends State<AuthScreen> {
         );
       }
     } on FirebaseAuthException catch (e) {
-      // Обробка помилок від Firebase
       String message = 'An error occurred. Please check your credentials.';
       if (e.code == 'weak-password') {
         message = 'The password provided is too weak.';
@@ -104,7 +94,6 @@ class _AuthScreenState extends State<AuthScreen> {
         );
       }
     } catch (e) {
-      // Обробка інших помилок
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -114,7 +103,6 @@ class _AuthScreenState extends State<AuthScreen> {
         );
       }
     } finally {
-      // Вимикаємо індикатор завантаження в будь-якому випадку
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -123,26 +111,18 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  // НОВЕ: Функція для автентифікації через Google
-  // ЗМІНЕНО: Повністю переписана функція з правильним API
-  // ЗМІНЕНО: Повністю переписана функція для роботи у вебі.
   Future<void> _signInWithGoogle() async {
     setState(() => _isLoading = true);
 
     try {
-      // 1. Створюємо провайдера для Google.
       GoogleAuthProvider googleProvider = GoogleAuthProvider();
 
-      // 2. Викликаємо signInWithPopup - це спеціальний метод для вебу.
-      // Він відкриє спливаюче вікно для вибору акаунта Google.
       final UserCredential userCredential = await _auth.signInWithPopup(
         googleProvider,
       );
 
-      // ЗМІНЕНО: Логуємо подію входу через Google
       await _analytics.logLogin(loginMethod: 'google');
 
-      // 3. Якщо вхід успішний (користувач існує), переходимо на головний екран.
       if (mounted && userCredential.user != null) {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const ExploreScreen()),
@@ -150,14 +130,10 @@ class _AuthScreenState extends State<AuthScreen> {
         );
       }
     } on FirebaseAuthException catch (e) {
-      // Обробляємо випадок, коли користувач просто закрив спливаюче вікно.
-      // Це не помилка, тому не показуємо сповіщення.
       if (e.code == 'popup-closed-by-user') {
-        // Просто зупиняємо завантаження.
         setState(() => _isLoading = false);
         return;
       }
-      // Для інших помилок показуємо повідомлення
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -169,7 +145,6 @@ class _AuthScreenState extends State<AuthScreen> {
         );
       }
     } catch (e) {
-      // Обробка будь-яких інших помилок
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -297,7 +272,6 @@ class _AuthScreenState extends State<AuthScreen> {
               const SizedBox(height: 32),
               _buildRegistrationForm(),
             ],
-            // ЗМІНЕНО: Додаємо новий блок з кнопкою Google
             const SizedBox(height: 24),
             _buildDivider(),
             const SizedBox(height: 24),
@@ -375,7 +349,7 @@ class _AuthScreenState extends State<AuthScreen> {
       children: [
         _buildTextField(
           controller: _emailController,
-          hintText: 'Email', // Змінив на Email для ясності
+          hintText: 'Email',
           validator: (val) =>
               (val?.isEmpty ?? true) ? 'Please fill in this field' : null,
         ),
@@ -388,7 +362,6 @@ class _AuthScreenState extends State<AuthScreen> {
               (val?.isEmpty ?? true) ? 'Please fill in this field' : null,
         ),
         const SizedBox(height: 32),
-        // ЗМІНЕНО: Передаємо _isLoading
         _buildAuthButton(
           text: 'Sign In',
           onPressed: _handleAuthentication,
@@ -435,7 +408,6 @@ class _AuthScreenState extends State<AuthScreen> {
           },
         ),
         const SizedBox(height: 32),
-        // ЗМІНЕНО: Передаємо _isLoading
         _buildAuthButton(
           text: 'Get Started',
           onPressed: _handleAuthentication,
@@ -496,7 +468,6 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
-  // НОВЕ: Віджет для розділювача "OR"
   Widget _buildDivider() {
     return const Row(
       children: [
@@ -516,7 +487,6 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
-  // НОВЕ: Віджет для кнопки входу через Google
   Widget _buildGoogleSignInButton() {
     return SizedBox(
       width: double.infinity,
@@ -542,7 +512,6 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
-  // ЗМІНЕНО: Додано параметр isLoading
   Widget _buildAuthButton({
     required String text,
     required VoidCallback onPressed,
@@ -551,7 +520,6 @@ class _AuthScreenState extends State<AuthScreen> {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        // ЗМІНЕНО: Кнопка неактивна під час завантаження
         onPressed: isLoading ? null : onPressed,
         style:
             ElevatedButton.styleFrom(
@@ -561,7 +529,6 @@ class _AuthScreenState extends State<AuthScreen> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(50),
               ),
-              // ЗМІНЕНО: Стиль для неактивної кнопки
               disabledBackgroundColor: AppTheme.darkCharcoal.withValues(),
             ).merge(
               ButtonStyle(
@@ -569,7 +536,6 @@ class _AuthScreenState extends State<AuthScreen> {
                 splashFactory: NoSplash.splashFactory,
               ),
             ),
-        // ЗМІНЕНО: Показуємо індикатор завантаження або текст
         child: isLoading
             ? const SizedBox(
                 height: 20,

@@ -6,7 +6,6 @@ import 'package:furtable/features/explore/widgets/recipe_card.dart';
 import 'package:furtable/features/favorites/screens/favorites_screen.dart';
 import 'package:furtable/features/loading/screens/loading_screen.dart';
 
-// ЗМІНЕНО: Конвертуємо у StatefulWidget
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
 
@@ -15,7 +14,6 @@ class ExploreScreen extends StatefulWidget {
 }
 
 class _ExploreScreenState extends State<ExploreScreen> {
-  // НОВЕ: Логуємо подію в initState
   @override
   void initState() {
     super.initState();
@@ -111,7 +109,6 @@ class _ExploreScreenState extends State<ExploreScreen> {
       ),
       body: Column(
         children: [
-          // НОВЕ: Кнопка для генерації помилки
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
@@ -119,7 +116,6 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 backgroundColor: Colors.redAccent,
               ),
               onPressed: () {
-                // Цей рядок згенерує помилку, яку Sentry має перехопити
                 throw Exception(
                   'Це тестова помилка від Sentry! Час: ${DateTime.now()}',
                 );
