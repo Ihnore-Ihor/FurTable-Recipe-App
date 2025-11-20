@@ -79,19 +79,22 @@ class _AuthScreenState extends State<AuthScreen> {
         );
       }
     } on FirebaseAuthException catch (e) {
-      String message = 'An error occurred. Please check your credentials.';
-      if (e.code == 'weak-password') {
-        message = 'The password provided is too weak.';
-      } else if (e.code == 'email-already-in-use') {
-        message = 'An account already exists for that email.';
-      } else if (e.code == 'user-not-found' || e.code == 'wrong-password') {
-        message = 'Invalid email or password.';
-      }
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message), backgroundColor: Colors.redAccent),
-        );
+      if (e.code == 'email-already-in-use') {
+        _showAccountExistsDialog(context);
+      } else {
+        String message = 'An error occurred. Please check your credentials.';
+        if (e.code == 'weak-password') {
+          message = 'The password provided is too weak.';
+        } else if (e.code == 'user-not-found' ||
+            e.code == 'wrong-password' ||
+            e.code == 'invalid-credential') {
+          message = 'Invalid email or password.';
+        }
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(message), backgroundColor: Colors.redAccent),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -111,12 +114,40 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
+  void _showAccountExistsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Account Exists'),
+          content: const Text(
+            'It looks like you already have an account. Did you sign in with Google before?',
+          ),
+          actions: [
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: const Text('Sign In with Google'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _signInWithGoogle();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _signInWithGoogle() async {
     setState(() => _isLoading = true);
 
     try {
       GoogleAuthProvider googleProvider = GoogleAuthProvider();
-
       final UserCredential userCredential = await _auth.signInWithPopup(
         googleProvider,
       );
@@ -130,19 +161,22 @@ class _AuthScreenState extends State<AuthScreen> {
         );
       }
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'popup-closed-by-user') {
-        setState(() => _isLoading = false);
-        return;
-      }
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              e.message ?? "An error occurred with Google Sign-In.",
+      if (e.code == 'account-exists-with-different-credential') {
+        if (e.email != null && e.credential != null) {
+          _handleAccountLinking(e.email!, e.credential!);
+        }
+      } else if (e.code == 'popup-closed-by-user') {
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                e.message ?? "An error occurred with Google Sign-In.",
+              ),
+              backgroundColor: Colors.redAccent,
             ),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -158,6 +192,97 @@ class _AuthScreenState extends State<AuthScreen> {
         setState(() => _isLoading = false);
       }
     }
+  }
+
+  Future<void> _handleAccountLinking(
+    String email,
+    AuthCredential credential,
+  ) async {
+    final passwordController = TextEditingController();
+
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Link Accounts'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(
+                  'An account already exists with the email $email. To link your Google sign-in, please enter the password for that account.',
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: passwordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Password',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: const Text('Link'),
+              onPressed: () async {
+                final password = passwordController.text;
+                if (password.isEmpty) return;
+
+                if (mounted) Navigator.of(context).pop();
+                setState(() => _isLoading = true);
+
+                try {
+                  final emailCredential = EmailAuthProvider.credential(
+                    email: email,
+                    password: password,
+                  );
+                  final userCredential = await _auth.signInWithCredential(
+                    credential,
+                  );
+
+                  await userCredential.user?.linkWithCredential(
+                    emailCredential,
+                  );
+
+                  await _analytics.logLogin(loginMethod: 'google_linked');
+
+                  if (mounted) {
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                        builder: (context) => const ExploreScreen(),
+                      ),
+                      (route) => false,
+                    );
+                  }
+                } on FirebaseAuthException catch (authError) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          authError.message ??
+                              "Failed to link accounts. Please check your password.",
+                        ),
+                        backgroundColor: Colors.redAccent,
+                      ),
+                    );
+                  }
+                } finally {
+                  if (mounted) setState(() => _isLoading = false);
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _togglePasswordVisibility() {
