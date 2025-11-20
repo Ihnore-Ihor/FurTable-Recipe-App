@@ -5,7 +5,6 @@ import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/features/explore/widgets/recipe_card.dart';
 import 'package:furtable/features/favorites/screens/favorites_screen.dart';
 import 'package:furtable/features/loading/screens/loading_screen.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
@@ -35,27 +34,6 @@ class _ExploreScreenState extends State<ExploreScreen> {
       return 2;
     } else {
       return 1;
-    }
-  }
-
-  Future<void> _simulateFailedDataFetch() async {
-    try {
-      throw Exception(
-        'Simulated Non-Fatal API Error: Could not fetch recipes.',
-      );
-    } catch (exception, stackTrace) {
-      await Sentry.captureException(exception, stackTrace: stackTrace);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            backgroundColor: Colors.amber,
-            content: Text(
-              'Could not load new recipes. Please try again later.',
-              style: TextStyle(color: AppTheme.darkCharcoal),
-            ),
-          ),
-        );
-      }
     }
   }
 
@@ -131,36 +109,6 @@ class _ExploreScreenState extends State<ExploreScreen> {
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.redAccent,
-              ),
-              onPressed: () {
-                throw Exception(
-                  'Це тестова помилка від Sentry! Час: ${DateTime.now()}',
-                );
-              },
-              child: const Text(
-                'Згенерувати тестову помилку для Sentry',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blueAccent,
-              ),
-              onPressed: _simulateFailedDataFetch,
-              child: const Text(
-                'Згенерувати Нефатальну Помилку',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ),
           Expanded(
             child: AlignedGridView.count(
               padding: const EdgeInsets.all(16),
