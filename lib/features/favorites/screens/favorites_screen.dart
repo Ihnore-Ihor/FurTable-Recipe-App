@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:furtable/core/app_theme.dart';
+import 'package:furtable/core/utils/navigation_helper.dart';
+import 'package:furtable/features/explore/models/recipe_model.dart'; // Імпорт моделі
 import 'package:furtable/features/explore/widgets/recipe_card.dart';
-import 'package:furtable/features/explore/screens/explore_screen.dart';
+import 'package:furtable/features/explore/screens/recipe_details_screen.dart'; // Для кліку
 import 'package:furtable/features/loading/screens/loading_screen.dart';
 
 class FavoritesScreen extends StatelessWidget {
@@ -10,22 +12,32 @@ class FavoritesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<Map<String, String>> favoriteRecipes = [
-      {
-        'image': 'assets/images/salmon.png',
-        'title': 'Grilled Salmon Teriyaki',
-        'author': 'ChefMaria',
-        'likes': '2.4k',
-      },
-      {
-        'image': 'assets/images/sushi.png',
-        'title': 'Dragon Roll Sushi',
-        'author': 'SushiMaster',
-        'likes': '3.1k',
-      },
+    // Використовуємо нашу модель Recipe замість Map
+    // (В реальному додатку це теж мало б йти через BLoC, але поки статика)
+    final List<Recipe> favoriteRecipes = [
+      const Recipe(
+        id: '1',
+        title: 'Grilled Salmon Teriyaki',
+        author: 'ChefMaria',
+        imageUrl: 'assets/images/salmon.png',
+        likes: '2.4k',
+        timeMinutes: 45,
+        ingredients: ['Salmon', 'Soy Sauce'],
+        steps: ['Cook it'],
+      ),
+      const Recipe(
+        id: '3',
+        title: 'Dragon Roll Sushi',
+        author: 'SushiMaster',
+        imageUrl: 'assets/images/sushi.png',
+        likes: '3.1k',
+        timeMinutes: 60,
+        ingredients: ['Rice', 'Fish'],
+        steps: ['Roll it'],
+      ),
     ];
 
-    //final List<Map<String, String>> favoriteRecipes = [];
+    // final List<Recipe> favoriteRecipes = []; // Розкоментуй для тесту Empty State
 
     return Scaffold(
       appBar: AppBar(
@@ -57,43 +69,9 @@ class FavoritesScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         selectedItemColor: AppTheme.darkCharcoal,
         unselectedItemColor: AppTheme.mediumGray,
-        showSelectedLabels: true,
-        showUnselectedLabels: true,
-        selectedLabelStyle: const TextStyle(
-          fontWeight: FontWeight.w500,
-          fontSize: 12,
-          fontFamily: 'Inter',
-        ),
-        unselectedLabelStyle: const TextStyle(
-          fontWeight: FontWeight.w400,
-          fontSize: 12,
-          fontFamily: 'Inter',
-        ),
-        currentIndex: 2,
-        onTap: (index) {
-          if (index == 0) {
-            Navigator.push(
-              context,
-              MaterialPageRoute<void>(
-                builder: (context) => const ExploreScreen(),
-              ),
-            );
-          } else if (index == 1) {
-            Navigator.push(
-              context,
-              MaterialPageRoute<void>(
-                builder: (context) => const LoadingScreen(),
-              ),
-            );
-          } else if (index == 4) {
-            Navigator.push(
-              context,
-              MaterialPageRoute<void>(
-                builder: (context) => const LoadingScreen(),
-              ),
-            );
-          }
-        },
+        currentIndex: 2, // Активна вкладка Favorites
+        onTap: (index) => NavigationHelper.onItemTapped(context, index, 2),
+
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.explore_outlined),
@@ -116,7 +94,7 @@ class FavoritesScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFavoritesGrid(List<Map<String, String>> recipes) {
+  Widget _buildFavoritesGrid(List<Recipe> recipes) {
     return AlignedGridView.count(
       padding: const EdgeInsets.all(16),
       crossAxisCount: 2,
@@ -125,11 +103,24 @@ class FavoritesScreen extends StatelessWidget {
       itemCount: recipes.length,
       itemBuilder: (context, index) {
         final recipe = recipes[index];
-        return RecipeCard(
-          imageUrl: recipe['image']!,
-          title: recipe['title']!,
-          author: recipe['author']!,
-          likes: recipe['likes']!,
+
+        // Додаємо GestureDetector, щоб можна було відкрити деталі і з улюблених
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => RecipeDetailsScreen(recipe: recipe),
+              ),
+            );
+          },
+          child: RecipeCard(
+            id: recipe.id,
+            imageUrl: recipe.imageUrl,
+            title: recipe.title,
+            author: recipe.author,
+            likes: recipe.likes,
+          ),
         );
       },
     );
@@ -143,7 +134,7 @@ class FavoritesScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Image.asset(
-            'assets/images/gohin_empty.png',
+            'assets/images/gohin_empty.png', // Твій ассет
             height: 200,
             color: AppTheme.mediumGray.withOpacity(0.5),
           ),
