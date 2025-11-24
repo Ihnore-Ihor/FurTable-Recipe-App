@@ -64,12 +64,27 @@ class _AuthScreenState extends State<AuthScreen> {
       } else {
         final UserCredential userCredential = await _auth
             .createUserWithEmailAndPassword(email: email, password: password);
+
         if (userCredential.user != null) {
           await userCredential.user!.updateDisplayName(
             _nicknameController.text.trim(),
           );
+
+          await userCredential.user!.sendEmailVerification();
         }
+
         await _analytics.logSignUp(signUpMethod: 'email_password');
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Account created! Please check your email to verify.',
+              ),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
       }
 
       if (mounted) {
@@ -119,19 +134,61 @@ class _AuthScreenState extends State<AuthScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Account Exists'),
-          content: const Text(
-            'It looks like you already have an account. Did you sign in with Google before?',
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
           ),
+          title: const Text(
+            'Account Exists',
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontWeight: FontWeight.w700,
+              color: AppTheme.darkCharcoal,
+            ),
+          ),
+          content: const Text(
+            'It looks like you already have an account associated with this email.\nDid you sign in with Google before?',
+            style: TextStyle(
+              fontFamily: 'Inter',
+              color: AppTheme.mediumGray,
+              fontSize: 16,
+            ),
+          ),
+          actionsPadding: const EdgeInsets.all(24),
           actions: [
             TextButton(
-              child: const Text('Cancel'),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  color: AppTheme.mediumGray,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             ElevatedButton(
-              child: const Text('Sign In with Google'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.darkCharcoal,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+              ),
+              child: const Text(
+                'Sign In with Google',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
                 _signInWithGoogle();
@@ -148,6 +205,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
     try {
       GoogleAuthProvider googleProvider = GoogleAuthProvider();
+
       final UserCredential userCredential = await _auth.signInWithPopup(
         googleProvider,
       );
@@ -170,9 +228,7 @@ class _AuthScreenState extends State<AuthScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(
-                e.message ?? "An error occurred with Google Sign-In.",
-              ),
+              content: Text(e.message ?? "An error occurred."),
               backgroundColor: Colors.redAccent,
             ),
           );
@@ -196,28 +252,47 @@ class _AuthScreenState extends State<AuthScreen> {
 
   Future<void> _handleAccountLinking(
     String email,
-    AuthCredential credential,
+    AuthCredential googleCredential,
   ) async {
     final passwordController = TextEditingController();
 
     return showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Link Accounts'),
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          title: const Text(
+            'Link Accounts',
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontWeight: FontWeight.w700,
+              color: AppTheme.darkCharcoal,
+            ),
+          ),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
                 Text(
-                  'An account already exists with the email $email. To link your Google sign-in, please enter the password for that account.',
+                  'An account already exists with the email $email.\nTo link your Google sign-in, please enter your password.',
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    color: AppTheme.mediumGray,
+                    fontSize: 15,
+                  ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
                 TextField(
                   controller: passwordController,
                   obscureText: true,
                   decoration: const InputDecoration(
                     labelText: 'Password',
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(50)),
+                    ),
                   ),
                 ),
               ],
@@ -228,9 +303,17 @@ class _AuthScreenState extends State<AuthScreen> {
               child: const Text('Cancel'),
               onPressed: () {
                 Navigator.of(context).pop();
+                if (mounted) setState(() => _isLoading = false);
               },
             ),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.darkCharcoal,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(50),
+                ),
+              ),
               child: const Text('Link'),
               onPressed: () async {
                 final password = passwordController.text;
@@ -240,16 +323,13 @@ class _AuthScreenState extends State<AuthScreen> {
                 setState(() => _isLoading = true);
 
                 try {
-                  final emailCredential = EmailAuthProvider.credential(
+                  final userCredential = await _auth.signInWithEmailAndPassword(
                     email: email,
                     password: password,
                   );
-                  final userCredential = await _auth.signInWithCredential(
-                    credential,
-                  );
 
                   await userCredential.user?.linkWithCredential(
-                    emailCredential,
+                    googleCredential,
                   );
 
                   await _analytics.logLogin(loginMethod: 'google_linked');
@@ -267,8 +347,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          authError.message ??
-                              "Failed to link accounts. Please check your password.",
+                          authError.message ?? "Incorrect password.",
                         ),
                         backgroundColor: Colors.redAccent,
                       ),
