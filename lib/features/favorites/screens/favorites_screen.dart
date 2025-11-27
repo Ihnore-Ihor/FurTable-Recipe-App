@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/core/utils/navigation_helper.dart';
 import 'package:furtable/features/explore/models/recipe_model.dart';
-import 'package:furtable/features/explore/widgets/recipe_card.dart';
 import 'package:furtable/features/explore/screens/recipe_details_screen.dart';
+import 'package:furtable/features/explore/widgets/recipe_card.dart';
+import 'package:furtable/features/favorites/bloc/favorites_bloc.dart';
+import 'package:furtable/features/favorites/bloc/favorites_event.dart';
+import 'package:furtable/features/favorites/bloc/favorites_state.dart';
 import 'package:furtable/features/profile/screens/profile_screen.dart';
 
 /// Screen displaying the user's favorite recipes.
@@ -14,34 +18,20 @@ class FavoritesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Using the Recipe model with static data for now.
-    // In a real application, this should be managed by a BLoC.
-    final List<Recipe> favoriteRecipes = [
-      const Recipe(
-        id: '1',
-        title: 'Grilled Salmon Teriyaki',
-        author: 'ChefMaria',
-        imageUrl: 'assets/images/salmon.png',
-        likes: '2.4k',
-        timeMinutes: 45,
-        ingredients: ['Salmon', 'Soy Sauce'],
-        steps: ['Cook it'],
-      ),
-      const Recipe(
-        id: '3',
-        title: 'Dragon Roll Sushi',
-        author: 'SushiMaster',
-        imageUrl: 'assets/images/sushi.png',
-        likes: '3.1k',
-        timeMinutes: 60,
-        ingredients: ['Rice', 'Fish'],
-        steps: ['Roll it'],
-      ),
-    ];
+    return BlocProvider(
+      create: (context) => FavoritesBloc()..add(LoadFavorites()),
+      child: const FavoritesView(),
+    );
+  }
+}
 
-    // Uncomment the following line to test the empty state:
-    // final List<Recipe> favoriteRecipes = [];
+/// The view implementation for [FavoritesScreen].
+class FavoritesView extends StatelessWidget {
+  /// Creates a [FavoritesView].
+  const FavoritesView({super.key});
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Padding(
@@ -66,18 +56,37 @@ class FavoritesScreen extends StatelessWidget {
         ],
       ),
 
-      body: favoriteRecipes.isEmpty
-          ? _buildEmptyState(context)
-          : _buildFavoritesGrid(favoriteRecipes),
+      // Connect BLoC Builder.
+      body: BlocBuilder<FavoritesBloc, FavoritesState>(
+        builder: (context, state) {
+          if (state is FavoritesLoading) {
+            return const Center(
+              child: CircularProgressIndicator(color: AppTheme.darkCharcoal),
+            );
+          }
+
+          if (state is FavoritesError) {
+            return Center(child: Text(state.message));
+          }
+
+          if (state is FavoritesLoaded) {
+            if (state.recipes.isEmpty) {
+              return _buildEmptyState(context);
+            }
+            return _buildFavoritesGrid(state.recipes);
+          }
+
+          return const SizedBox.shrink();
+        },
+      ),
 
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         backgroundColor: Colors.white,
         selectedItemColor: AppTheme.darkCharcoal,
         unselectedItemColor: AppTheme.mediumGray,
-        currentIndex: 2, // Favorites tab index.
+        currentIndex: 2,
         onTap: (index) => NavigationHelper.onItemTapped(context, index, 2),
-
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.explore_outlined),
@@ -110,7 +119,6 @@ class FavoritesScreen extends StatelessWidget {
       itemBuilder: (context, index) {
         final recipe = recipes[index];
 
-        // Wrap with GestureDetector to navigate to details screen.
         return GestureDetector(
           onTap: () {
             Navigator.push(
