@@ -1,21 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/core/app_theme.dart';
+import 'package:furtable/features/create_recipe/bloc/create_recipe_bloc.dart';
+import 'package:furtable/features/create_recipe/bloc/create_recipe_event.dart';
+import 'package:furtable/features/create_recipe/bloc/create_recipe_state.dart';
 
-class CreateRecipeScreen extends StatefulWidget {
+class CreateRecipeScreen extends StatelessWidget {
   const CreateRecipeScreen({super.key});
 
   @override
-  State<CreateRecipeScreen> createState() => _CreateRecipeScreenState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => CreateRecipeBloc(),
+      child: const CreateRecipeView(),
+    );
+  }
 }
 
-class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
-  // Контролери для текстових полів
+class CreateRecipeView extends StatefulWidget {
+  const CreateRecipeView({super.key});
+
+  @override
+  State<CreateRecipeView> createState() => _CreateRecipeViewState();
+}
+
+class _CreateRecipeViewState extends State<CreateRecipeView> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _ingredientsController = TextEditingController();
   final _instructionsController = TextEditingController();
-
-  // Стан перемикача Public/Private
   bool _isPublic = false;
 
   @override
@@ -29,183 +42,200 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.offWhite,
-      appBar: AppBar(
-        title: const Text('Create Recipe'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-          onPressed: () => Navigator.pop(context),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: ElevatedButton(
-              onPressed: () {
-                // Тут буде логіка збереження
-                Navigator.pop(context);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.darkCharcoal,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 0,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                minimumSize: const Size(0, 36), // Висота кнопки
-              ),
-              child: const Text(
-                'Save',
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ),
+    // BlocListener слухає зміни стану і реагує (навігація, снекбари)
+    return BlocListener<CreateRecipeBloc, CreateRecipeState>(
+      listener: (context, state) {
+        if (state is CreateRecipeSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Recipe created successfully!')),
+          );
+          Navigator.pop(context); // Закриваємо екран
+        } else if (state is CreateRecipeFailure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.error), backgroundColor: Colors.red),
+          );
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppTheme.offWhite,
+        appBar: AppBar(
+          title: const Text('Create Recipe'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new, size: 20),
+            onPressed: () => Navigator.pop(context),
           ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // --- 1. Image Upload Section ---
-            const Text(
-              'Recipe Image',
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w700,
-                fontSize: 16,
-                color: AppTheme.darkCharcoal,
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: BlocBuilder<CreateRecipeBloc, CreateRecipeState>(
+                builder: (context, state) {
+                  return ElevatedButton(
+                    onPressed: state is CreateRecipeLoading
+                        ? null // Блокуємо кнопку поки вантажить
+                        : () {
+                            // Відправляємо подію
+                            context.read<CreateRecipeBloc>().add(
+                              SubmitRecipe(
+                                title: _titleController.text,
+                                description: _descriptionController.text,
+                                isPublic: _isPublic,
+                              ),
+                            );
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.darkCharcoal,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 0,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      minimumSize: const Size(0, 36),
+                    ),
+                    child: state is CreateRecipeLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text(
+                            'Save',
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                  );
+                },
               ),
             ),
-            const SizedBox(height: 12),
-            GestureDetector(
-              onTap: () {
-                // Тут буде логіка вибору фото
-                print("Pick image");
-              },
-              child: Container(
-                height: 200,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: AppTheme.offWhite, // Або Colors.white, як в дизайні
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFE0E0E0)),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.file_upload_outlined,
-                      size: 32,
-                      color: AppTheme.mediumGray,
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Tap to add photo',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        color: AppTheme.mediumGray,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // --- 2. Recipe Title ---
-            _buildLabel('Recipe Title *'),
-            _buildTextField(
-              controller: _titleController,
-              hintText: 'Enter recipe title...',
-            ),
-
-            const SizedBox(height: 24),
-
-            // --- 3. Description ---
-            _buildLabel('Description'),
-            _buildTextField(
-              controller: _descriptionController,
-              hintText: 'Describe your recipe...',
-              maxLines: 4,
-            ),
-
-            const SizedBox(height: 24),
-
-            // --- 4. Ingredients ---
-            _buildLabel('Ingredients *'),
-            _buildTextField(
-              controller: _ingredientsController,
-              hintText: 'Enter each ingredient on a new line...',
-              maxLines: 6,
-            ),
-
-            const SizedBox(height: 24),
-
-            // --- 5. Instructions ---
-            _buildLabel('Instructions *'),
-            _buildTextField(
-              controller: _instructionsController,
-              hintText: 'Enter each step on a new line...',
-              maxLines: 8,
-            ),
-
-            const SizedBox(height: 24),
-
-            // --- 6. Public Switch ---
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Make this recipe public',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
-                        color: AppTheme.darkCharcoal,
-                      ),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      'Anyone can see this recipe',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 14,
-                        color: AppTheme.mediumGray,
-                      ),
-                    ),
-                  ],
-                ),
-                Switch.adaptive(
-                  value: _isPublic,
-                  activeColor: AppTheme.darkCharcoal,
-                  onChanged: (value) {
-                    setState(() {
-                      _isPublic = value;
-                    });
-                  },
-                ),
-              ],
-            ),
-
-            // Додатковий відступ знизу для скролу
-            const SizedBox(height: 40),
           ],
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // --- 1. Image Upload ---
+              const Text(
+                'Recipe Image',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                  color: AppTheme.darkCharcoal,
+                ),
+              ),
+              const SizedBox(height: 12),
+              GestureDetector(
+                onTap: () => print("Pick image"),
+                child: Container(
+                  height: 200,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: AppTheme.offWhite,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFE0E0E0)),
+                  ),
+                  child: const Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.file_upload_outlined,
+                        size: 32,
+                        color: AppTheme.mediumGray,
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Tap to add photo',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          color: AppTheme.mediumGray,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // --- Fields ---
+              _buildLabel('Recipe Title *'),
+              _buildTextField(
+                controller: _titleController,
+                hintText: 'Enter recipe title...',
+              ),
+              const SizedBox(height: 24),
+
+              _buildLabel('Description'),
+              _buildTextField(
+                controller: _descriptionController,
+                hintText: 'Describe your recipe...',
+                maxLines: 4,
+              ),
+              const SizedBox(height: 24),
+
+              _buildLabel('Ingredients *'),
+              _buildTextField(
+                controller: _ingredientsController,
+                hintText: 'Enter each ingredient on a new line...',
+                maxLines: 6,
+              ),
+              const SizedBox(height: 24),
+
+              _buildLabel('Instructions *'),
+              _buildTextField(
+                controller: _instructionsController,
+                hintText: 'Enter each step on a new line...',
+                maxLines: 8,
+              ),
+              const SizedBox(height: 24),
+
+              // --- Switch ---
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Make this recipe public',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                          color: AppTheme.darkCharcoal,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Anyone can see this recipe',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 14,
+                          color: AppTheme.mediumGray,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Switch.adaptive(
+                    value: _isPublic,
+                    activeColor: AppTheme.darkCharcoal,
+                    onChanged: (value) => setState(() => _isPublic = value),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 40),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // Допоміжний віджет для заголовків полів
   Widget _buildLabel(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
@@ -221,7 +251,6 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
     );
   }
 
-  // Допоміжний віджет для полів вводу (щоб не дублювати стиль)
   Widget _buildTextField({
     required TextEditingController controller,
     required String hintText,
@@ -240,17 +269,16 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
       child: TextField(
         controller: controller,
         maxLines: maxLines,
-        minLines: maxLines > 1 ? 3 : 1, // Мінімальна висота для великих полів
+        minLines: maxLines > 1 ? 3 : 1,
         decoration: InputDecoration(
           hintText: hintText,
           hintStyle: const TextStyle(color: AppTheme.mediumGray),
           filled: true,
-          fillColor: Colors.white, // Білий фон поля
+          fillColor: Colors.white,
           contentPadding: const EdgeInsets.all(16),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide:
-                BorderSide.none, // Прибираємо рамку (або робимо дуже світлу)
+            borderSide: BorderSide.none,
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
