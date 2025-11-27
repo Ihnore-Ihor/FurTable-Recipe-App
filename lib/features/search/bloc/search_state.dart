@@ -28,3 +28,14 @@ class SearchSuccess extends SearchState {
 
 /// State indicating that no recipes were found matching the query.
 class SearchEmpty extends SearchState {}
+
+/// State indicating that the search history has been loaded.
+class SearchHistoryLoaded extends SearchState {
+  /// The list of past search queries.
+  final List<String> history;
+
+  /// Creates a [SearchHistoryLoaded] state.
+  const SearchHistoryLoaded(this.history);
+  @override
+  List<Object> get props => [history];
+}

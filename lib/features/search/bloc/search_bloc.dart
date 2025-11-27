@@ -1,13 +1,19 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:furtable/core/services/local_storage_service.dart';
 import 'package:furtable/features/explore/models/recipe_model.dart';
 import 'package:furtable/features/search/bloc/search_event.dart';
 import 'package:furtable/features/search/bloc/search_state.dart';
 
-/// Manages the state of the search screen, including query processing and result filtering.
+/// Manages the state of the search screen, including query processing, result filtering, and history management.
 class SearchBloc extends Bloc<SearchEvent, SearchState> {
-  /// Creates a [SearchBloc].
+  final _storage = LocalStorageService();
+
+  /// Creates a [SearchBloc] and registers event handlers.
   SearchBloc() : super(SearchInitial()) {
+    on<LoadSearchHistory>(_onLoadHistory);
     on<SearchQueryChanged>(_onQueryChanged);
+    on<ClearSearchHistory>(_onClearHistory);
+    on<SearchQuerySubmitted>(_onQuerySubmitted);
   }
 
   // Mock list of recipes for search (simulating an API response).
@@ -74,29 +80,61 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     ),
   ];
 
+  Future<void> _onLoadHistory(
+    LoadSearchHistory event,
+    Emitter<SearchState> emit,
+  ) async {
+    final history = await _storage.getSearchHistory();
+    if (history.isNotEmpty) {
+      emit(SearchHistoryLoaded(history));
+    } else {
+      emit(SearchInitial());
+    }
+  }
+
+  Future<void> _onClearHistory(
+    ClearSearchHistory event,
+    Emitter<SearchState> emit,
+  ) async {
+    await _storage.clearHistory();
+    emit(SearchInitial());
+  }
+
+  // 1. WHEN TYPING: Switch between "History" and "Initial State".
   Future<void> _onQueryChanged(
     SearchQueryChanged event,
     Emitter<SearchState> emit,
   ) async {
-    final query = event.query.toLowerCase();
-
-    if (query.isEmpty) {
+    if (event.query.isEmpty) {
+      add(LoadSearchHistory());
+    } else {
+      // If text exists but Enter hasn't been pressed -> show Initial state.
       emit(SearchInitial());
-      return;
     }
+  }
 
+  // 2. WHEN ENTER PRESSED: Save to history + Perform Search.
+  Future<void> _onQuerySubmitted(
+    SearchQuerySubmitted event,
+    Emitter<SearchState> emit,
+  ) async {
+    final query = event.query.trim().toLowerCase();
+    if (query.isEmpty) return;
+
+    // A. Save to history.
+    await _storage.saveSearchQuery(event.query.trim());
+
+    // B. Start loading.
     emit(SearchLoading());
-
-    // Simulate search delay.
     await Future.delayed(const Duration(milliseconds: 500));
 
+    // C. Perform search.
     final results = _allRecipes.where((recipe) {
-      final titleLower = recipe.title.toLowerCase();
-      final authorLower = recipe.author.toLowerCase();
-
-      return titleLower.contains(query) || authorLower.contains(query);
+      return recipe.title.toLowerCase().contains(query) ||
+          recipe.author.toLowerCase().contains(query);
     }).toList();
 
+    // D. Show results.
     if (results.isEmpty) {
       emit(SearchEmpty());
     } else {

@@ -18,7 +18,7 @@ class SearchScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => SearchBloc(),
+      create: (context) => SearchBloc()..add(LoadSearchHistory()),
       child: const SearchView(),
     );
   }
@@ -112,6 +112,13 @@ class _SearchViewState extends State<SearchView> {
               onChanged: (value) {
                 context.read<SearchBloc>().add(SearchQueryChanged(value));
               },
+              // History Save (saves only when Enter/Search is pressed).
+              onSubmitted: (value) {
+                context.read<SearchBloc>().add(SearchQuerySubmitted(value));
+              },
+              // Keyboard action setting.
+              textInputAction: TextInputAction.search,
+
               decoration: InputDecoration(
                 hintText: 'Recipe or Author',
                 hintStyle: const TextStyle(color: AppTheme.mediumGray),
@@ -142,6 +149,72 @@ class _SearchViewState extends State<SearchView> {
           Expanded(
             child: BlocBuilder<SearchBloc, SearchState>(
               builder: (context, state) {
+                // History State.
+                if (state is SearchHistoryLoaded) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Recent Searches',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.darkCharcoal,
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () => context.read<SearchBloc>().add(
+                                ClearSearchHistory(),
+                              ),
+                              child: const Text(
+                                'Clear',
+                                style: TextStyle(color: AppTheme.mediumGray),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: state.history.length,
+                          itemBuilder: (context, index) {
+                            final item = state.history[index];
+                            return ListTile(
+                              leading: const Icon(
+                                Icons.history,
+                                color: AppTheme.mediumGray,
+                              ),
+                              title: Text(
+                                item,
+                                style: const TextStyle(
+                                  color: AppTheme.darkCharcoal,
+                                ),
+                              ),
+                              onTap: () {
+                                // 1. Set text.
+                                _searchController.text = item;
+                                // 2. IMPORTANT: Trigger Submitted to start search.
+                                context.read<SearchBloc>().add(
+                                  SearchQuerySubmitted(item),
+                                );
+                                // 3. Unfocus to hide keyboard.
+                                FocusScope.of(context).unfocus();
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  );
+                }
+
                 // 1. STATE: INITIAL
                 if (state is SearchInitial) {
                   return Center(
