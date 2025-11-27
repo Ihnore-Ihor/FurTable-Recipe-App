@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:furtable/features/explore/screens/explore_screen.dart';
+import 'package:furtable/features/my_recipes/screens/my_recipes_screen.dart';
 import 'package:furtable/features/favorites/screens/favorites_screen.dart';
-import 'package:furtable/features/loading/screens/loading_screen.dart';
 import 'package:furtable/features/search/screens/search_screen.dart';
 
 class NavigationHelper {
@@ -15,8 +15,7 @@ class NavigationHelper {
         page = const ExploreScreen();
         break;
       case 1:
-        // Поки що Loading, пізніше тут буде MyRecipesScreen
-        page = const LoadingScreen();
+        page = const MyRecipesScreen();
         break;
       case 2:
         page = const FavoritesScreen();
