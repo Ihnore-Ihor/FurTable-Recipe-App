@@ -1,14 +1,109 @@
+import 'dart:async'; // Для таймера
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/features/auth/screens/auth_screen.dart';
 import 'package:furtable/features/profile/screens/account_settings_screen.dart';
 import 'package:furtable/features/profile/screens/edit_profile_screen.dart';
-import 'package:furtable/features/profile/screens/faq_screen.dart'; // <--- Імпорт
-import 'package:furtable/features/profile/screens/feedback_screen.dart'; // <--- Імпорт
+import 'package:furtable/features/profile/screens/faq_screen.dart';
+import 'package:furtable/features/profile/screens/feedback_screen.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  User? _user;
+  bool _isSendingVerification = false;
+
+  // Змінні для таймера (захист від спаму)
+  Timer? _timer;
+  int _cooldownSeconds = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshUser();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel(); // Обов'язково чистимо таймер
+    super.dispose();
+  }
+
+  Future<void> _refreshUser() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      await currentUser.reload();
+      if (mounted) {
+        setState(() {
+          _user = FirebaseAuth.instance.currentUser;
+        });
+      }
+    }
+  }
+
+  // Запуск таймера на 60 секунд
+  void _startCooldown() {
+    setState(() {
+      _cooldownSeconds = 60;
+    });
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_cooldownSeconds == 0) {
+        timer.cancel();
+      } else {
+        setState(() {
+          _cooldownSeconds--;
+        });
+      }
+    });
+  }
+
+  Future<void> _resendVerification() async {
+    if (_cooldownSeconds > 0) return; // Не пускаємо, якщо таймер йде
+
+    setState(() => _isSendingVerification = true);
+    try {
+      await _user?.sendEmailVerification();
+
+      _startCooldown(); // Вмикаємо захист
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Verification email sent! Check your inbox.'),
+            backgroundColor: AppTheme.darkCharcoal,
+          ),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      String msg = e.message ?? "Error sending email.";
+      if (e.code == 'too-many-requests') {
+        msg = "Too many requests. Please wait a few minutes.";
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(msg), backgroundColor: Colors.redAccent),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSendingVerification = false);
+    }
+  }
 
   Future<void> _signOut(BuildContext context) async {
     try {
@@ -28,9 +123,9 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-    final displayName = user?.displayName ?? 'Legoshi Fan1';
-    final email = user?.email ?? 'legoshi.fan1@email.com';
+    final displayName = _user?.displayName ?? 'User';
+    final email = _user?.email ?? '';
+    final isVerified = _user?.emailVerified ?? false;
 
     return Scaffold(
       backgroundColor: AppTheme.offWhite,
@@ -41,13 +136,22 @@ class ProfileScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios_new, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          // Кнопка оновлення показується ТІЛЬКИ якщо пошта НЕ підтверджена
+          if (!isVerified)
+            IconButton(
+              icon: const Icon(Icons.refresh, color: AppTheme.darkCharcoal),
+              onPressed: _refreshUser,
+              tooltip: 'Check Verification Status',
+            ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
         child: Column(
           children: [
             const SizedBox(height: 16),
-            // Аватар (код залишається той самий)
+            // Avatar
             Container(
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
@@ -71,6 +175,7 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
+
             Text(
               displayName,
               style: const TextStyle(
@@ -89,9 +194,76 @@ class ProfileScreen extends StatelessWidget {
                 color: AppTheme.mediumGray,
               ),
             ),
+
+            // --- ЛОГІКА ПОКАЗУ СТАТУСУ ---
+            if (!isVerified && _user != null) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEF2F2), // Світло-червоний фон
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.red.shade200),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.warning_amber_rounded,
+                          size: 16,
+                          color: Colors.red.shade700,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Email not verified',
+                          style: TextStyle(
+                            color: Colors.red.shade700,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+
+                    // Кліпкий текст з таймером
+                    GestureDetector(
+                      onTap: (_isSendingVerification || _cooldownSeconds > 0)
+                          ? null
+                          : _resendVerification,
+                      child: Text(
+                        _isSendingVerification
+                            ? 'Sending...'
+                            : _cooldownSeconds > 0
+                            ? 'Wait ${_cooldownSeconds}s to resend'
+                            : 'Resend Verification Email',
+                        style: TextStyle(
+                          color:
+                              (_isSendingVerification || _cooldownSeconds > 0)
+                              ? AppTheme.mediumGray
+                              : AppTheme.darkCharcoal,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                          decoration:
+                              (_isSendingVerification || _cooldownSeconds > 0)
+                              ? TextDecoration.none
+                              : TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
             const SizedBox(height: 32),
 
-            // --- МЕНЮ З НАВІГАЦІЄЮ ---
+            // Menu
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -110,58 +282,44 @@ class ProfileScreen extends StatelessWidget {
                     context,
                     icon: Icons.person_outline,
                     title: 'Edit Profile',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const EditProfileScreen(),
-                        ),
-                      );
-                    },
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const EditProfileScreen(),
+                      ),
+                    ),
                   ),
                   const Divider(height: 1, indent: 56),
                   _buildMenuItem(
                     context,
                     icon: Icons.settings_outlined,
                     title: 'Account Settings',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const AccountSettingsScreen(),
-                        ),
-                      );
-                    },
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const AccountSettingsScreen(),
+                      ),
+                    ),
                   ),
                   const Divider(height: 1, indent: 56),
                   _buildMenuItem(
                     context,
                     icon: Icons.help_outline,
                     title: 'FAQ',
-                    onTap: () {
-                      // <--- ПЕРЕХІД НА FAQ
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const FAQScreen(),
-                        ),
-                      );
-                    },
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const FAQScreen()),
+                    ),
                   ),
                   const Divider(height: 1, indent: 56),
                   _buildMenuItem(
                     context,
                     icon: Icons.chat_bubble_outline,
                     title: 'Send Feedback',
-                    onTap: () {
-                      // <--- ПЕРЕХІД НА FEEDBACK
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const FeedbackScreen(),
-                        ),
-                      );
-                    },
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const FeedbackScreen()),
+                    ),
                   ),
                 ],
               ),
