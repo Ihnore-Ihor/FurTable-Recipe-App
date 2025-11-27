@@ -5,6 +5,7 @@ import 'package:furtable/core/utils/navigation_helper.dart';
 import 'package:furtable/features/explore/models/recipe_model.dart';
 import 'package:furtable/features/explore/screens/recipe_details_screen.dart';
 import 'package:furtable/features/explore/widgets/recipe_card.dart';
+import 'package:furtable/features/create_recipe/screens/create_recipe_screen.dart';
 
 class MyRecipesScreen extends StatelessWidget {
   const MyRecipesScreen({super.key});
@@ -17,7 +18,7 @@ class MyRecipesScreen extends StatelessWidget {
         id: 'mp_1',
         title: 'Homemade Pizza',
         author: 'You',
-        imageUrl: 'assets/images/burger.png', // Заміни на піцу, якщо є
+        imageUrl: 'assets/images/pizza.png',
         likes: '124',
         timeMinutes: 40,
         ingredients: [],
@@ -27,7 +28,7 @@ class MyRecipesScreen extends StatelessWidget {
         id: 'mp_2',
         title: 'Banana Bread',
         author: 'You',
-        imageUrl: 'assets/images/cake.png',
+        imageUrl: 'assets/images/banana_bread.png',
         likes: '67',
         timeMinutes: 60,
         ingredients: [],
@@ -40,7 +41,7 @@ class MyRecipesScreen extends StatelessWidget {
         id: 'mpr_1',
         title: 'Secret Family Soup',
         author: 'You',
-        imageUrl: 'assets/images/salad.png', // Заміни на суп
+        imageUrl: 'assets/images/family_soup.png',
         likes: '0',
         timeMinutes: 120,
         ingredients: [],
@@ -62,8 +63,13 @@ class MyRecipesScreen extends StatelessWidget {
             // Кнопка "Додати" (+)
             IconButton(
               onPressed: () {
-                // Тут буде перехід на CreateRecipeScreen
-                print("Open Create Recipe");
+                // Перехід на екран створення
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CreateRecipeScreen(),
+                  ),
+                );
               },
               icon: const Icon(
                 Icons.add,
