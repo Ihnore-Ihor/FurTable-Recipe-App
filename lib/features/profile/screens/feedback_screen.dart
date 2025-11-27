@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/core/app_theme.dart';
-import 'package:furtable/features/feedback/bloc/feedback_bloc.dart'; // Створи цей файл!
+import 'package:furtable/features/feedback/bloc/feedback_bloc.dart';
 
 class FeedbackScreen extends StatelessWidget {
   const FeedbackScreen({super.key});
@@ -49,9 +49,19 @@ class _FeedbackViewState extends State<FeedbackView> {
       listener: (context, state) {
         if (state is FeedbackSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Thank you for your feedback!')),
+            const SnackBar(
+              content: Text('Thank you for your feedback!'),
+              backgroundColor: AppTheme.darkCharcoal, // <--- БУЛО Colors.green
+            ),
           );
           Navigator.pop(context);
+        } else if (state is FeedbackFailure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.error),
+              backgroundColor: Colors.redAccent,
+            ),
+          );
         }
       },
       child: Scaffold(
@@ -74,11 +84,11 @@ class _FeedbackViewState extends State<FeedbackView> {
                   fontFamily: 'Inter',
                   fontWeight: FontWeight.w700,
                   fontSize: 16,
+                  color: AppTheme.darkCharcoal,
                 ),
               ),
               const SizedBox(height: 16),
 
-              // Text Area
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
@@ -90,13 +100,14 @@ class _FeedbackViewState extends State<FeedbackView> {
                     controller: _controller,
                     maxLines: null,
                     maxLength: 1000,
+                    style: const TextStyle(color: AppTheme.darkCharcoal),
                     decoration: const InputDecoration(
                       hintText:
                           'Share your thoughts, suggestions, or report any issues...',
                       hintStyle: TextStyle(color: AppTheme.mediumGray),
                       contentPadding: EdgeInsets.all(16),
                       border: InputBorder.none,
-                      counterText: '', // Ховаємо стандартний лічильник
+                      counterText: '',
                     ),
                   ),
                 ),
@@ -119,7 +130,6 @@ class _FeedbackViewState extends State<FeedbackView> {
 
               const SizedBox(height: 16),
 
-              // Button
               SizedBox(
                 width: double.infinity,
                 child: BlocBuilder<FeedbackBloc, FeedbackState>(
@@ -135,13 +145,24 @@ class _FeedbackViewState extends State<FeedbackView> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        disabledBackgroundColor: Colors.grey.shade300,
+                        disabledBackgroundColor: Colors.grey.shade400,
+                        disabledForegroundColor: Colors.white,
                       ),
                       child: state is FeedbackLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
                           : const Text(
                               'Send Feedback',
-                              style: TextStyle(fontSize: 16),
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                     );
                   },

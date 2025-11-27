@@ -69,22 +69,30 @@ class _AuthScreenState extends State<AuthScreen> {
           await userCredential.user!.updateDisplayName(
             _nicknameController.text.trim(),
           );
-
           await userCredential.user!.sendEmailVerification();
         }
-
         await _analytics.logSignUp(signUpMethod: 'email_password');
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'Account created! Please check your email to verify.',
-              ),
-              backgroundColor: Colors.green,
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (context) =>
+                  const ExploreScreen(showVerificationMessage: true),
             ),
+            (route) => false,
           );
         }
+        return;
+      }
+
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (context) =>
+                const ExploreScreen(showVerificationMessage: false),
+          ),
+          (route) => false,
+        );
       }
 
       if (mounted) {

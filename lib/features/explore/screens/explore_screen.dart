@@ -13,13 +13,20 @@ import 'package:furtable/features/profile/screens/profile_screen.dart';
 
 // 1. Цей віджет просто надає BLoC. Він не має стану.
 class ExploreScreen extends StatelessWidget {
-  const ExploreScreen({super.key});
+  final bool showVerificationMessage;
+
+  const ExploreScreen({
+    super.key,
+    this.showVerificationMessage = false, // За замовчуванням false
+  });
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => ExploreBloc()..add(LoadRecipesEvent()),
-      child: const ExploreView(), // Викликаємо внутрішній віджет
+      child: ExploreView(
+        showVerificationMessage: showVerificationMessage,
+      ), // Передаємо далі
     );
   }
 }
@@ -27,7 +34,9 @@ class ExploreScreen extends StatelessWidget {
 // 2. Цей віджет містить UI і логіку скролу.
 // Він вже має доступ до BLoC, бо знаходиться ПІД BlocProvider.
 class ExploreView extends StatefulWidget {
-  const ExploreView({super.key});
+  final bool showVerificationMessage;
+
+  const ExploreView({super.key, required this.showVerificationMessage});
 
   @override
   State<ExploreView> createState() => _ExploreViewState();
@@ -41,6 +50,25 @@ class _ExploreViewState extends State<ExploreView> {
     super.initState();
     FirebaseAnalytics.instance.logScreenView(screenName: 'ExploreScreen');
     _scrollController.addListener(_onScroll);
+
+    // 3. ЛОГІКА ПОКАЗУ ПОВІДОМЛЕННЯ
+    if (widget.showVerificationMessage) {
+      // Чекаємо, поки екран намалюється, і показуємо SnackBar
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Account created! Please check your email to verify.',
+            ),
+            backgroundColor: AppTheme.darkCharcoal, // Чорний колір
+            duration: Duration(seconds: 6), // Показуємо довше
+            behavior:
+                SnackBarBehavior.floating, // Щоб виглядало гарно над табами
+            margin: EdgeInsets.all(16),
+          ),
+        );
+      });
+    }
   }
 
   @override
