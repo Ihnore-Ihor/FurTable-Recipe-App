@@ -1,56 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/core/utils/navigation_helper.dart';
+import 'package:furtable/features/create_recipe/screens/create_recipe_screen.dart';
 import 'package:furtable/features/explore/models/recipe_model.dart';
 import 'package:furtable/features/explore/screens/recipe_details_screen.dart';
 import 'package:furtable/features/explore/widgets/recipe_card.dart';
-import 'package:furtable/features/create_recipe/screens/create_recipe_screen.dart';
+import 'package:furtable/features/my_recipes/bloc/my_recipes_bloc.dart';
+import 'package:furtable/features/my_recipes/bloc/my_recipes_event.dart';
+import 'package:furtable/features/my_recipes/bloc/my_recipes_state.dart';
 
 class MyRecipesScreen extends StatelessWidget {
   const MyRecipesScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Фейкові дані для прикладу
-    final myPublicRecipes = [
-      const Recipe(
-        id: 'mp_1',
-        title: 'Homemade Pizza',
-        author: 'You',
-        imageUrl: 'assets/images/pizza.png',
-        likes: '124',
-        timeMinutes: 40,
-        ingredients: [],
-        steps: [],
-      ),
-      const Recipe(
-        id: 'mp_2',
-        title: 'Banana Bread',
-        author: 'You',
-        imageUrl: 'assets/images/banana_bread.png',
-        likes: '67',
-        timeMinutes: 60,
-        ingredients: [],
-        steps: [],
-      ),
-    ];
+    // Провайдер тут, щоб завантажити дані при вході на екран
+    return BlocProvider(
+      create: (context) => MyRecipesBloc()..add(LoadMyRecipes()),
+      child: const MyRecipesView(),
+    );
+  }
+}
 
-    final myPrivateRecipes = [
-      const Recipe(
-        id: 'mpr_1',
-        title: 'Secret Family Soup',
-        author: 'You',
-        imageUrl: 'assets/images/family_soup.png',
-        likes: '0',
-        timeMinutes: 120,
-        ingredients: [],
-        steps: [],
-      ),
-    ];
+class MyRecipesView extends StatelessWidget {
+  const MyRecipesView({super.key});
 
+  @override
+  Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2, // Дві вкладки: Public, Private
+      length: 2,
       child: Scaffold(
         backgroundColor: AppTheme.offWhite,
         appBar: AppBar(
@@ -60,10 +40,8 @@ class MyRecipesScreen extends StatelessWidget {
           ),
           automaticallyImplyLeading: false,
           actions: [
-            // Кнопка "Додати" (+)
             IconButton(
               onPressed: () {
-                // Перехід на екран створення
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -86,13 +64,11 @@ class MyRecipesScreen extends StatelessWidget {
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(
-                  12,
-                ), // Округлий контейнер для табів
+                borderRadius: BorderRadius.circular(12),
               ),
               child: TabBar(
                 indicator: BoxDecoration(
-                  color: AppTheme.offWhite, // Колір активної вкладки
+                  color: AppTheme.offWhite,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 labelColor: AppTheme.darkCharcoal,
@@ -105,27 +81,49 @@ class MyRecipesScreen extends StatelessWidget {
                   Tab(text: 'Public'),
                   Tab(text: 'Private'),
                 ],
-                dividerColor: Colors.transparent, // Прибираємо лінію знизу
+                dividerColor: Colors.transparent,
                 indicatorSize: TabBarIndicatorSize.tab,
               ),
             ),
           ),
         ),
 
-        body: TabBarView(
-          children: [
-            _buildRecipeGrid(context, myPublicRecipes),
-            _buildRecipeGrid(context, myPrivateRecipes, isPrivate: true),
-          ],
+        // Тут слухаємо стан
+        body: BlocBuilder<MyRecipesBloc, MyRecipesState>(
+          builder: (context, state) {
+            if (state is MyRecipesLoading) {
+              return const Center(
+                child: CircularProgressIndicator(color: AppTheme.darkCharcoal),
+              );
+            }
+
+            if (state is MyRecipesError) {
+              return Center(child: Text(state.message));
+            }
+
+            if (state is MyRecipesLoaded) {
+              return TabBarView(
+                children: [
+                  _buildRecipeGrid(context, state.publicRecipes),
+                  _buildRecipeGrid(
+                    context,
+                    state.privateRecipes,
+                    isPrivate: true,
+                  ),
+                ],
+              );
+            }
+
+            return const SizedBox.shrink();
+          },
         ),
 
-        // Навігація
         bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
           backgroundColor: Colors.white,
           selectedItemColor: AppTheme.darkCharcoal,
           unselectedItemColor: AppTheme.mediumGray,
-          currentIndex: 1, // Індекс "My Recipes"
+          currentIndex: 1,
           onTap: (index) => NavigationHelper.onItemTapped(context, index, 1),
           items: const [
             BottomNavigationBarItem(
@@ -135,7 +133,7 @@ class MyRecipesScreen extends StatelessWidget {
             BottomNavigationBarItem(
               icon: Icon(Icons.book),
               label: 'My Recipes',
-            ), // Icon changed to filled book
+            ),
             BottomNavigationBarItem(
               icon: Icon(Icons.favorite_border),
               label: 'Favorites',
@@ -187,7 +185,6 @@ class MyRecipesScreen extends StatelessWidget {
                 author: recipe.author,
                 likes: recipe.likes,
               ),
-              // Якщо приватний - додаємо замочок
               if (isPrivate)
                 Positioned(
                   top: 8,
