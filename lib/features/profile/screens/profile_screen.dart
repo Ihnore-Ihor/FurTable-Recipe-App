@@ -2,13 +2,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/features/auth/screens/auth_screen.dart';
-// import 'package:furtable/features/profile/screens/edit_profile_screen.dart'; // Створимо пізніше
-// import 'package:furtable/features/profile/screens/account_settings_screen.dart'; // Створимо пізніше
+import 'package:furtable/features/profile/screens/account_settings_screen.dart';
+import 'package:furtable/features/profile/screens/edit_profile_screen.dart';
+import 'package:furtable/features/profile/screens/faq_screen.dart'; // <--- Імпорт
+import 'package:furtable/features/profile/screens/feedback_screen.dart'; // <--- Імпорт
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
-  // Метод для виходу з акаунту
   Future<void> _signOut(BuildContext context) async {
     try {
       await FirebaseAuth.instance.signOut();
@@ -27,7 +28,6 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Отримуємо дані поточного користувача (якщо є)
     final user = FirebaseAuth.instance.currentUser;
     final displayName = user?.displayName ?? 'Legoshi Fan1';
     final email = user?.email ?? 'legoshi.fan1@email.com';
@@ -36,7 +36,7 @@ class ProfileScreen extends StatelessWidget {
       backgroundColor: AppTheme.offWhite,
       appBar: AppBar(
         title: const Text('Profile'),
-        centerTitle: true, // В iOS стилі, як на макеті
+        centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, size: 20),
           onPressed: () => Navigator.pop(context),
@@ -47,25 +47,30 @@ class ProfileScreen extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: 16),
-
-            // --- Аватар ---
+            // Аватар (код залишається той самий)
             Container(
-              width: 120,
-              height: 120,
+              padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.grey.shade300, width: 2),
-                image: const DecorationImage(
-                  // Тимчасова картинка, як на макеті
-                  image: AssetImage('assets/images/legoshi_eating_auth.png'),
-                  fit: BoxFit.cover,
+                border: Border.all(
+                  color: AppTheme.mediumGray.withOpacity(0.5),
+                  width: 1.5,
+                ),
+              ),
+              child: Container(
+                width: 110,
+                height: 110,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppTheme.darkCharcoal, width: 2),
+                  image: const DecorationImage(
+                    image: AssetImage('assets/images/legoshi_eating_auth.png'),
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
             ),
-
             const SizedBox(height: 16),
-
-            // --- Ім'я та Пошта ---
             Text(
               displayName,
               style: const TextStyle(
@@ -84,10 +89,9 @@ class ProfileScreen extends StatelessWidget {
                 color: AppTheme.mediumGray,
               ),
             ),
-
             const SizedBox(height: 32),
 
-            // --- Меню ---
+            // --- МЕНЮ З НАВІГАЦІЄЮ ---
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -107,41 +111,62 @@ class ProfileScreen extends StatelessWidget {
                     icon: Icons.person_outline,
                     title: 'Edit Profile',
                     onTap: () {
-                      // Навігація на Edit Profile
-                      print("Go to Edit Profile");
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const EditProfileScreen(),
+                        ),
+                      );
                     },
                   ),
-                  const Divider(height: 1, indent: 56), // Розділювач
+                  const Divider(height: 1, indent: 56),
                   _buildMenuItem(
                     context,
                     icon: Icons.settings_outlined,
                     title: 'Account Settings',
                     onTap: () {
-                      // Навігація на Settings
-                      print("Go to Settings");
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AccountSettingsScreen(),
+                        ),
+                      );
                     },
                   ),
                   const Divider(height: 1, indent: 56),
                   _buildMenuItem(
                     context,
                     icon: Icons.help_outline,
-                    title: 'Help & Support',
-                    onTap: () {},
+                    title: 'FAQ',
+                    onTap: () {
+                      // <--- ПЕРЕХІД НА FAQ
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const FAQScreen(),
+                        ),
+                      );
+                    },
                   ),
                   const Divider(height: 1, indent: 56),
                   _buildMenuItem(
                     context,
                     icon: Icons.chat_bubble_outline,
                     title: 'Send Feedback',
-                    onTap: () {},
+                    onTap: () {
+                      // <--- ПЕРЕХІД НА FEEDBACK
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const FeedbackScreen(),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
             ),
-
             const SizedBox(height: 32),
-
-            // --- Кнопка Log Out ---
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
