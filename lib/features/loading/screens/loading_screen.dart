@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:furtable/core/app_theme.dart';
 
+/// A simple loading screen displaying a spinner and an image.
 class LoadingScreen extends StatelessWidget {
+  /// Creates a [LoadingScreen].
   const LoadingScreen({super.key});
 
   @override

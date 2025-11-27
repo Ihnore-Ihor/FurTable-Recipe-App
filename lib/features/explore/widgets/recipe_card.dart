@@ -1,16 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:furtable/core/app_theme.dart';
 
+/// A card widget displaying a recipe summary.
 class RecipeCard extends StatefulWidget {
-  final String id; // <--- НОВЕ ПОЛЕ
+  /// The unique identifier of the recipe.
+  final String id;
+
+  /// The URL or path to the recipe image.
   final String imageUrl;
+
+  /// The title of the recipe.
   final String title;
+
+  /// The author of the recipe.
   final String author;
+
+  /// The number of likes formatted as a string.
   final String likes;
 
+  /// Creates a [RecipeCard].
   const RecipeCard({
     super.key,
-    required this.id, // <--- ВИМАГАЄМО ID
+    required this.id,
     required this.imageUrl,
     required this.title,
     required this.author,
@@ -33,7 +44,7 @@ class _RecipeCardState extends State<RecipeCard> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    // Розрахунок ширини картки, щоб уникнути помилок layout
+    // Calculate card width to avoid layout errors.
     final cardWidth = (MediaQuery.of(context).size.width - 48) / 2;
 
     return Column(
@@ -44,13 +55,13 @@ class _RecipeCardState extends State<RecipeCard> {
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: Hero(
-                // ВИПРАВЛЕНО: Тепер тег унікальний завдяки ID
+                // Ensure the tag is unique using the ID.
                 tag: 'recipe_image_${widget.id}',
                 child: Image.asset(
                   widget.imageUrl,
                   fit: BoxFit.cover,
-                  width: double.infinity, // Заповнюємо ширину колонки
-                  height: cardWidth, // Робимо квадратним
+                  width: double.infinity, // Fill column width.
+                  height: cardWidth, // Make it square.
                 ),
               ),
             ),

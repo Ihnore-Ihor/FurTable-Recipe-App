@@ -1,4 +1,4 @@
-import 'dart:async'; // Для таймера
+import 'dart:async'; // For timer
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:furtable/core/app_theme.dart';
@@ -8,7 +8,9 @@ import 'package:furtable/features/profile/screens/edit_profile_screen.dart';
 import 'package:furtable/features/profile/screens/faq_screen.dart';
 import 'package:furtable/features/profile/screens/feedback_screen.dart';
 
+/// Screen displaying the user's profile and settings menu.
 class ProfileScreen extends StatefulWidget {
+  /// Creates a [ProfileScreen].
   const ProfileScreen({super.key});
 
   @override
@@ -19,7 +21,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   User? _user;
   bool _isSendingVerification = false;
 
-  // Змінні для таймера (захист від спаму)
+  // Timer variables for spam protection.
   Timer? _timer;
   int _cooldownSeconds = 0;
 
@@ -31,7 +33,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   void dispose() {
-    _timer?.cancel(); // Обов'язково чистимо таймер
+    _timer?.cancel(); // Ensure timer is cancelled.
     super.dispose();
   }
 
@@ -47,7 +49,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  // Запуск таймера на 60 секунд
+  // Start a 60-second cooldown timer.
   void _startCooldown() {
     setState(() {
       _cooldownSeconds = 60;
@@ -64,13 +66,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _resendVerification() async {
-    if (_cooldownSeconds > 0) return; // Не пускаємо, якщо таймер йде
+    if (_cooldownSeconds > 0) return; // Prevent sending if cooldown is active.
 
     setState(() => _isSendingVerification = true);
     try {
       await _user?.sendEmailVerification();
 
-      _startCooldown(); // Вмикаємо захист
+      _startCooldown(); // Activate cooldown.
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -137,7 +139,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
-          // Кнопка оновлення показується ТІЛЬКИ якщо пошта НЕ підтверджена
+          // Show refresh button ONLY if email is NOT verified.
           if (!isVerified)
             IconButton(
               icon: const Icon(Icons.refresh, color: AppTheme.darkCharcoal),
@@ -195,7 +197,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
 
-            // --- ЛОГІКА ПОКАЗУ СТАТУСУ ---
+            // --- VERIFICATION STATUS LOGIC ---
             if (!isVerified && _user != null) ...[
               const SizedBox(height: 12),
               Container(
@@ -204,7 +206,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFEF2F2), // Світло-червоний фон
+                  color: const Color(0xFFFEF2F2), // Light red background.
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: Colors.red.shade200),
                 ),
@@ -231,7 +233,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     const SizedBox(height: 4),
 
-                    // Кліпкий текст з таймером
+                    // Clickable text with timer.
                     GestureDetector(
                       onTap: (_isSendingVerification || _cooldownSeconds > 0)
                           ? null

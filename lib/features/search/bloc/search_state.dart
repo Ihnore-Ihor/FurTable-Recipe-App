@@ -1,25 +1,30 @@
 import 'package:equatable/equatable.dart';
 import 'package:furtable/features/explore/models/recipe_model.dart';
 
+/// Abstract base class for the state of the search screen.
 abstract class SearchState extends Equatable {
+  /// Creates a [SearchState].
   const SearchState();
   @override
   List<Object> get props => [];
 }
 
-// Коли користувач ще нічого не ввів
+/// Initial state when no search query has been entered.
 class SearchInitial extends SearchState {}
 
-// Коли йде пошук
+/// State indicating that a search is in progress.
 class SearchLoading extends SearchState {}
 
-// Коли знайшли рецепти
+/// State indicating that recipes were found matching the query.
 class SearchSuccess extends SearchState {
+  /// The list of matching recipes.
   final List<Recipe> recipes;
+
+  /// Creates a [SearchSuccess] state.
   const SearchSuccess(this.recipes);
   @override
   List<Object> get props => [recipes];
 }
 
-// Коли нічого не знайшли (Empty State з куркою)
+/// State indicating that no recipes were found matching the query.
 class SearchEmpty extends SearchState {}

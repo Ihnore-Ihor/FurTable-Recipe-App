@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/features/profile/screens/change_password_screen.dart';
 
+/// Screen for managing account settings, including notifications and deletion.
 class AccountSettingsScreen extends StatefulWidget {
+  /// Creates an [AccountSettingsScreen].
   const AccountSettingsScreen({super.key});
 
   @override
@@ -10,7 +12,7 @@ class AccountSettingsScreen extends StatefulWidget {
 }
 
 class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
-  // Стан перемикачів (Switches)
+  // Switch states.
   bool _emailNotifications = true;
   bool _recipeUpdates = false;
   bool _pushNotifications = true;
@@ -64,12 +66,11 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                   child: TextButton(
                     onPressed: () {
                       Navigator.pop(context);
-                      // Логіка видалення
+                      // Account deletion logic would go here.
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('Account deleted (simulation)'),
-                          backgroundColor:
-                              AppTheme.darkCharcoal, // Чорний колір
+                          backgroundColor: AppTheme.darkCharcoal,
                         ),
                       );
                     },
@@ -211,7 +212,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
               ),
             ),
 
-            // Кнопка видалення акаунту (можна додати внизу, якщо треба, або залишити лише в логіці)
+            // Account deletion button.
             const SizedBox(height: 32),
             Center(
               child: TextButton(
@@ -233,7 +234,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
     );
   }
 
-  // Віджет для рядка з перемикачем
+  // Widget for a row with a switch.
   Widget _buildSwitchRow(
     String title,
     String subtitle,
@@ -263,7 +264,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
     );
   }
 
-  // Стилі
+  // Styles.
   static const _titleStyle = TextStyle(
     fontFamily: 'Inter',
     fontWeight: FontWeight.w700,

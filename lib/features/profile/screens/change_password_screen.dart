@@ -5,7 +5,9 @@ import 'package:furtable/features/profile/bloc/profile_bloc.dart';
 import 'package:furtable/features/profile/bloc/profile_event.dart';
 import 'package:furtable/features/profile/bloc/profile_state.dart';
 
+/// Screen for changing the user's password.
 class ChangePasswordScreen extends StatelessWidget {
+  /// Creates a [ChangePasswordScreen].
   const ChangePasswordScreen({super.key});
 
   @override
@@ -17,7 +19,9 @@ class ChangePasswordScreen extends StatelessWidget {
   }
 }
 
+/// The view implementation for [ChangePasswordScreen].
 class ChangePasswordView extends StatefulWidget {
+  /// Creates a [ChangePasswordView].
   const ChangePasswordView({super.key});
 
   @override
@@ -34,12 +38,12 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
   bool _obscureNew = true;
   bool _obscureConfirm = true;
 
-  bool _isButtonEnabled = false; // Стан активності кнопки
+  bool _isButtonEnabled = false; // Button activity state.
 
   @override
   void initState() {
     super.initState();
-    // Слухаємо зміни у всіх полях
+    // Listen to changes in all fields.
     _currentController.addListener(_validateForm);
     _newController.addListener(_validateForm);
     _confirmController.addListener(_validateForm);
@@ -53,7 +57,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
     super.dispose();
   }
 
-  // Перевіряємо умови активації кнопки
+  // Check conditions to enable the button.
   void _validateForm() {
     final current = _currentController.text;
     final newPass = _newController.text;
@@ -93,7 +97,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Password updated!'),
-              backgroundColor: AppTheme.darkCharcoal, // Чорний снекбар
+              backgroundColor: AppTheme.darkCharcoal,
             ),
           );
           Navigator.pop(context);
@@ -120,7 +124,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
               padding: const EdgeInsets.only(right: 16.0),
               child: BlocBuilder<ProfileBloc, ProfileState>(
                 builder: (context, state) {
-                  // Кнопка активна тільки якщо валідація пройшла і не йде завантаження
+                  // Button is active only if validation passes and not loading.
                   final isEnabled =
                       _isButtonEnabled && state is! ProfileLoading;
 
@@ -159,7 +163,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
         ),
         body: Form(
           key: _formKey,
-          // autovalidateMode вмикаємо, щоб показувати помилки (червоний текст)
+          // Enable autovalidateMode to show errors (red text).
           autovalidateMode: AutovalidateMode.onUserInteraction,
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
@@ -182,7 +186,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                   obscure: _obscureNew,
                   onToggle: () => setState(() => _obscureNew = !_obscureNew),
                   hint: 'Enter your new password',
-                  // Помилки валідації для червоного тексту
+                  // Validation errors for red text.
                   validator: (val) {
                     if (val != null && val.isNotEmpty) {
                       if (val.length < 8)
@@ -225,8 +229,6 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
     );
   }
 
-  // ... _buildLabel та _buildPasswordField залишаються такі самі, як були ...
-  // (лише переконайтеся, що _buildPasswordField використовує стилі AppTheme)
   Widget _buildLabel(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:furtable/core/app_theme.dart';
 
+/// Screen displaying Frequently Asked Questions.
 class FAQScreen extends StatelessWidget {
+  /// Creates an [FAQScreen].
   const FAQScreen({super.key});
 
   @override
@@ -9,7 +11,7 @@ class FAQScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppTheme.offWhite,
       appBar: AppBar(
-        title: const Text('FAQ'), // Назва як у меню
+        title: const Text('FAQ'), // Title matches menu item.
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, size: 20),
@@ -59,10 +61,15 @@ class FAQScreen extends StatelessWidget {
   }
 }
 
+/// A widget representing a single FAQ item with an expandable answer.
 class FAQItem extends StatelessWidget {
+  /// The question text.
   final String question;
+
+  /// The answer text.
   final String answer;
 
+  /// Creates an [FAQItem].
   const FAQItem({super.key, required this.question, required this.answer});
 
   @override
@@ -83,7 +90,7 @@ class FAQItem extends StatelessWidget {
       child: Theme(
         data: Theme.of(context).copyWith(
           dividerColor: Colors.transparent,
-        ), // Прибираємо лінію при розкритті
+        ), // Remove divider line when expanded.
         child: ExpansionTile(
           tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
           childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),

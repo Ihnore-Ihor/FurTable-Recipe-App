@@ -6,6 +6,10 @@ import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/features/auth/screens/auth_screen.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
+/// The entry point of the application.
+///
+/// Initializes Sentry for error tracking, Firebase for backend services,
+/// and runs the [MyApp] widget.
 Future<void> main() async {
   await SentryFlutter.init(
     (options) {
@@ -26,7 +30,12 @@ Future<void> main() async {
   );
 }
 
+/// The root widget of the application.
+///
+/// Configures the [MaterialApp] with the app theme and sets the
+/// [AuthScreen] as the home screen.
 class MyApp extends StatelessWidget {
+  /// Creates a [MyApp] instance.
   const MyApp({super.key});
 
   @override

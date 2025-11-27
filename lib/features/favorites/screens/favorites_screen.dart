@@ -2,18 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/core/utils/navigation_helper.dart';
-import 'package:furtable/features/explore/models/recipe_model.dart'; // Імпорт моделі
+import 'package:furtable/features/explore/models/recipe_model.dart';
 import 'package:furtable/features/explore/widgets/recipe_card.dart';
-import 'package:furtable/features/explore/screens/recipe_details_screen.dart'; // Для кліку
+import 'package:furtable/features/explore/screens/recipe_details_screen.dart';
 import 'package:furtable/features/profile/screens/profile_screen.dart';
 
+/// Screen displaying the user's favorite recipes.
 class FavoritesScreen extends StatelessWidget {
+  /// Creates a [FavoritesScreen].
   const FavoritesScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Використовуємо нашу модель Recipe замість Map
-    // (В реальному додатку це теж мало б йти через BLoC, але поки статика)
+    // Using the Recipe model with static data for now.
+    // In a real application, this should be managed by a BLoC.
     final List<Recipe> favoriteRecipes = [
       const Recipe(
         id: '1',
@@ -37,7 +39,8 @@ class FavoritesScreen extends StatelessWidget {
       ),
     ];
 
-    // final List<Recipe> favoriteRecipes = []; // Розкоментуй для тесту Empty State
+    // Uncomment the following line to test the empty state:
+    // final List<Recipe> favoriteRecipes = [];
 
     return Scaffold(
       appBar: AppBar(
@@ -72,7 +75,7 @@ class FavoritesScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         selectedItemColor: AppTheme.darkCharcoal,
         unselectedItemColor: AppTheme.mediumGray,
-        currentIndex: 2, // Активна вкладка Favorites
+        currentIndex: 2, // Favorites tab index.
         onTap: (index) => NavigationHelper.onItemTapped(context, index, 2),
 
         items: const [
@@ -107,7 +110,7 @@ class FavoritesScreen extends StatelessWidget {
       itemBuilder: (context, index) {
         final recipe = recipes[index];
 
-        // Додаємо GestureDetector, щоб можна було відкрити деталі і з улюблених
+        // Wrap with GestureDetector to navigate to details screen.
         return GestureDetector(
           onTap: () {
             Navigator.push(
@@ -137,7 +140,7 @@ class FavoritesScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Image.asset(
-            'assets/images/gohin_empty.png', // Твій ассет
+            'assets/images/gohin_empty.png',
             height: 200,
             color: AppTheme.mediumGray.withOpacity(0.5),
           ),

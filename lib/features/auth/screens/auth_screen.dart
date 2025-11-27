@@ -5,7 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/features/explore/screens/explore_screen.dart';
 
+/// The authentication screen handling both login and registration.
+///
+/// Allows users to sign in with email/password or Google, and create new accounts.
 class AuthScreen extends StatefulWidget {
+  /// Creates an [AuthScreen].
   const AuthScreen({super.key});
 
   @override
@@ -35,6 +39,10 @@ class _AuthScreenState extends State<AuthScreen> {
     _analytics.logScreenView(screenName: 'AuthScreen');
   }
 
+  /// Handles the authentication process for both login and registration.
+  ///
+  /// Validates the form, performs the authentication request, and handles
+  /// success or error states.
   Future<void> _handleAuthentication() async {
     final bool isValid = _formKey.currentState?.validate() ?? false;
 
@@ -137,6 +145,7 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
+  /// Shows a dialog when an account already exists with the provided email.
   void _showAccountExistsDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -208,6 +217,7 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
+  /// Initiates the Google Sign-In flow.
   Future<void> _signInWithGoogle() async {
     setState(() => _isLoading = true);
 
@@ -258,6 +268,8 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
+  /// Handles account linking when a user tries to sign in with Google
+  /// but an account with the same email already exists.
   Future<void> _handleAccountLinking(
     String email,
     AuthCredential googleCredential,
@@ -372,6 +384,7 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
+  /// Toggles the visibility of the password field.
   void _togglePasswordVisibility() {
     setState(() {
       _isPasswordVisible = !_isPasswordVisible;
@@ -386,6 +399,7 @@ class _AuthScreenState extends State<AuthScreen> {
     super.dispose();
   }
 
+  /// Switches between the Login and Create Account tabs.
   void _switchTab(bool isLogin) {
     if (_isLoginView != isLogin) {
       setState(() {
@@ -409,6 +423,7 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
+  /// Builds the top section of the screen with the logo and image.
   Widget _buildTopSection() {
     return Container(
       color: Colors.white,
@@ -437,6 +452,7 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
+  /// Builds the bottom section containing the form and action buttons.
   Widget _buildBottomSection() {
     return Container(
       decoration: const BoxDecoration(
@@ -494,6 +510,7 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
+  /// Builds the tab selector for switching between Login and Sign Up.
   Widget _buildAuthTabs() {
     final noSplashButtonStyle = ButtonStyle(
       overlayColor: WidgetStateProperty.all(Colors.transparent),
@@ -523,6 +540,7 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
+  /// Builds a single tab button.
   Widget _buildTab(
     String text,
     bool isActive, {
@@ -556,6 +574,7 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
+  /// Builds the login form fields.
   Widget _buildLoginForm() {
     return Column(
       children: [
@@ -583,6 +602,7 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
+  /// Builds the registration form fields.
   Widget _buildRegistrationForm() {
     return Column(
       children: [
@@ -629,6 +649,7 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
+  /// Builds a text input field with consistent styling.
   Widget _buildTextField({
     required TextEditingController controller,
     required String hintText,
@@ -680,6 +701,7 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
+  /// Builds the divider with "OR" text.
   Widget _buildDivider() {
     return const Row(
       children: [
@@ -699,6 +721,7 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
+  /// Builds the Google Sign-In button.
   Widget _buildGoogleSignInButton() {
     return SizedBox(
       width: double.infinity,
@@ -724,6 +747,7 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
+  /// Builds the primary authentication button (Sign In / Get Started).
   Widget _buildAuthButton({
     required String text,
     required VoidCallback onPressed,

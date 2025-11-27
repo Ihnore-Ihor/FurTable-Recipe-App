@@ -3,7 +3,11 @@ import 'package:furtable/features/explore/models/recipe_model.dart';
 import 'package:furtable/features/my_recipes/bloc/my_recipes_event.dart';
 import 'package:furtable/features/my_recipes/bloc/my_recipes_state.dart';
 
+/// Manages the state of the user's recipes screen.
+///
+/// Loads and separates recipes into public and private categories.
 class MyRecipesBloc extends Bloc<MyRecipesEvent, MyRecipesState> {
+  /// Creates a [MyRecipesBloc].
   MyRecipesBloc() : super(MyRecipesLoading()) {
     on<LoadMyRecipes>(_onLoadMyRecipes);
   }
@@ -14,9 +18,9 @@ class MyRecipesBloc extends Bloc<MyRecipesEvent, MyRecipesState> {
   ) async {
     emit(MyRecipesLoading());
     try {
-      await Future.delayed(const Duration(seconds: 1)); // Імітація мережі
+      await Future.delayed(const Duration(seconds: 1)); // Simulate network delay.
 
-      // Фейкові дані
+      // Mock data.
       final public = [
         const Recipe(
           id: 'mp_1',

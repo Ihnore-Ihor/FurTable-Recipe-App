@@ -4,9 +4,14 @@ import 'package:furtable/features/my_recipes/screens/my_recipes_screen.dart';
 import 'package:furtable/features/favorites/screens/favorites_screen.dart';
 import 'package:furtable/features/search/screens/search_screen.dart';
 
+/// Helper class for handling bottom navigation bar transitions.
 class NavigationHelper {
+  /// Handles the tap event on the bottom navigation bar items.
+  ///
+  /// Navigates to the selected screen using a fade transition if the
+  /// selected index is different from the current index.
   static void onItemTapped(BuildContext context, int index, int currentIndex) {
-    // Якщо натиснули на ту саму вкладку — нічого не робимо
+    // Do nothing if the same tab is selected.
     if (index == currentIndex) return;
 
     Widget page;
@@ -27,7 +32,7 @@ class NavigationHelper {
         return;
     }
 
-    // Виконуємо перехід з Fade анімацією для підтримки Hero
+    // Navigate with a fade transition to support Hero animations.
     Navigator.pushReplacement(
       context,
       PageRouteBuilder(

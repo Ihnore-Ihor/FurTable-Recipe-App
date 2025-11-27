@@ -5,7 +5,11 @@ import 'package:furtable/features/create_recipe/bloc/create_recipe_bloc.dart';
 import 'package:furtable/features/create_recipe/bloc/create_recipe_event.dart';
 import 'package:furtable/features/create_recipe/bloc/create_recipe_state.dart';
 
+/// A screen that allows users to create a new recipe.
+///
+/// Wraps the [CreateRecipeView] with a [CreateRecipeBloc].
 class CreateRecipeScreen extends StatelessWidget {
+  /// Creates a [CreateRecipeScreen].
   const CreateRecipeScreen({super.key});
 
   @override
@@ -17,7 +21,9 @@ class CreateRecipeScreen extends StatelessWidget {
   }
 }
 
+/// The view implementation for creating a recipe.
 class CreateRecipeView extends StatefulWidget {
+  /// Creates a [CreateRecipeView].
   const CreateRecipeView({super.key});
 
   @override
@@ -25,10 +31,10 @@ class CreateRecipeView extends StatefulWidget {
 }
 
 class _CreateRecipeViewState extends State<CreateRecipeView> {
-  // Ключ для форми
+  // Key for the form validation.
   final _formKey = GlobalKey<FormState>();
 
-  // Режим валідації (спочатку вимкнений, вмикається після натискання Save)
+  // Validation mode, enabled after the first submit attempt.
   AutovalidateMode _autovalidateMode = AutovalidateMode.disabled;
 
   final _titleController = TextEditingController();
@@ -50,7 +56,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
     final isValid = _formKey.currentState?.validate() ?? false;
 
     if (!isValid) {
-      // Якщо є помилки, вмикаємо живий режим валідації
+      // Enable live validation if there are errors.
       if (_autovalidateMode == AutovalidateMode.disabled) {
         setState(() {
           _autovalidateMode = AutovalidateMode.onUserInteraction;
@@ -59,7 +65,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
       return;
     }
 
-    // Якщо все ок, відправляємо подію в BLoC
+    // Dispatch the submit event to the BLoC if validation passes.
     context.read<CreateRecipeBloc>().add(
       SubmitRecipe(
         title: _titleController.text.trim(),
@@ -103,7 +109,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                   return ElevatedButton(
                     onPressed: state is CreateRecipeLoading
                         ? null
-                        : _submitForm, // Викликаємо нашу функцію валідації
+                        : _submitForm, // Triggers validation and submission.
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.darkCharcoal,
                       foregroundColor: Colors.white,
@@ -137,7 +143,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
             ),
           ],
         ),
-        // Обгортаємо все в Form
+        // Wraps the content in a Form widget.
         body: Form(
           key: _formKey,
           autovalidateMode: _autovalidateMode,
@@ -146,7 +152,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // --- 1. Image Upload ---
+                // Image Upload Section
                 const Text(
                   'Recipe Image',
                   style: TextStyle(
@@ -190,7 +196,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                 ),
                 const SizedBox(height: 24),
 
-                // --- Fields ---
+                // Form Fields
                 _buildLabel('Recipe Title *'),
                 _buildTextFormField(
                   controller: _titleController,
@@ -209,7 +215,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                   controller: _descriptionController,
                   hintText: 'Describe your recipe...',
                   maxLines: 4,
-                  // Опис не обов'язковий, тому validator не потрібен
+                  // Description is optional, so no validator needed.
                 ),
                 const SizedBox(height: 24),
 
@@ -241,7 +247,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                 ),
                 const SizedBox(height: 24),
 
-                // --- Switch ---
+                // Visibility Switch
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -299,7 +305,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
     );
   }
 
-  // Оновлений віджет для полів вводу (TextFormField)
+  // Custom text form field widget with consistent styling.
   Widget _buildTextFormField({
     required TextEditingController controller,
     required String hintText,
@@ -319,14 +325,14 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
         fillColor: Colors.white,
         contentPadding: const EdgeInsets.all(16),
 
-        // Стиль помилки (червоний текст знизу)
+        // Error text style.
         errorStyle: const TextStyle(
           color: Color(0xFFDC2626),
           fontSize: 13,
           fontWeight: FontWeight.w500,
         ),
 
-        // Звичайна рамка (світло-сіра або прозора)
+        // Default border style.
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
@@ -336,7 +342,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
           borderSide: BorderSide.none,
         ),
 
-        // Рамка при фокусі (чорна або темно-сіра)
+        // Focused border style.
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(
@@ -345,7 +351,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
           ),
         ),
 
-        // Рамка при помилці (червона)
+        // Error border style.
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Color(0xFFDC2626), width: 1.5),

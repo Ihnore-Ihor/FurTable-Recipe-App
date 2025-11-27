@@ -10,7 +10,9 @@ import 'package:furtable/features/search/bloc/search_event.dart';
 import 'package:furtable/features/search/bloc/search_state.dart';
 import 'package:furtable/features/profile/screens/profile_screen.dart';
 
+/// Screen for searching recipes by title or author.
 class SearchScreen extends StatelessWidget {
+  /// Creates a [SearchScreen].
   const SearchScreen({super.key});
 
   @override
@@ -22,7 +24,9 @@ class SearchScreen extends StatelessWidget {
   }
 }
 
+/// The view implementation for [SearchScreen].
 class SearchView extends StatefulWidget {
+  /// Creates a [SearchView].
   const SearchView({super.key});
 
   @override
@@ -55,18 +59,18 @@ class _SearchViewState extends State<SearchView> {
     FocusScope.of(context).unfocus();
   }
 
-  // Спільний віджет для відображення картинок (Legom )
+  // Common widget for displaying placeholder images.
   Widget _buildPlaceholderImage(String assetPath) {
     return Opacity(
-      opacity: 0.75, // 75% непрозорості
+      opacity: 0.75, // 75% opacity.
       child: Container(
-        width: double.infinity, // На всю ширину
-        height: 250, // Фіксована висота
+        width: double.infinity, // Full width.
+        height: 250, // Fixed height.
         decoration: BoxDecoration(
           image: DecorationImage(
             image: AssetImage(assetPath),
-            fit: BoxFit.cover, // Розтягуємо по ширині
-            alignment: Alignment.topCenter, // Показуємо тільки верхні 40%
+            fit: BoxFit.cover, // Stretch to width.
+            alignment: Alignment.topCenter, // Show only top 40%.
           ),
         ),
       ),
@@ -138,12 +142,12 @@ class _SearchViewState extends State<SearchView> {
           Expanded(
             child: BlocBuilder<SearchBloc, SearchState>(
               builder: (context, state) {
-                // 1. СТАН: ПОЧАТОК (Legom)
+                // 1. STATE: INITIAL
                 if (state is SearchInitial) {
                   return Center(
                     child: Column(
                       mainAxisAlignment:
-                          MainAxisAlignment.center, // Вертикально по центру
+                          MainAxisAlignment.center, // Vertically centered.
                       children: [
                         _buildPlaceholderImage(
                           'assets/images/legom_posing.png',
@@ -162,7 +166,7 @@ class _SearchViewState extends State<SearchView> {
                   );
                 }
 
-                // 2. СТАН: ЗАВАНТАЖЕННЯ
+                // 2. STATE: LOADING
                 if (state is SearchLoading) {
                   return const Center(
                     child: CircularProgressIndicator(
@@ -171,12 +175,12 @@ class _SearchViewState extends State<SearchView> {
                   );
                 }
 
-                // 3. СТАН: НЕ ЗНАЙДЕНО (Legom) - Той самий стиль
+                // 3. STATE: EMPTY
                 if (state is SearchEmpty) {
                   return Center(
                     child: Column(
                       mainAxisAlignment:
-                          MainAxisAlignment.center, // Вертикально по центру
+                          MainAxisAlignment.center, // Vertically centered.
                       children: [
                         _buildPlaceholderImage(
                           'assets/images/legom_posing.png',
@@ -205,7 +209,7 @@ class _SearchViewState extends State<SearchView> {
                   );
                 }
 
-                // 4. СТАН: УСПІХ
+                // 4. STATE: SUCCESS
                 if (state is SearchSuccess) {
                   return AlignedGridView.count(
                     padding: const EdgeInsets.all(16),
@@ -244,7 +248,7 @@ class _SearchViewState extends State<SearchView> {
         ],
       ),
 
-      // Навігація (виклик спільної функції, яку ми напишемо нижче)
+      // Navigation bar.
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         backgroundColor: Colors.white,

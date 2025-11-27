@@ -2,16 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/features/explore/models/recipe_model.dart';
 
+/// Screen displaying the details of a specific recipe.
 class RecipeDetailsScreen extends StatelessWidget {
+  /// The recipe to display.
   final Recipe recipe;
 
+  /// Creates a [RecipeDetailsScreen].
   const RecipeDetailsScreen({super.key, required this.recipe});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.offWhite,
-      // AppBar прозорий або білий, з кнопками навігації
+      // Transparent or white AppBar with navigation buttons.
       appBar: AppBar(
         backgroundColor: AppTheme.offWhite,
         leading: IconButton(
@@ -22,7 +25,7 @@ class RecipeDetailsScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.favorite, color: AppTheme.darkCharcoal),
             onPressed: () {
-              // Логіка лайка буде пізніше
+              // Like logic to be implemented later.
             },
           ),
           const SizedBox(width: 8),
@@ -33,22 +36,22 @@ class RecipeDetailsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. Картинка рецепту
+            // Recipe Image
             Hero(
-              tag: 'recipe_image_${recipe.id}', // <--- ЗМІНИЛИ URL НА ID
+              tag: 'recipe_image_${recipe.id}',
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: Image.asset(
                   recipe.imageUrl,
                   width: double.infinity,
-                  height: 250, // Фіксована висота як на дизайні
+                  height: 250, // Fixed height as per design.
                   fit: BoxFit.cover,
                 ),
               ),
             ),
             const SizedBox(height: 24),
 
-            // 2. Заголовок
+            // Title
             Text(
               recipe.title,
               style: const TextStyle(
@@ -61,15 +64,15 @@ class RecipeDetailsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // 3. Автор (Аватар + Ім'я)
+            // Author (Avatar + Name)
             Row(
               children: [
-                // Фейковий аватар (можна замінити на картинку автора з моделі)
+                // Placeholder avatar (can be replaced with author image from model).
                 const CircleAvatar(
                   radius: 20,
                   backgroundImage: AssetImage(
                     'assets/images/legoshi_eating_auth.png',
-                  ), // Тимчасово
+                  ),
                   backgroundColor: Colors.transparent,
                 ),
                 const SizedBox(width: 12),
@@ -87,7 +90,7 @@ class RecipeDetailsScreen extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            // 4. Опис (Description)
+            // Description
             const Text(
               'Description',
               style: TextStyle(
@@ -110,7 +113,7 @@ class RecipeDetailsScreen extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            // 5. Інгредієнти (Ingredients)
+            // Ingredients
             const Text(
               'Ingredients',
               style: TextStyle(
@@ -127,13 +130,13 @@ class RecipeDetailsScreen extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Сіра крапочка
+                    // Bullet point
                     Container(
                       margin: const EdgeInsets.only(top: 6),
                       width: 6,
                       height: 6,
                       decoration: const BoxDecoration(
-                        color: Color(0xFF9CA3AF), // Світло-сірий як на макеті
+                        color: Color(0xFF9CA3AF),
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -155,7 +158,7 @@ class RecipeDetailsScreen extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            // 6. Інструкції (Instructions)
+            // Instructions
             const Text(
               'Instructions',
               style: TextStyle(
@@ -174,7 +177,7 @@ class RecipeDetailsScreen extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Чорний кружечок з цифрою
+                    // Numbered circle
                     Container(
                       width: 24,
                       height: 24,

@@ -11,12 +11,16 @@ import 'package:furtable/features/my_recipes/bloc/my_recipes_bloc.dart';
 import 'package:furtable/features/my_recipes/bloc/my_recipes_event.dart';
 import 'package:furtable/features/my_recipes/bloc/my_recipes_state.dart';
 
+/// Screen displaying the recipes created by the current user.
+///
+/// Provides tabs for Public and Private recipes.
 class MyRecipesScreen extends StatelessWidget {
+  /// Creates a [MyRecipesScreen].
   const MyRecipesScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Провайдер тут, щоб завантажити дані при вході на екран
+    // Provide the BLoC here to load data when entering the screen.
     return BlocProvider(
       create: (context) => MyRecipesBloc()..add(LoadMyRecipes()),
       child: const MyRecipesView(),
@@ -24,7 +28,9 @@ class MyRecipesScreen extends StatelessWidget {
   }
 }
 
+/// The view implementation for [MyRecipesScreen].
 class MyRecipesView extends StatelessWidget {
+  /// Creates a [MyRecipesView].
   const MyRecipesView({super.key});
 
   @override
@@ -88,7 +94,7 @@ class MyRecipesView extends StatelessWidget {
           ),
         ),
 
-        // Тут слухаємо стан
+        // Listen to the state here.
         body: BlocBuilder<MyRecipesBloc, MyRecipesState>(
           builder: (context, state) {
             if (state is MyRecipesLoading) {

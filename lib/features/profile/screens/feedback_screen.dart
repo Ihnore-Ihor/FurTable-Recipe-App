@@ -4,7 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/features/feedback/bloc/feedback_bloc.dart';
 
+/// Screen for users to submit feedback.
 class FeedbackScreen extends StatelessWidget {
+  /// Creates a [FeedbackScreen].
   const FeedbackScreen({super.key});
 
   @override
@@ -16,7 +18,9 @@ class FeedbackScreen extends StatelessWidget {
   }
 }
 
+/// The view implementation for [FeedbackScreen].
 class FeedbackView extends StatefulWidget {
+  /// Creates a [FeedbackView].
   const FeedbackView({super.key});
 
   @override
@@ -51,7 +55,7 @@ class _FeedbackViewState extends State<FeedbackView> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Thank you for your feedback!'),
-              backgroundColor: AppTheme.darkCharcoal, // <--- БУЛО Colors.green
+              backgroundColor: AppTheme.darkCharcoal,
             ),
           );
           Navigator.pop(context);

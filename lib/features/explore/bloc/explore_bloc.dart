@@ -3,11 +3,15 @@ import 'package:furtable/features/explore/bloc/explore_event.dart';
 import 'package:furtable/features/explore/bloc/explore_state.dart';
 import 'package:furtable/features/explore/models/recipe_model.dart';
 
+/// Manages the state of the explore screen, including loading recipes
+/// and handling pagination.
 class ExploreBloc extends Bloc<ExploreEvent, ExploreState> {
+  /// Creates an [ExploreBloc] with an initial state.
   ExploreBloc() : super(const ExploreState()) {
     on<LoadRecipesEvent>(_onLoadRecipes);
   }
 
+  /// Generates a list of mock recipes for testing purposes.
   List<Recipe> _generateMockRecipes(int startIndex, int count) {
     return List.generate(count, (index) {
       final id = startIndex + index;
@@ -33,6 +37,9 @@ class ExploreBloc extends Bloc<ExploreEvent, ExploreState> {
     });
   }
 
+  /// Handles the [LoadRecipesEvent] to fetch recipes.
+  ///
+  /// Supports pagination by appending new recipes to the existing list.
   Future<void> _onLoadRecipes(
     LoadRecipesEvent event,
     Emitter<ExploreState> emit,
@@ -41,7 +48,7 @@ class ExploreBloc extends Bloc<ExploreEvent, ExploreState> {
 
     try {
       if (state.status == ExploreStatus.initial) {
-        // НОВЕ: Явно вмикаємо стан завантаження
+        // Explicitly set the status to loading.
         emit(state.copyWith(status: ExploreStatus.loading));
 
         await Future.delayed(const Duration(seconds: 1));
@@ -56,7 +63,7 @@ class ExploreBloc extends Bloc<ExploreEvent, ExploreState> {
         );
       }
 
-      // Логіка для довантаження (пагінація)
+      // Logic for loading more recipes (pagination).
       await Future.delayed(const Duration(milliseconds: 800));
       final currentLength = state.recipes.length;
       final moreRecipes = _generateMockRecipes(currentLength, 10);

@@ -11,13 +11,17 @@ import 'package:furtable/features/explore/screens/recipe_details_screen.dart';
 import 'package:furtable/features/explore/widgets/recipe_card.dart';
 import 'package:furtable/features/profile/screens/profile_screen.dart';
 
-// 1. Цей віджет просто надає BLoC. Він не має стану.
+/// The main screen for exploring recipes.
+///
+/// This widget provides the [ExploreBloc] to the widget tree.
 class ExploreScreen extends StatelessWidget {
+  /// Whether to show a verification message upon loading.
   final bool showVerificationMessage;
 
+  /// Creates an [ExploreScreen].
   const ExploreScreen({
     super.key,
-    this.showVerificationMessage = false, // За замовчуванням false
+    this.showVerificationMessage = false, // Default is false
   });
 
   @override
@@ -26,16 +30,19 @@ class ExploreScreen extends StatelessWidget {
       create: (context) => ExploreBloc()..add(LoadRecipesEvent()),
       child: ExploreView(
         showVerificationMessage: showVerificationMessage,
-      ), // Передаємо далі
+      ),
     );
   }
 }
 
-// 2. Цей віджет містить UI і логіку скролу.
-// Він вже має доступ до BLoC, бо знаходиться ПІД BlocProvider.
+/// The view implementation for the explore screen.
+///
+/// Contains the UI and scroll logic, and has access to the [ExploreBloc].
 class ExploreView extends StatefulWidget {
+  /// Whether to show a verification message.
   final bool showVerificationMessage;
 
+  /// Creates an [ExploreView].
   const ExploreView({super.key, required this.showVerificationMessage});
 
   @override
@@ -51,19 +58,19 @@ class _ExploreViewState extends State<ExploreView> {
     FirebaseAnalytics.instance.logScreenView(screenName: 'ExploreScreen');
     _scrollController.addListener(_onScroll);
 
-    // 3. ЛОГІКА ПОКАЗУ ПОВІДОМЛЕННЯ
+    // Logic to show verification message if needed.
     if (widget.showVerificationMessage) {
-      // Чекаємо, поки екран намалюється, і показуємо SnackBar
+      // Wait for the frame to render before showing the SnackBar.
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
               'Account created! Please check your email to verify.',
             ),
-            backgroundColor: AppTheme.darkCharcoal, // Чорний колір
-            duration: Duration(seconds: 6), // Показуємо довше
+            backgroundColor: AppTheme.darkCharcoal,
+            duration: Duration(seconds: 6),
             behavior:
-                SnackBarBehavior.floating, // Щоб виглядало гарно над табами
+                SnackBarBehavior.floating, // Floating behavior for better UI.
             margin: EdgeInsets.all(16),
           ),
         );
@@ -81,7 +88,7 @@ class _ExploreViewState extends State<ExploreView> {
 
   void _onScroll() {
     if (_isBottom) {
-      // ТЕПЕР ЦЕ ПРАЦЮЄ: context цього віджета бачить ExploreBloc вище по дереву
+      // Load more recipes when the bottom is reached.
       context.read<ExploreBloc>().add(LoadRecipesEvent());
     }
   }
@@ -160,10 +167,10 @@ class _ExploreViewState extends State<ExploreView> {
                   itemBuilder: (context, index) {
                     final recipe = state.recipes[index];
 
-                    // Додаємо обробку натискання
+                    // Handle recipe tap.
                     return GestureDetector(
                       onTap: () {
-                        // Навігація на екран деталей
+                        // Navigate to recipe details screen.
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -173,10 +180,8 @@ class _ExploreViewState extends State<ExploreView> {
                         );
                       },
                       child: RecipeCard(
-                        // Додаємо Hero тег для красивої анімації (опціонально,
-                        // але треба буде оновити і RecipeCard, щоб він прийняв цей тег,
-                        // або поки що пропустити Hero, якщо RecipeCard не підтримує)
-                        id: recipe.id, // <--- ДОДАЛИ ЦЕ
+                        // Pass ID for Hero animation tag.
+                        id: recipe.id,
                         imageUrl: recipe.imageUrl,
                         title: recipe.title,
                         author: recipe.author,

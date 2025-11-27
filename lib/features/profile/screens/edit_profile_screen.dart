@@ -6,7 +6,9 @@ import 'package:furtable/features/profile/bloc/profile_bloc.dart';
 import 'package:furtable/features/profile/bloc/profile_event.dart';
 import 'package:furtable/features/profile/bloc/profile_state.dart';
 
+/// Screen for editing the user's profile information.
 class EditProfileScreen extends StatelessWidget {
+  /// Creates an [EditProfileScreen].
   const EditProfileScreen({super.key});
 
   @override
@@ -18,7 +20,9 @@ class EditProfileScreen extends StatelessWidget {
   }
 }
 
+/// The view implementation for [EditProfileScreen].
 class EditProfileView extends StatefulWidget {
+  /// Creates an [EditProfileView].
   const EditProfileView({super.key});
 
   @override
@@ -30,10 +34,10 @@ class _EditProfileViewState extends State<EditProfileView> {
   final _nicknameController = TextEditingController();
   final _emailController = TextEditingController();
 
-  // Змінні для відстеження змін
+  // Variables to track changes.
   late String _initialNickname;
-  bool _isImageChanged = false; // Прапорець зміни фото
-  bool _hasChanges = false; // Загальний статус
+  bool _isImageChanged = false; // Flag for photo change.
+  bool _hasChanges = false; // Overall change status.
 
   @override
   void initState() {
@@ -44,7 +48,7 @@ class _EditProfileViewState extends State<EditProfileView> {
     _nicknameController.text = _initialNickname;
     _emailController.text = user?.email ?? 'legoshi.fan1@email.com';
 
-    // Слухаємо зміни в полі нікнейму
+    // Listen for changes in the nickname field.
     _nicknameController.addListener(_checkForChanges);
   }
 
@@ -59,7 +63,7 @@ class _EditProfileViewState extends State<EditProfileView> {
     }
   }
 
-  // Симуляція зміни фото (оскільки у нас немає реального Image Picker)
+  // Simulate photo change (since we don't have a real Image Picker).
   void _changePhoto() {
     setState(() {
       _isImageChanged = true;
@@ -110,25 +114,24 @@ class _EditProfileViewState extends State<EditProfileView> {
               padding: const EdgeInsets.only(right: 16.0),
               child: BlocBuilder<ProfileBloc, ProfileState>(
                 builder: (context, state) {
-                  // Визначаємо, чи активна кнопка
-                  // Активна, якщо: (є зміни) І (не йде завантаження)
+                  // Determine if the button is active.
+                  // Active if: (has changes) AND (not loading).
                   final isButtonEnabled =
                       _hasChanges && state is! ProfileLoading;
 
                   return ElevatedButton(
                     onPressed: isButtonEnabled ? _saveProfile : null,
                     style: ElevatedButton.styleFrom(
-                      // Колір залежить від активності
+                      // Color depends on activity.
                       backgroundColor: isButtonEnabled
-                          ? AppTheme
-                                .darkCharcoal // Активна (чорна)
-                          : Colors.grey.shade400, // Неактивна (сіра)
+                          ? AppTheme.darkCharcoal // Active (black)
+                          : Colors.grey.shade400, // Inactive (grey)
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                       minimumSize: const Size(0, 36),
-                      // Щоб при disabled колір був саме сірий, а не дефолтний прозорий
+                      // Ensure grey color when disabled, not default transparent.
                       disabledBackgroundColor: Colors.grey.shade400,
                       disabledForegroundColor: Colors.white,
                     ),
@@ -163,7 +166,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                   child: Column(
                     children: [
                       GestureDetector(
-                        onTap: _changePhoto, // Клік по фото активує зміни
+                        onTap: _changePhoto, // Clicking photo activates changes.
                         child: Stack(
                           children: [
                             Container(
@@ -171,7 +174,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                  // Підсвічуємо рамку, якщо фото змінено
+                                  // Highlight border if photo changed.
                                   color: _isImageChanged
                                       ? AppTheme.darkCharcoal
                                       : Colors.grey.shade400,
@@ -277,7 +280,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                   enabled: false,
                   style: const TextStyle(
                     color: AppTheme.mediumGray,
-                  ), // Сірий текст для disabled поля
+                  ), // Grey text for disabled field.
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.white,

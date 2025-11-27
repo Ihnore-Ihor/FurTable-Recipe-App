@@ -3,12 +3,14 @@ import 'package:furtable/features/explore/models/recipe_model.dart';
 import 'package:furtable/features/search/bloc/search_event.dart';
 import 'package:furtable/features/search/bloc/search_state.dart';
 
+/// Manages the state of the search screen, including query processing and result filtering.
 class SearchBloc extends Bloc<SearchEvent, SearchState> {
+  /// Creates a [SearchBloc].
   SearchBloc() : super(SearchInitial()) {
     on<SearchQueryChanged>(_onQueryChanged);
   }
 
-  // Той самий список для пошуку (в реальності це запит до API)
+  // Mock list of recipes for search (simulating an API response).
   final List<Recipe> _allRecipes = [
     const Recipe(
       id: '1',
@@ -85,7 +87,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
 
     emit(SearchLoading());
 
-    // Імітація затримки пошуку
+    // Simulate search delay.
     await Future.delayed(const Duration(milliseconds: 500));
 
     final results = _allRecipes.where((recipe) {
