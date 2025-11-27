@@ -8,6 +8,7 @@ import 'package:furtable/features/explore/widgets/recipe_card.dart';
 import 'package:furtable/features/search/bloc/search_bloc.dart';
 import 'package:furtable/features/search/bloc/search_event.dart';
 import 'package:furtable/features/search/bloc/search_state.dart';
+import 'package:furtable/features/profile/screens/profile_screen.dart';
 
 class SearchScreen extends StatelessWidget {
   const SearchScreen({super.key});
@@ -84,7 +85,12 @@ class _SearchViewState extends State<SearchView> {
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProfileScreen()),
+              );
+            },
             icon: const Icon(
               Icons.person_outline,
               color: AppTheme.darkCharcoal,

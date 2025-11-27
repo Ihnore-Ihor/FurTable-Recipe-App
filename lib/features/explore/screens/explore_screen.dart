@@ -9,7 +9,7 @@ import 'package:furtable/features/explore/bloc/explore_event.dart';
 import 'package:furtable/features/explore/bloc/explore_state.dart';
 import 'package:furtable/features/explore/screens/recipe_details_screen.dart';
 import 'package:furtable/features/explore/widgets/recipe_card.dart';
-import 'package:furtable/features/loading/screens/loading_screen.dart';
+import 'package:furtable/features/profile/screens/profile_screen.dart';
 
 // 1. Цей віджет просто надає BLoC. Він не має стану.
 class ExploreScreen extends StatelessWidget {
@@ -92,7 +92,7 @@ class _ExploreViewState extends State<ExploreView> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const LoadingScreen()),
+                MaterialPageRoute(builder: (context) => const ProfileScreen()),
               );
             },
             icon: const Icon(

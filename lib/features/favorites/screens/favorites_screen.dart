@@ -5,7 +5,7 @@ import 'package:furtable/core/utils/navigation_helper.dart';
 import 'package:furtable/features/explore/models/recipe_model.dart'; // Імпорт моделі
 import 'package:furtable/features/explore/widgets/recipe_card.dart';
 import 'package:furtable/features/explore/screens/recipe_details_screen.dart'; // Для кліку
-import 'package:furtable/features/loading/screens/loading_screen.dart';
+import 'package:furtable/features/profile/screens/profile_screen.dart';
 
 class FavoritesScreen extends StatelessWidget {
   const FavoritesScreen({super.key});
@@ -51,10 +51,13 @@ class FavoritesScreen extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const LoadingScreen()),
+                MaterialPageRoute(builder: (context) => const ProfileScreen()),
               );
             },
-            icon: const Icon(Icons.person_outline),
+            icon: const Icon(
+              Icons.person_outline,
+              color: AppTheme.darkCharcoal,
+            ),
           ),
           const SizedBox(width: 8),
         ],
