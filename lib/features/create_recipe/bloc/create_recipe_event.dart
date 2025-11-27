@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-/// Abstract base class for all events related to creating a recipe.
+/// Abstract base class for all events related to creating or updating a recipe.
 abstract class CreateRecipeEvent extends Equatable {
   /// Creates a [CreateRecipeEvent].
   const CreateRecipeEvent();
@@ -28,4 +28,30 @@ class SubmitRecipe extends CreateRecipeEvent {
 
   @override
   List<Object> get props => [title, description, isPublic];
+}
+
+/// Event triggered when the user updates an existing recipe.
+class UpdateRecipe extends CreateRecipeEvent {
+  /// The ID of the recipe being updated.
+  final String id;
+
+  /// The new title of the recipe.
+  final String title;
+
+  /// The new description of the recipe.
+  final String description;
+
+  /// The new visibility status of the recipe.
+  final bool isPublic;
+
+  /// Creates an [UpdateRecipe] event.
+  const UpdateRecipe({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.isPublic,
+  });
+
+  @override
+  List<Object> get props => [id, title, description, isPublic];
 }

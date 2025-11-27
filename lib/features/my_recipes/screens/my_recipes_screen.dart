@@ -13,7 +13,7 @@ import 'package:furtable/features/my_recipes/bloc/my_recipes_state.dart';
 
 /// Screen displaying the recipes created by the current user.
 ///
-/// Provides tabs for Public and Private recipes.
+/// Provides tabs for Public and Private recipes and allows editing or deleting them.
 class MyRecipesScreen extends StatelessWidget {
   /// Creates a [MyRecipesScreen].
   const MyRecipesScreen({super.key});
@@ -191,10 +191,78 @@ class MyRecipesView extends StatelessWidget {
                 author: recipe.author,
                 likes: recipe.likes,
               ),
+
+              // --- Menu Button (3 dots) ---
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Container(
+                  width: 32,
+                  height: 32,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: PopupMenuButton<String>(
+                    icon: const Icon(
+                      Icons.more_vert,
+                      size: 18,
+                      color: AppTheme.darkCharcoal,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    color: Colors.white,
+                    onSelected: (value) async {
+                      if (value == 'edit') {
+                        // 1. Navigate to edit screen.
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                CreateRecipeScreen(recipeToEdit: recipe),
+                          ),
+                        );
+                        // If returned true (successful save), refresh the list.
+                        if (result == true) {
+                          context.read<MyRecipesBloc>().add(LoadMyRecipes());
+                        }
+                      } else if (value == 'delete') {
+                        // 2. Show delete dialog.
+                        _showDeleteDialog(context, recipe);
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'edit',
+                        child: Row(
+                          children: [
+                            Icon(Icons.edit, size: 18),
+                            SizedBox(width: 8),
+                            Text('Edit'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'delete',
+                        child: Row(
+                          children: [
+                            Icon(Icons.delete, size: 18, color: Colors.red),
+                            SizedBox(width: 8),
+                            Text('Delete', style: TextStyle(color: Colors.red)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Lock icon for private recipes.
               if (isPrivate)
                 Positioned(
                   top: 8,
-                  right: 8,
+                  left: 8,
                   child: Container(
                     padding: const EdgeInsets.all(6),
                     decoration: const BoxDecoration(
@@ -212,6 +280,52 @@ class MyRecipesView extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  /// Shows a confirmation dialog for deleting a recipe.
+  void _showDeleteDialog(BuildContext context, Recipe recipe) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Delete Recipe?',
+          style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.bold),
+        ),
+        content: const Text(
+          'Are you sure you want to permanently delete this recipe? This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: AppTheme.mediumGray),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.darkCharcoal,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () {
+              // Delete via BLoC.
+              context.read<MyRecipesBloc>().add(DeleteRecipeEvent(recipe.id));
+              Navigator.pop(ctx); // Close dialog.
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Recipe deleted'),
+                  backgroundColor: AppTheme.darkCharcoal,
+                ),
+              );
+            },
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -4,37 +4,41 @@ import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/features/create_recipe/bloc/create_recipe_bloc.dart';
 import 'package:furtable/features/create_recipe/bloc/create_recipe_event.dart';
 import 'package:furtable/features/create_recipe/bloc/create_recipe_state.dart';
+import 'package:furtable/features/explore/models/recipe_model.dart';
 
-/// A screen that allows users to create a new recipe.
+/// A screen that allows users to create a new recipe or edit an existing one.
 ///
-/// Wraps the [CreateRecipeView] with a [CreateRecipeBloc].
+/// If [recipeToEdit] is provided, the screen pre-fills the fields with the recipe's data.
 class CreateRecipeScreen extends StatelessWidget {
+  /// The recipe to edit, if any.
+  final Recipe? recipeToEdit;
+
   /// Creates a [CreateRecipeScreen].
-  const CreateRecipeScreen({super.key});
+  const CreateRecipeScreen({super.key, this.recipeToEdit});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => CreateRecipeBloc(),
-      child: const CreateRecipeView(),
+      child: CreateRecipeView(recipeToEdit: recipeToEdit),
     );
   }
 }
 
-/// The view implementation for creating a recipe.
+/// The view implementation for creating or editing a recipe.
 class CreateRecipeView extends StatefulWidget {
+  /// The recipe to edit, if any.
+  final Recipe? recipeToEdit;
+
   /// Creates a [CreateRecipeView].
-  const CreateRecipeView({super.key});
+  const CreateRecipeView({super.key, this.recipeToEdit});
 
   @override
   State<CreateRecipeView> createState() => _CreateRecipeViewState();
 }
 
 class _CreateRecipeViewState extends State<CreateRecipeView> {
-  // Key for the form validation.
   final _formKey = GlobalKey<FormState>();
-
-  // Validation mode, enabled after the first submit attempt.
   AutovalidateMode _autovalidateMode = AutovalidateMode.disabled;
 
   final _titleController = TextEditingController();
@@ -42,6 +46,22 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
   final _ingredientsController = TextEditingController();
   final _instructionsController = TextEditingController();
   bool _isPublic = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // If editing, pre-fill fields with existing recipe data.
+    if (widget.recipeToEdit != null) {
+      final r = widget.recipeToEdit!;
+      _titleController.text = r.title;
+      // Convert lists to newline-separated strings.
+      _ingredientsController.text = r.ingredients.join('\n');
+      _instructionsController.text = r.steps.join('\n');
+      // Simulate description as it's not in the model.
+      _descriptionController.text = "Delicious recipe by ${r.author}";
+      // _isPublic = r.isPublic; // Uncomment if isPublic is added to the model.
+    }
+  }
 
   @override
   void dispose() {
@@ -52,11 +72,12 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
     super.dispose();
   }
 
+  /// Validates the form and dispatches the appropriate event (Submit or Update).
   void _submitForm() {
     final isValid = _formKey.currentState?.validate() ?? false;
 
+    // 1. Validation.
     if (!isValid) {
-      // Enable live validation if there are errors.
       if (_autovalidateMode == AutovalidateMode.disabled) {
         setState(() {
           _autovalidateMode = AutovalidateMode.onUserInteraction;
@@ -65,28 +86,43 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
       return;
     }
 
-    // Dispatch the submit event to the BLoC if validation passes.
-    context.read<CreateRecipeBloc>().add(
-      SubmitRecipe(
-        title: _titleController.text.trim(),
-        description: _descriptionController.text.trim(),
-        isPublic: _isPublic,
-      ),
-    );
+    final title = _titleController.text.trim();
+    final desc = _descriptionController.text.trim();
+
+    // 2. Dispatch event based on mode (Create vs Update).
+    if (widget.recipeToEdit != null) {
+      context.read<CreateRecipeBloc>().add(
+        UpdateRecipe(
+          id: widget.recipeToEdit!.id,
+          title: title,
+          description: desc,
+          isPublic: _isPublic,
+        ),
+      );
+    } else {
+      context.read<CreateRecipeBloc>().add(
+        SubmitRecipe(title: title, description: desc, isPublic: _isPublic),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isEditing = widget.recipeToEdit != null;
+
     return BlocListener<CreateRecipeBloc, CreateRecipeState>(
       listener: (context, state) {
         if (state is CreateRecipeSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Recipe created successfully!'),
-              backgroundColor: Colors.green,
+            SnackBar(
+              content: Text(
+                isEditing ? 'Recipe updated!' : 'Recipe created successfully!',
+              ),
+              backgroundColor: AppTheme.darkCharcoal,
             ),
           );
-          Navigator.pop(context);
+          // Return true to indicate success and trigger a refresh on the previous screen.
+          Navigator.pop(context, true);
         } else if (state is CreateRecipeFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.error), backgroundColor: Colors.red),
@@ -96,7 +132,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
       child: Scaffold(
         backgroundColor: AppTheme.offWhite,
         appBar: AppBar(
-          title: const Text('Create Recipe'),
+          title: Text(isEditing ? 'Edit Recipe' : 'Create Recipe'),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios_new, size: 20),
             onPressed: () => Navigator.pop(context),
@@ -143,7 +179,6 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
             ),
           ],
         ),
-        // Wraps the content in a Form widget.
         body: Form(
           key: _formKey,
           autovalidateMode: _autovalidateMode,
@@ -152,7 +187,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Image Upload Section
+                // --- Image Upload Section ---
                 const Text(
                   'Recipe Image',
                   style: TextStyle(
@@ -173,30 +208,39 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: const Color(0xFFE0E0E0)),
                     ),
-                    child: const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.file_upload_outlined,
-                          size: 32,
-                          color: AppTheme.mediumGray,
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          'Tap to add photo',
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            color: AppTheme.mediumGray,
-                            fontSize: 14,
+                    // Logic for image display: Show photo if editing, otherwise show upload icon.
+                    child: isEditing
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.asset(
+                              widget.recipeToEdit!.imageUrl,
+                              fit: BoxFit.cover,
+                            ),
+                          )
+                        : const Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.file_upload_outlined,
+                                size: 32,
+                                color: AppTheme.mediumGray,
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                'Tap to add photo',
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  color: AppTheme.mediumGray,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
                   ),
                 ),
                 const SizedBox(height: 24),
 
-                // Form Fields
+                // --- Form Fields with Validation ---
                 _buildLabel('Recipe Title *'),
                 _buildTextFormField(
                   controller: _titleController,
@@ -215,7 +259,6 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                   controller: _descriptionController,
                   hintText: 'Describe your recipe...',
                   maxLines: 4,
-                  // Description is optional, so no validator needed.
                 ),
                 const SizedBox(height: 24),
 
@@ -247,7 +290,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                 ),
                 const SizedBox(height: 24),
 
-                // Visibility Switch
+                // --- Visibility Switch ---
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -305,7 +348,6 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
     );
   }
 
-  // Custom text form field widget with consistent styling.
   Widget _buildTextFormField({
     required TextEditingController controller,
     required String hintText,
@@ -325,14 +367,13 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
         fillColor: Colors.white,
         contentPadding: const EdgeInsets.all(16),
 
-        // Error text style.
+        // Error styling.
         errorStyle: const TextStyle(
           color: Color(0xFFDC2626),
           fontSize: 13,
           fontWeight: FontWeight.w500,
         ),
 
-        // Default border style.
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
@@ -341,8 +382,6 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
         ),
-
-        // Focused border style.
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(
@@ -351,7 +390,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
           ),
         ),
 
-        // Error border style.
+        // Red border on error.
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Color(0xFFDC2626), width: 1.5),
