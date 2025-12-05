@@ -13,8 +13,17 @@ class UpdateProfileInfo extends ProfileEvent {
   /// The new nickname for the user.
   final String nickname;
 
+  /// The new avatar path for the user.
+  final String avatarPath;
+
   /// Creates an [UpdateProfileInfo] event.
-  const UpdateProfileInfo(this.nickname);
+  const UpdateProfileInfo({
+    required this.nickname,
+    required this.avatarPath,
+  });
+
+  @override
+  List<Object> get props => [nickname, avatarPath];
 }
 
 /// Event triggered to change the user's password.

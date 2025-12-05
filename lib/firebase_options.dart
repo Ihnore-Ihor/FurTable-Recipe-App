@@ -48,7 +48,6 @@ class DefaultFirebaseOptions {
     }
   }
 
-  /// Firebase options for the Web platform.
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyCInx-HkXQYzfpzY1A9e37zHtSdAdQUuoQ',
     appId: '1:119425224593:web:edf5ca4ea2f5eb9fb35430',
@@ -58,4 +57,6 @@ class DefaultFirebaseOptions {
     storageBucket: 'furtable.firebasestorage.app',
     measurementId: 'G-ZPD8D1J3F8',
   );
+
+  /// Firebase options for the Web platform.
 }

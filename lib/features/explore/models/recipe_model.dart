@@ -5,6 +5,7 @@ class Recipe extends Equatable {
   final String id;
   final String authorId;
   final String authorName;
+  final String authorAvatarUrl; // <--- НОВЕ ПОЛЕ
   final String title;
   final String description;
   final String imageUrl;
@@ -19,6 +20,7 @@ class Recipe extends Equatable {
     required this.id,
     required this.authorId,
     required this.authorName,
+    this.authorAvatarUrl = 'assets/images/legoshi_eating_auth.png', // Дефолт
     required this.title,
     required this.description,
     required this.imageUrl,
@@ -36,6 +38,8 @@ class Recipe extends Equatable {
       id: doc.id,
       authorId: data['authorId'] ?? '',
       authorName: data['authorName'] ?? 'Unknown',
+      authorAvatarUrl: data['authorAvatarUrl'] ??
+          'assets/images/legoshi_eating_auth.png', // Читаємо
       title: data['title'] ?? '',
       description: data['description'] ?? '',
       imageUrl: data['imageUrl'] ?? '',
@@ -52,6 +56,7 @@ class Recipe extends Equatable {
     return {
       'authorId': authorId,
       'authorName': authorName,
+      'authorAvatarUrl': authorAvatarUrl, // Пишемо
       'title': title,
       'description': description,
       'imageUrl': imageUrl,
@@ -61,12 +66,12 @@ class Recipe extends Equatable {
       'steps': steps,
       'isPublic': isPublic,
       'createdAt': Timestamp.fromDate(createdAt),
-      'searchKeywords': _generateKeywords(title),
+      'searchKeywords': generateKeywords(title, authorName),
     };
   }
 
   // Розумна генерація: розбиваємо на слова, і для кожного слова робимо префікси
-  List<String> _generateKeywords(String title) {
+  static List<String> generateKeywords(String title, String authorName) {
     Set<String> keywords = {};
 
     // 1. Додаємо слова з назви

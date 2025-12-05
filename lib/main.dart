@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/features/auth/screens/auth_screen.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/features/favorites/bloc/favorites_bloc.dart';
 import 'package:furtable/features/favorites/bloc/favorites_event.dart';
@@ -25,11 +24,6 @@ Future<void> main() async {
       WidgetsFlutterBinding.ensureInitialized();
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
-      );
-
-      await Supabase.initialize(
-        url: 'https://qmpjfofqcpsxuwzjrret.supabase.co',
-        anonKey: 'sb_secret_HaU_unnteMBf_spO6wptqA_FtiSd5Kj',
       );
 
       await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);

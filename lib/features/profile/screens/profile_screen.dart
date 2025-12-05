@@ -2,6 +2,7 @@ import 'dart:async'; // For timer
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:furtable/core/app_theme.dart';
+import 'package:furtable/core/utils/avatar_helper.dart';
 import 'package:furtable/features/auth/screens/auth_screen.dart';
 import 'package:furtable/features/profile/screens/account_settings_screen.dart';
 import 'package:furtable/features/profile/screens/edit_profile_screen.dart';
@@ -28,25 +29,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
+    // 1. МИТТЄВА ІНІЦІАЛІЗАЦІЯ
+    // Ми беремо дані, які вже є в пам'яті, тому картинка з'явиться одразу
+    _user = FirebaseAuth.instance.currentUser;
+    
+    // 2. Оновлення у фоні
+    // Це потрібно тільки для перевірки emailVerified або якщо дані змінилися на іншому пристрої
     _refreshUser();
+  }
+
+  Future<void> _refreshUser() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      await currentUser.reload(); 
+      if (mounted) {
+        setState(() {
+          // Оновлюємо стан тільки після завершення запиту
+          _user = FirebaseAuth.instance.currentUser;
+        });
+      }
+    }
   }
 
   @override
   void dispose() {
     _timer?.cancel(); // Ensure timer is cancelled.
     super.dispose();
-  }
-
-  Future<void> _refreshUser() async {
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser != null) {
-      await currentUser.reload();
-      if (mounted) {
-        setState(() {
-          _user = FirebaseAuth.instance.currentUser;
-        });
-      }
-    }
   }
 
   // Start a 60-second cooldown timer.
@@ -153,7 +161,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           children: [
             const SizedBox(height: 16),
-            // Avatar
             Container(
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
@@ -168,9 +175,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 height: 110,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
+                  color: Colors.white, // <--- ВАЖЛИВО: Білий фон під картинкою
                   border: Border.all(color: AppTheme.darkCharcoal, width: 2),
-                  image: const DecorationImage(
-                    image: AssetImage('assets/images/legoshi_eating_auth.png'),
+                  image: DecorationImage(
+                    image: AssetImage(
+                        _user?.photoURL ?? AvatarHelper.defaultAvatar),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -284,12 +293,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     context,
                     icon: Icons.person_outline,
                     title: 'Edit Profile',
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const EditProfileScreen(),
-                      ),
-                    ),
+                    onTap: () async {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const EditProfileScreen(),
+                        ),
+                      );
+
+                      if (result == true) {
+                        _refreshUser(); // <--- Викликаємо оновлення
+                      }
+                    },
                   ),
                   const Divider(height: 1, indent: 56),
                   _buildMenuItem(

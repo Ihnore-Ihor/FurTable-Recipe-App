@@ -1,29 +1,39 @@
 import 'package:firebase_auth/firebase_auth.dart'; // Імпорт
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:furtable/features/explore/repositories/recipe_repository.dart';
 import 'package:furtable/features/profile/bloc/profile_event.dart';
 import 'package:furtable/features/profile/bloc/profile_state.dart';
 
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
+  final RecipeRepository _recipeRepo = RecipeRepository();
+
   ProfileBloc() : super(ProfileInitial()) {
     
-    // Оновлення нікнейму
+    // Оновлення нікнейму та аватара
     on<UpdateProfileInfo>((event, emit) async {
       emit(ProfileLoading());
       try {
         final user = FirebaseAuth.instance.currentUser;
         if (user != null) {
+          // 1. Оновлюємо Auth профіль
           await user.updateDisplayName(event.nickname);
+          // Оновлюємо "посилання" на фото (тут буде наш локальний шлях)
+          await user.updatePhotoURL(event.avatarPath);
           
-          // user.reload() іноді може "тупити", якщо немає мережі. 
-          // Можна пропустити його тут, якщо ми довіряємо updateDisplayName
-          // або обгорнути в timeout
           try {
              await user.reload().timeout(const Duration(seconds: 5));
           } catch (_) {
              // Ігноруємо помилку reload, головне що update пройшов
           }
 
-          emit(const ProfileSuccess("Profile updated successfully"));
+          // 2. Оновлюємо всі рецепти цього користувача в базі!
+          await _recipeRepo.updateAuthorDetails(
+            user.uid, 
+            event.nickname, 
+            event.avatarPath
+          );
+
+          emit(const ProfileSuccess("Profile and recipes updated successfully"));
         } else {
           emit(const ProfileFailure("User not logged in"));
         }

@@ -1,39 +1,25 @@
 import 'dart:typed_data';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:firebase_storage/firebase_storage.dart'; // <--- Firebase
 import 'package:uuid/uuid.dart';
 
 class StorageRepository {
-  // Отримуємо клієнт Supabase
-  final SupabaseClient _supabase = Supabase.instance.client;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
   final Uuid _uuid = const Uuid();
 
-  // Метод завантаження
   Future<String> uploadImageBytes(Uint8List data, String folder) async {
     try {
-      // 1. Генеруємо унікальну назву файлу (наприклад: "a1b2-c3d4.jpg")
       final String fileName = '${_uuid.v4()}.jpg';
-      final String path = fileName; // В корінь бакета
+      final Reference ref = _storage.ref().child('$folder/$fileName');
 
-      // 2. Завантажуємо файл у бакет 'recipe_images'
-      await _supabase.storage
-          .from('recipe_images')
-          .uploadBinary(
-            path,
-            data,
-            fileOptions: const FileOptions(
-              contentType: 'image/jpeg',
-              upsert: true, // Перезаписати, якщо існує (малоймовірно з uuid)
-            ),
-          );
+      final UploadTask uploadTask = ref.putData(
+        data,
+        SettableMetadata(contentType: 'image/jpeg'),
+      );
 
-      // 3. Отримуємо публічне посилання на файл
-      final String publicUrl = _supabase.storage
-          .from('recipe_images')
-          .getPublicUrl(path);
-
-      return publicUrl;
+      final TaskSnapshot snapshot = await uploadTask;
+      return await snapshot.ref.getDownloadURL();
     } catch (e) {
-      throw Exception('Image upload failed: $e');
+      throw Exception('Firebase Storage upload failed: $e');
     }
   }
 }

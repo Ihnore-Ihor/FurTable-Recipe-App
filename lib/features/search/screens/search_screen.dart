@@ -301,7 +301,7 @@ class _SearchViewState extends State<SearchView> {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  RecipeDetailsScreen(recipe: recipe),
+                                  RecipeDetailsScreen(initialRecipe: recipe),
                             ),
                           );
                         },

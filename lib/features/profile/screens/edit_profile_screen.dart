@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/core/app_theme.dart';
+import 'package:furtable/core/utils/avatar_helper.dart';
 import 'package:furtable/features/profile/bloc/profile_bloc.dart';
 import 'package:furtable/features/profile/bloc/profile_event.dart';
 import 'package:furtable/features/profile/bloc/profile_state.dart';
@@ -33,28 +34,34 @@ class _EditProfileViewState extends State<EditProfileView> {
   final _formKey = GlobalKey<FormState>();
   final _nicknameController = TextEditingController();
   final _emailController = TextEditingController();
-
-  // Variables to track changes.
+  
+  // Зберігаємо шлях до вибраної картинки
+  String _selectedAvatarPath = AvatarHelper.defaultAvatar;
+  bool _hasChanges = false;
   late String _initialNickname;
-  bool _isImageChanged = false; // Flag for photo change.
-  bool _hasChanges = false; // Overall change status.
+  late String _initialAvatar;
 
   @override
   void initState() {
     super.initState();
     final user = FirebaseAuth.instance.currentUser;
+    
     _initialNickname = user?.displayName ?? 'Legoshi Fan1';
+    // Якщо у юзера є фото в профілі - беремо його, інакше дефолт
+    _initialAvatar = user?.photoURL ?? AvatarHelper.defaultAvatar;
 
     _nicknameController.text = _initialNickname;
     _emailController.text = user?.email ?? 'legoshi.fan1@email.com';
+    _selectedAvatarPath = _initialAvatar;
 
-    // Listen for changes in the nickname field.
     _nicknameController.addListener(_checkForChanges);
   }
 
   void _checkForChanges() {
     final nicknameChanged = _nicknameController.text.trim() != _initialNickname;
-    final hasChanges = nicknameChanged || _isImageChanged;
+    final avatarChanged = _selectedAvatarPath != _initialAvatar;
+    
+    final hasChanges = nicknameChanged || avatarChanged;
 
     if (_hasChanges != hasChanges) {
       setState(() {
@@ -63,25 +70,84 @@ class _EditProfileViewState extends State<EditProfileView> {
     }
   }
 
-  // Simulate photo change (since we don't have a real Image Picker).
-  void _changePhoto() {
-    setState(() {
-      _isImageChanged = true;
-      _checkForChanges();
-    });
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Photo selected (simulated)')));
+  // --- ГОЛОВНА ФІШКА: Меню вибору аватара ---
+  void _showAvatarPicker() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          height: 300,
+          child: Column(
+            children: [
+              const Text(
+                'Choose an Avatar',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: AppTheme.darkCharcoal,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Expanded(
+                child: GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4, // 4 в ряд
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                  ),
+                  itemCount: AvatarHelper.avatars.length,
+                  itemBuilder: (context, index) {
+                    final path = AvatarHelper.avatars[index];
+                    final isSelected = path == _selectedAvatarPath;
+
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedAvatarPath = path;
+                          _checkForChanges();
+                        });
+                        Navigator.pop(context); // Закриваємо шторку
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: isSelected 
+                              ? Border.all(color: AppTheme.darkCharcoal, width: 3)
+                              : null,
+                        ),
+                        child: CircleAvatar(
+                          backgroundImage: AssetImage(path),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   void _saveProfile() {
     if (_formKey.currentState!.validate()) {
+      // Передаємо і нік, і новий шлях до аватара
       context.read<ProfileBloc>().add(
-        UpdateProfileInfo(_nicknameController.text),
+        UpdateProfileInfo(
+          nickname: _nicknameController.text,
+          avatarPath: _selectedAvatarPath, // <--- Треба оновити івент!
+        ),
       );
     }
   }
-
+  
   @override
   void dispose() {
     _nicknameController.dispose();
@@ -97,7 +163,8 @@ class _EditProfileViewState extends State<EditProfileView> {
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(const SnackBar(content: Text('Profile updated!')));
-          Navigator.pop(context);
+          // ПОВЕРТАЄМО true, щоб попередити попередній екран
+          Navigator.pop(context, true);
         }
       },
       child: Scaffold(
@@ -166,7 +233,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                   child: Column(
                     children: [
                       GestureDetector(
-                        onTap: _changePhoto, // Clicking photo activates changes.
+                        onTap: _showAvatarPicker, // <--- Викликаємо наше меню
                         child: Stack(
                           children: [
                             Container(
@@ -174,17 +241,21 @@ class _EditProfileViewState extends State<EditProfileView> {
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                  // Highlight border if photo changed.
-                                  color: _isImageChanged
-                                      ? AppTheme.darkCharcoal
-                                      : Colors.grey.shade400,
-                                  width: 2,
+                                  color: _selectedAvatarPath != _initialAvatar 
+                                      ? AppTheme.darkCharcoal 
+                                      : Colors.grey.shade400, 
+                                  width: 2
                                 ),
                               ),
-                              child: const CircleAvatar(
-                                radius: 50,
-                                backgroundImage: AssetImage(
-                                  'assets/images/legoshi_eating_auth.png',
+                              child: Container(
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle, 
+                                  color: Colors.white
+                                ),
+                                child: CircleAvatar(
+                                  radius: 50,
+                                  backgroundColor: Colors.transparent,
+                                  backgroundImage: AssetImage(_selectedAvatarPath), // <--- Показуємо вибране
                                 ),
                               ),
                             ),
@@ -219,7 +290,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                       ),
                       const SizedBox(height: 12),
                       GestureDetector(
-                        onTap: _changePhoto,
+                        onTap: _showAvatarPicker,
                         child: const Text(
                           'Tap to change photo',
                           style: TextStyle(

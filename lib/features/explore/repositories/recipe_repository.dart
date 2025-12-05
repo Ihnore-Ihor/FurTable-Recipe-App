@@ -89,6 +89,7 @@ class RecipeRepository {
           id: recipe.id,
           authorId: recipe.authorId,
           authorName: recipe.authorName,
+          authorAvatarUrl: recipe.authorAvatarUrl, // Зберігаємо аватар
           title: recipe.title,
           description: recipe.description,
           imageUrl: recipe.imageUrl,
@@ -106,6 +107,46 @@ class RecipeRepository {
         });
       }
     });
+  }
+
+  // 10. Масове оновлення даних автора у всіх його рецептах
+  Future<void> updateAuthorDetails(
+      String userId, String newName, String newAvatar) async {
+    // 2. Створюємо пакет (batch) для атомарного оновлення
+    final batch = FirebaseFirestore.instance.batch();
+
+    // А. Оновлюємо в головній колекції 'recipes'
+    final mainSnapshot =
+        await _recipesRef.where('authorId', isEqualTo: userId).get();
+        
+    for (var doc in mainSnapshot.docs) {
+      batch.update(doc.reference, {
+        'authorName': newName,
+        'authorAvatarUrl': newAvatar,
+        // Оновлюємо ключові слова пошуку, бо ім'я змінилося!
+        'searchKeywords': Recipe.generateKeywords(doc['title'], newName),
+      });
+    }
+
+    // Б. Оновлюємо в колекції 'users/{userId}/favorites' (Улюблені цього користувача)
+    // Це виправить баг, коли в "Favorites" залишається старий нік/фото
+    final favSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('favorites')
+        .where('authorId', isEqualTo: userId) // Шукаємо тільки свої рецепти в своїх улюблених
+        .get();
+
+    for (var doc in favSnapshot.docs) {
+      batch.update(doc.reference, {
+        'authorName': newName,
+        'authorAvatarUrl': newAvatar,
+        // searchKeywords в улюблених зазвичай не потрібні, але можна оновити
+      });
+    }
+
+    // 3. Застосовуємо зміни
+    await batch.commit();
   }
 
   // 9. Отримати список улюблених (Stream)

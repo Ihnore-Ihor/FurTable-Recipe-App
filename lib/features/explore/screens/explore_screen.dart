@@ -178,7 +178,7 @@ class _ExploreViewState extends State<ExploreView> {
                           context,
                           MaterialPageRoute(
                             builder: (context) =>
-                                RecipeDetailsScreen(recipe: recipe),
+                                RecipeDetailsScreen(initialRecipe: recipe),
                           ),
                         );
                       },

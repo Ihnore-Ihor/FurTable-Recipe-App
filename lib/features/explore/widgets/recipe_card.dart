@@ -5,8 +5,8 @@ class RecipeCard extends StatefulWidget {
   final String id;
   final String imageUrl;
   final String title;
-  final String author; // Використовуємо геттер з моделі
-  final String likes; // Використовуємо геттер з моделі
+  final String author; 
+  final String likes;
   final bool isFavorite;
   final VoidCallback? onFavoriteToggle;
 
@@ -28,7 +28,6 @@ class RecipeCard extends StatefulWidget {
 class _RecipeCardState extends State<RecipeCard> {
   @override
   Widget build(BuildContext context) {
-    // Розрахунок ширини для адаптивності
     final cardWidth = (MediaQuery.of(context).size.width - 48) / 2;
 
     return Column(
@@ -40,36 +39,29 @@ class _RecipeCardState extends State<RecipeCard> {
               borderRadius: BorderRadius.circular(10),
               child: Hero(
                 tag: 'recipe_image_${widget.id}',
-                child: widget.imageUrl.startsWith('http')
+                child: widget.imageUrl.startsWith('http') 
                     ? Image.network(
                         widget.imageUrl,
                         fit: BoxFit.cover,
                         width: double.infinity,
                         height: cardWidth,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            width: double.infinity,
-                            height: cardWidth,
-                            color: Colors.grey[200],
-                            child: const Icon(
-                              Icons.broken_image,
-                              color: Colors.grey,
-                            ),
-                          );
-                        },
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          width: double.infinity,
+                          height: cardWidth,
+                          color: Colors.grey[200],
+                          child: const Icon(Icons.broken_image, color: Colors.grey),
+                        ),
                       )
                     : Image.asset(
                         widget.imageUrl,
                         fit: BoxFit.cover,
                         width: double.infinity,
                         height: cardWidth,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            width: double.infinity,
-                            height: cardWidth,
-                            color: Colors.grey[200],
-                          );
-                        },
+                        errorBuilder: (context, error, stackTrace) => Container(
+                           width: double.infinity,
+                           height: cardWidth,
+                           color: Colors.grey[200],
+                        ),
                       ),
               ),
             ),
@@ -79,10 +71,7 @@ class _RecipeCardState extends State<RecipeCard> {
               child: GestureDetector(
                 onTap: widget.onFavoriteToggle,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(50),
@@ -98,17 +87,12 @@ class _RecipeCardState extends State<RecipeCard> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        widget.isFavorite
-                            ? Icons.favorite
-                            : Icons.favorite_border,
-                        color: AppTheme.darkCharcoal,
+                        widget.isFavorite ? Icons.favorite : Icons.favorite_border,
+                        color: widget.isFavorite ? AppTheme.darkCharcoal : AppTheme.darkCharcoal,
                         size: 14,
                       ),
                       const SizedBox(width: 4),
-                      Text(
-                        widget.likes,
-                        style: Theme.of(context).textTheme.labelSmall,
-                      ),
+                      Text(widget.likes, style: Theme.of(context).textTheme.labelSmall),
                     ],
                   ),
                 ),
@@ -124,7 +108,11 @@ class _RecipeCardState extends State<RecipeCard> {
           overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 4),
-        Text(widget.author, style: Theme.of(context).textTheme.bodyMedium),
+        // Тільки текст автора, без аватарки
+        Text(
+          widget.author, 
+          style: Theme.of(context).textTheme.bodyMedium
+        ),
       ],
     );
   }

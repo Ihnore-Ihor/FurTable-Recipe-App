@@ -121,7 +121,7 @@ class FavoritesView extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => RecipeDetailsScreen(recipe: recipe),
+                builder: (context) => RecipeDetailsScreen(initialRecipe: recipe),
               ),
             );
           },
