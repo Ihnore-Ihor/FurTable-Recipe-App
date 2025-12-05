@@ -1,47 +1,96 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:furtable/core/repositories/storage_repository.dart';
 import 'package:furtable/features/create_recipe/bloc/create_recipe_event.dart';
 import 'package:furtable/features/create_recipe/bloc/create_recipe_state.dart';
+import 'package:furtable/features/explore/models/recipe_model.dart';
+import 'package:furtable/features/explore/repositories/recipe_repository.dart';
 
-/// Manages the state of the recipe creation and update process.
-///
-/// Handles [SubmitRecipe] and [UpdateRecipe] events to simulate network requests
-/// and manage the loading/success/failure states.
 class CreateRecipeBloc extends Bloc<CreateRecipeEvent, CreateRecipeState> {
-  /// Creates a [CreateRecipeBloc] and registers event handlers.
+  final RecipeRepository _recipeRepo = RecipeRepository();
+  final StorageRepository _storageRepo = StorageRepository();
+
   CreateRecipeBloc() : super(CreateRecipeInitial()) {
     on<SubmitRecipe>(_onSubmit);
     on<UpdateRecipe>(_onUpdate);
   }
 
-  /// Handles the [SubmitRecipe] event.
-  Future<void> _onSubmit(
-    SubmitRecipe event,
-    Emitter<CreateRecipeState> emit,
-  ) async {
+  Future<void> _onSubmit(SubmitRecipe event, Emitter<CreateRecipeState> emit) async {
     emit(CreateRecipeLoading());
     try {
-      // Simulate network delay.
-      await Future.delayed(const Duration(seconds: 2));
-      // Validation is handled in the UI, so we just emit success.
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) throw Exception("User not logged in");
+
+      String imageUrl = '';
+      
+      // 1. Вантажимо картинку в Supabase
+      if (event.imageBytes != null) {
+        imageUrl = await _storageRepo.uploadImageBytes(event.imageBytes!, 'recipe_images');
+      } else {
+        imageUrl = 'https://placehold.co/600x400/png?text=No+Image'; 
+      }
+
+      // 2. Створюємо об'єкт рецепту
+      final recipe = Recipe(
+        id: '', // ID дасть Firestore
+        authorId: user.uid,
+        authorName: user.displayName ?? 'Chef',
+        title: event.title,
+        description: event.description,
+        imageUrl: imageUrl, 
+        likesCount: 0,
+        timeMinutes: event.timeMinutes,
+        ingredients: event.ingredients.split('\n'),
+        steps: event.instructions.split('\n'),
+        isPublic: event.isPublic,
+        createdAt: DateTime.now(),
+      );
+
+      // 3. Зберігаємо текст у Firestore
+      await _recipeRepo.createRecipe(recipe);
+
       emit(CreateRecipeSuccess());
     } catch (e) {
-      emit(const CreateRecipeFailure("Failed to create recipe"));
+      emit(CreateRecipeFailure(e.toString()));
     }
   }
 
-  /// Handles the [UpdateRecipe] event.
-  Future<void> _onUpdate(
-    UpdateRecipe event,
-    Emitter<CreateRecipeState> emit,
-  ) async {
+  Future<void> _onUpdate(UpdateRecipe event, Emitter<CreateRecipeState> emit) async {
     emit(CreateRecipeLoading());
     try {
-      // Simulate network delay.
-      await Future.delayed(const Duration(seconds: 2));
-      // Logic to update the recipe in the database would go here.
+      // 1. Визначаємо URL картинки
+      // Якщо завантажили нову - беремо нову URL, інакше залишаємо стару
+      String imageUrl = event.currentImageUrl ?? '';
+
+      if (event.newImageBytes != null) {
+         imageUrl = await _storageRepo.uploadImageBytes(event.newImageBytes!, 'recipe_images');
+      }
+
+      // 2. Створюємо оновлений об'єкт
+      // Для спрощення беремо поточного юзера як автора (або можна було б передати authorId в івенті)
+      final user = FirebaseAuth.instance.currentUser;
+      
+      final recipe = Recipe(
+        id: event.id,
+        authorId: user?.uid ?? '', 
+        authorName: user?.displayName ?? 'Chef',
+        title: event.title,
+        description: event.description,
+        imageUrl: imageUrl,
+        likesCount: 0, // В ідеалі треба зберегти старі лайки, але в UpdateRecipe ми їх не передали. Хай буде 0 для лаби.
+        timeMinutes: 45,
+        ingredients: event.ingredients.split('\n'),
+        steps: event.instructions.split('\n'),
+        isPublic: event.isPublic,
+        createdAt: DateTime.now(), // Оновлюємо дату
+      );
+
+      // 3. Оновлюємо в базі
+      await _recipeRepo.updateRecipe(recipe);
+      
       emit(CreateRecipeSuccess());
     } catch (e) {
-      emit(const CreateRecipeFailure("Failed to update recipe"));
+      emit(CreateRecipeFailure(e.toString()));
     }
   }
 }

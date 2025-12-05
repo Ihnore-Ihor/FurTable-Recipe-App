@@ -1,91 +1,86 @@
+import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/features/explore/models/recipe_model.dart';
+import 'package:furtable/features/explore/repositories/recipe_repository.dart'; // <--- Репозиторій
 import 'package:furtable/features/my_recipes/bloc/my_recipes_event.dart';
 import 'package:furtable/features/my_recipes/bloc/my_recipes_state.dart';
 
-/// Manages the state of the user's recipes screen.
-///
-/// Loads, filters, and deletes recipes.
 class MyRecipesBloc extends Bloc<MyRecipesEvent, MyRecipesState> {
-  /// Creates a [MyRecipesBloc] and registers event handlers.
+  final RecipeRepository _recipeRepo = RecipeRepository();
+  StreamSubscription? _recipesSubscription;
+
   MyRecipesBloc() : super(MyRecipesLoading()) {
     on<LoadMyRecipes>(_onLoadMyRecipes);
+    on<MyRecipesUpdated>(_onMyRecipesUpdated);
     on<DeleteRecipeEvent>(_onDeleteRecipe);
   }
 
-  /// Handles the [LoadMyRecipes] event.
   Future<void> _onLoadMyRecipes(
     LoadMyRecipes event,
     Emitter<MyRecipesState> emit,
   ) async {
+    // Якщо вже є підписка - скасовуємо стару (на всяк випадок)
+    await _recipesSubscription?.cancel();
+    
     emit(MyRecipesLoading());
+
     try {
-      await Future.delayed(const Duration(seconds: 1)); // Simulate network delay.
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        emit(const MyRecipesError("User not logged in"));
+        return;
+      }
 
-      // Mock data.
-      final public = [
-        const Recipe(
-          id: 'mp_1',
-          title: 'Homemade Pizza',
-          author: 'You',
-          imageUrl: 'assets/images/pizza.png',
-          likes: '124',
-          timeMinutes: 40,
-          ingredients: ['Dough', 'Cheese', 'Tomato'],
-          steps: ['Bake it'],
-        ),
-        const Recipe(
-          id: 'mp_2',
-          title: 'Banana Bread',
-          author: 'You',
-          imageUrl: 'assets/images/banana_bread.png',
-          likes: '67',
-          timeMinutes: 60,
-          ingredients: ['Banana', 'Flour'],
-          steps: ['Mix and bake'],
-        ),
-      ];
+      // Підписуємося на стрім рецептів ТІЛЬКИ ЦЬОГО користувача
+      _recipesSubscription = _recipeRepo.getMyRecipes(user.uid).listen(
+        (allRecipes) {
+          // Коли приходять дані, ми їх сортуємо
+          final public = allRecipes.where((r) => r.isPublic).toList();
+          final private = allRecipes.where((r) => !r.isPublic).toList();
 
-      final private = [
-        const Recipe(
-          id: 'mpr_1',
-          title: 'Secret Family Soup',
-          author: 'You',
-          imageUrl: 'assets/images/family_soup.png',
-          likes: '0',
-          timeMinutes: 120,
-          ingredients: ['Secret ingredient'],
-          steps: ['Boil it'],
-        ),
-      ];
-
-      emit(MyRecipesLoaded(publicRecipes: public, privateRecipes: private));
+          // І відправляємо подію оновлення
+          add(MyRecipesUpdated(publicRecipes: public, privateRecipes: private));
+        },
+        onError: (error) {
+          print("MyRecipes Error: $error");
+          // Тут важко емітити стан напряму з listen, тому краще обробляти помилки в UI або через окрему подію Error
+        },
+      );
     } catch (e) {
-      emit(const MyRecipesError("Failed to load recipes"));
+      emit(MyRecipesError(e.toString()));
     }
   }
 
-  /// Handles the [DeleteRecipeEvent].
+  // Обробник оновлення (просто оновлює стан UI)
+  void _onMyRecipesUpdated(
+    MyRecipesUpdated event,
+    Emitter<MyRecipesState> emit,
+  ) {
+    emit(MyRecipesLoaded(
+      publicRecipes: event.publicRecipes,
+      privateRecipes: event.privateRecipes,
+    ));
+  }
+
+  // Видалення (тепер реальне!)
   Future<void> _onDeleteRecipe(
     DeleteRecipeEvent event,
     Emitter<MyRecipesState> emit,
   ) async {
-    if (state is MyRecipesLoaded) {
-      final currentState = state as MyRecipesLoaded;
-
-      // Create new lists by filtering out the deleted recipe.
-      final newPublic = currentState.publicRecipes
-          .where((r) => r.id != event.recipeId)
-          .toList();
-
-      final newPrivate = currentState.privateRecipes
-          .where((r) => r.id != event.recipeId)
-          .toList();
-
-      // Emit the updated state.
-      emit(
-        MyRecipesLoaded(publicRecipes: newPublic, privateRecipes: newPrivate),
-      );
+    try {
+      // Видаляємо з бази. Стрім вище автоматично побачить зміни і оновить список.
+      // Нам НЕ треба вручну правити списки тут.
+      await _recipeRepo.deleteRecipe(event.recipeId);
+    } catch (e) {
+      // Можна додати стан помилки видалення, але для простоти покажемо в консоль
+      print("Error deleting: $e");
     }
+  }
+
+  @override
+  Future<void> close() {
+    _recipesSubscription?.cancel();
+    return super.close();
   }
 }

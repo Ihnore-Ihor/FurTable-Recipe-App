@@ -41,12 +41,21 @@ class RecipeDetailsScreen extends StatelessWidget {
               tag: 'recipe_image_${recipe.id}',
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Image.asset(
-                  recipe.imageUrl,
-                  width: double.infinity,
-                  height: 250, // Fixed height as per design.
-                  fit: BoxFit.cover,
-                ),
+                child: recipe.imageUrl.startsWith('http')
+                    ? Image.network(
+                        recipe.imageUrl,
+                        width: double.infinity,
+                        height: 250,
+                        fit: BoxFit.cover,
+                        errorBuilder: (ctx, err, stack) =>
+                            Container(color: Colors.grey),
+                      )
+                    : Image.asset(
+                        recipe.imageUrl,
+                        width: double.infinity,
+                        height: 250,
+                        fit: BoxFit.cover,
+                      ),
               ),
             ),
             const SizedBox(height: 24),
@@ -77,7 +86,7 @@ class RecipeDetailsScreen extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  recipe.author,
+                  recipe.authorName,
                   style: const TextStyle(
                     fontFamily: 'Inter',
                     fontSize: 16,

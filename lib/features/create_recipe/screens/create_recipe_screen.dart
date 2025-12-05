@@ -1,19 +1,17 @@
+import 'dart:typed_data'; // Для роботи з байтами картинки
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Для фільтрації вводу цифр
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart'; // Для вибору фото
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/features/create_recipe/bloc/create_recipe_bloc.dart';
 import 'package:furtable/features/create_recipe/bloc/create_recipe_event.dart';
 import 'package:furtable/features/create_recipe/bloc/create_recipe_state.dart';
 import 'package:furtable/features/explore/models/recipe_model.dart';
 
-/// A screen that allows users to create a new recipe or edit an existing one.
-///
-/// If [recipeToEdit] is provided, the screen pre-fills the fields with the recipe's data.
 class CreateRecipeScreen extends StatelessWidget {
-  /// The recipe to edit, if any.
   final Recipe? recipeToEdit;
 
-  /// Creates a [CreateRecipeScreen].
   const CreateRecipeScreen({super.key, this.recipeToEdit});
 
   @override
@@ -25,12 +23,8 @@ class CreateRecipeScreen extends StatelessWidget {
   }
 }
 
-/// The view implementation for creating or editing a recipe.
 class CreateRecipeView extends StatefulWidget {
-  /// The recipe to edit, if any.
   final Recipe? recipeToEdit;
-
-  /// Creates a [CreateRecipeView].
   const CreateRecipeView({super.key, this.recipeToEdit});
 
   @override
@@ -45,21 +39,22 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
   final _descriptionController = TextEditingController();
   final _ingredientsController = TextEditingController();
   final _instructionsController = TextEditingController();
-  bool _isPublic = false;
+  final _timeController = TextEditingController(); // <--- НОВЕ: ЧАС
+  
+  bool _isPublic = true; // За замовчуванням публічний
+  Uint8List? _selectedImageBytes; // <--- НОВЕ: Зберігаємо фото
 
   @override
   void initState() {
     super.initState();
-    // If editing, pre-fill fields with existing recipe data.
     if (widget.recipeToEdit != null) {
       final r = widget.recipeToEdit!;
       _titleController.text = r.title;
-      // Convert lists to newline-separated strings.
+      _descriptionController.text = r.description;
       _ingredientsController.text = r.ingredients.join('\n');
       _instructionsController.text = r.steps.join('\n');
-      // Simulate description as it's not in the model.
-      _descriptionController.text = "Delicious recipe by ${r.author}";
-      // _isPublic = r.isPublic; // Uncomment if isPublic is added to the model.
+      _timeController.text = r.timeMinutes.toString(); // Заповнюємо час
+      _isPublic = r.isPublic;
     }
   }
 
@@ -69,40 +64,68 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
     _descriptionController.dispose();
     _ingredientsController.dispose();
     _instructionsController.dispose();
+    _timeController.dispose();
     super.dispose();
   }
 
-  /// Validates the form and dispatches the appropriate event (Submit or Update).
+  // --- ФУНКЦІЯ ВИБОРУ ФОТО ---
+  Future<void> _pickImage() async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+
+      if (image != null) {
+        final bytes = await image.readAsBytes();
+        setState(() {
+          _selectedImageBytes = bytes;
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error picking image: $e')),
+      );
+    }
+  }
+
   void _submitForm() {
     final isValid = _formKey.currentState?.validate() ?? false;
 
-    // 1. Validation.
     if (!isValid) {
       if (_autovalidateMode == AutovalidateMode.disabled) {
-        setState(() {
-          _autovalidateMode = AutovalidateMode.onUserInteraction;
-        });
+        setState(() => _autovalidateMode = AutovalidateMode.onUserInteraction);
       }
       return;
     }
 
-    final title = _titleController.text.trim();
-    final desc = _descriptionController.text.trim();
+    // Парсимо час (якщо пусто або 0, ставимо дефолт)
+    int time = int.tryParse(_timeController.text) ?? 30;
 
-    // 2. Dispatch event based on mode (Create vs Update).
     if (widget.recipeToEdit != null) {
-      context.read<CreateRecipeBloc>().add(
-        UpdateRecipe(
-          id: widget.recipeToEdit!.id,
-          title: title,
-          description: desc,
-          isPublic: _isPublic,
-        ),
-      );
+        // Логіка оновлення (UpdateRecipe)...
+        context.read<CreateRecipeBloc>().add(
+          UpdateRecipe(
+            id: widget.recipeToEdit!.id,
+            title: _titleController.text.trim(),
+            description: _descriptionController.text.trim(),
+            ingredients: _ingredientsController.text.trim(),
+            instructions: _instructionsController.text.trim(),
+            isPublic: _isPublic,
+            currentImageUrl: widget.recipeToEdit!.imageUrl,
+            newImageBytes: _selectedImageBytes,
+          ),
+        );
     } else {
       context.read<CreateRecipeBloc>().add(
-        SubmitRecipe(title: title, description: desc, isPublic: _isPublic),
-      );
+            SubmitRecipe(
+              title: _titleController.text.trim(),
+              description: _descriptionController.text.trim(),
+              ingredients: _ingredientsController.text.trim(),
+              instructions: _instructionsController.text.trim(),
+              timeMinutes: time, // <--- Передаємо час
+              isPublic: _isPublic,
+              imageBytes: _selectedImageBytes, // <--- Передаємо фото
+            ),
+          );
     }
   }
 
@@ -114,14 +137,8 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
       listener: (context, state) {
         if (state is CreateRecipeSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                isEditing ? 'Recipe updated!' : 'Recipe created successfully!',
-              ),
-              backgroundColor: AppTheme.darkCharcoal,
-            ),
+            const SnackBar(content: Text('Success!'), backgroundColor: AppTheme.darkCharcoal),
           );
-          // Return true to indicate success and trigger a refresh on the previous screen.
           Navigator.pop(context, true);
         } else if (state is CreateRecipeFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -143,36 +160,15 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
               child: BlocBuilder<CreateRecipeBloc, CreateRecipeState>(
                 builder: (context, state) {
                   return ElevatedButton(
-                    onPressed: state is CreateRecipeLoading
-                        ? null
-                        : _submitForm, // Triggers validation and submission.
+                    onPressed: state is CreateRecipeLoading ? null : _submitForm,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.darkCharcoal,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 0,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      minimumSize: const Size(0, 36),
-                      disabledBackgroundColor: AppTheme.darkCharcoal
-                          .withOpacity(0.7),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
                     child: state is CreateRecipeLoading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Text(
-                            'Save',
-                            style: TextStyle(fontWeight: FontWeight.w600),
-                          ),
+                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                        : const Text('Save', style: TextStyle(fontWeight: FontWeight.w600)),
                   );
                 },
               ),
@@ -187,19 +183,12 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // --- Image Upload Section ---
-                const Text(
-                  'Recipe Image',
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16,
-                    color: AppTheme.darkCharcoal,
-                  ),
-                ),
+                const Text('Recipe Image', style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w700, fontSize: 16, color: AppTheme.darkCharcoal)),
                 const SizedBox(height: 12),
+                
+                // --- ЗОНА ВИБОРУ ФОТО ---
                 GestureDetector(
-                  onTap: () => print("Pick image"),
+                  onTap: _pickImage, // <--- ТУТ ПІДКЛЮЧЕНО ФУНКЦІЮ
                   child: Container(
                     height: 200,
                     width: double.infinity,
@@ -208,120 +197,75 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: const Color(0xFFE0E0E0)),
                     ),
-                    // Logic for image display: Show photo if editing, otherwise show upload icon.
-                    child: isEditing
+                    child: _selectedImageBytes != null
                         ? ClipRRect(
                             borderRadius: BorderRadius.circular(12),
-                            child: Image.asset(
-                              widget.recipeToEdit!.imageUrl,
-                              fit: BoxFit.cover,
-                            ),
+                            child: Image.memory(_selectedImageBytes!, fit: BoxFit.cover),
                           )
-                        : const Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.file_upload_outlined,
-                                size: 32,
-                                color: AppTheme.mediumGray,
+                        : (isEditing &&
+                                widget.recipeToEdit!.imageUrl.isNotEmpty)
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: widget.recipeToEdit!.imageUrl
+                                        .startsWith('http')
+                                    ? Image.network(
+                                        widget.recipeToEdit!.imageUrl,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, __, ___) =>
+                                            const Icon(Icons.error),
+                                      )
+                                    : Image.asset(
+                                        widget.recipeToEdit!.imageUrl,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, __, ___) =>
+                                            const Icon(Icons.error),
+                                      ),
+                              )
+                            : const Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.file_upload_outlined, size: 32, color: AppTheme.mediumGray),
+                                  SizedBox(height: 8),
+                                  Text('Tap to add photo', style: TextStyle(fontFamily: 'Inter', color: AppTheme.mediumGray, fontSize: 14)),
+                                ],
                               ),
-                              SizedBox(height: 8),
-                              Text(
-                                'Tap to add photo',
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  color: AppTheme.mediumGray,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
                   ),
                 ),
+                
                 const SizedBox(height: 24),
-
-                // --- Form Fields with Validation ---
                 _buildLabel('Recipe Title *'),
-                _buildTextFormField(
-                  controller: _titleController,
-                  hintText: 'Enter recipe title...',
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Title is required';
-                    }
-                    return null;
-                  },
-                ),
+                _buildTextFormField(controller: _titleController, hintText: 'Enter title...', validator: (v) => v!.isEmpty ? 'Required' : null),
+                
                 const SizedBox(height: 24),
-
                 _buildLabel('Description'),
-                _buildTextFormField(
-                  controller: _descriptionController,
-                  hintText: 'Describe your recipe...',
-                  maxLines: 4,
-                ),
-                const SizedBox(height: 24),
+                _buildTextFormField(controller: _descriptionController, hintText: 'Describe it...', maxLines: 3),
 
+                // --- ПОЛЕ ЧАСУ ---
+                const SizedBox(height: 24),
+                _buildLabel('Cooking Time (minutes) *'),
+                _buildTextFormField(
+                  controller: _timeController,
+                  hintText: 'e.g. 45',
+                  // Дозволяємо вводити тільки цифри
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  keyboardType: TextInputType.number,
+                  validator: (v) => v!.isEmpty ? 'Required' : null,
+                ),
+
+                const SizedBox(height: 24),
                 _buildLabel('Ingredients *'),
-                _buildTextFormField(
-                  controller: _ingredientsController,
-                  hintText: 'Enter each ingredient on a new line...',
-                  maxLines: 6,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please list at least one ingredient';
-                    }
-                    return null;
-                  },
-                ),
+                _buildTextFormField(controller: _ingredientsController, hintText: 'One per line...', maxLines: 6, validator: (v) => v!.isEmpty ? 'Required' : null),
+                
                 const SizedBox(height: 24),
-
                 _buildLabel('Instructions *'),
-                _buildTextFormField(
-                  controller: _instructionsController,
-                  hintText: 'Enter each step on a new line...',
-                  maxLines: 8,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please provide cooking instructions';
-                    }
-                    return null;
-                  },
-                ),
+                _buildTextFormField(controller: _instructionsController, hintText: 'One per line...', maxLines: 8, validator: (v) => v!.isEmpty ? 'Required' : null),
+                
                 const SizedBox(height: 24),
-
-                // --- Visibility Switch ---
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Make this recipe public',
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.w700,
-                            fontSize: 16,
-                            color: AppTheme.darkCharcoal,
-                          ),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          'Anyone can see this recipe',
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 14,
-                            color: AppTheme.mediumGray,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Switch.adaptive(
-                      value: _isPublic,
-                      activeColor: AppTheme.darkCharcoal,
-                      onChanged: (value) => setState(() => _isPublic = value),
-                    ),
+                    const Text('Make Public', style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.bold, fontSize: 16)),
+                    Switch.adaptive(value: _isPublic, activeColor: AppTheme.darkCharcoal, onChanged: (v) => setState(() => _isPublic = v)),
                   ],
                 ),
                 const SizedBox(height: 40),
@@ -333,72 +277,28 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
     );
   }
 
-  Widget _buildLabel(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
-      child: Text(
-        text,
-        style: const TextStyle(
-          fontFamily: 'Inter',
-          fontWeight: FontWeight.w700,
-          fontSize: 16,
-          color: AppTheme.darkCharcoal,
-        ),
-      ),
-    );
-  }
+  Widget _buildLabel(String text) => Padding(padding: const EdgeInsets.only(bottom: 12), child: Text(text, style: const TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.bold, fontSize: 16)));
 
   Widget _buildTextFormField({
     required TextEditingController controller,
     required String hintText,
     int maxLines = 1,
     String? Function(String?)? validator,
+    List<TextInputFormatter>? inputFormatters,
+    TextInputType? keyboardType,
   }) {
     return TextFormField(
       controller: controller,
       maxLines: maxLines,
       minLines: maxLines > 1 ? 3 : 1,
       validator: validator,
-      style: const TextStyle(color: AppTheme.darkCharcoal),
+      inputFormatters: inputFormatters,
+      keyboardType: keyboardType,
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: const TextStyle(color: AppTheme.mediumGray),
         filled: true,
         fillColor: Colors.white,
-        contentPadding: const EdgeInsets.all(16),
-
-        // Error styling.
-        errorStyle: const TextStyle(
-          color: Color(0xFFDC2626),
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
-        ),
-
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: AppTheme.darkCharcoal,
-            width: 1.5,
-          ),
-        ),
-
-        // Red border on error.
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFDC2626), width: 1.5),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFDC2626), width: 1.5),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
       ),
     );
   }

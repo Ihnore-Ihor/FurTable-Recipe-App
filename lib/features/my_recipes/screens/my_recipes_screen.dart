@@ -188,7 +188,7 @@ class MyRecipesView extends StatelessWidget {
                 id: recipe.id,
                 imageUrl: recipe.imageUrl,
                 title: recipe.title,
-                author: recipe.author,
+                author: recipe.authorName,
                 likes: recipe.likes,
               ),
 

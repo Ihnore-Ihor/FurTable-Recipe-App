@@ -13,25 +13,33 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
 
   // Initial list of favorites (simulating a database).
   List<Recipe> _currentFavorites = [
-    const Recipe(
+    Recipe(
       id: '1',
+      authorId: 'u1',
       title: 'Grilled Salmon Teriyaki',
-      author: 'ChefMaria',
+      authorName: 'ChefMaria',
+      description: 'Tasty fish',
       imageUrl: 'assets/images/salmon.png',
-      likes: '2.4k',
+      likesCount: 2400,
       timeMinutes: 45,
       ingredients: ['Salmon', 'Soy Sauce'],
       steps: ['Cook it'],
+      isPublic: true,
+      createdAt: DateTime.now(),
     ),
-    const Recipe(
+    Recipe(
       id: '3',
+      authorId: 'u3',
       title: 'Dragon Roll Sushi',
-      author: 'SushiMaster',
+      authorName: 'SushiMaster',
+      description: 'Fresh sushi roll',
       imageUrl: 'assets/images/sushi.png',
-      likes: '3.1k',
+      likesCount: 3100,
       timeMinutes: 60,
       ingredients: ['Rice', 'Fish'],
       steps: ['Roll it'],
+      isPublic: true,
+      createdAt: DateTime.now(),
     ),
   ];
 

@@ -189,10 +189,12 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                   // Validation errors for red text.
                   validator: (val) {
                     if (val != null && val.isNotEmpty) {
-                      if (val.length < 8)
+                      if (val.length < 8) {
                         return 'Minimum 8 characters required';
-                      if (!val.contains(RegExp(r'[0-9]')))
+                      }
+                      if (!val.contains(RegExp(r'[0-9]'))) {
                         return 'Must contain at least one number';
+                      }
                     }
                     return null;
                   },

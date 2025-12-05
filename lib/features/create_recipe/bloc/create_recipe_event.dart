@@ -1,57 +1,74 @@
+import 'dart:typed_data';
 import 'package:equatable/equatable.dart';
 
-/// Abstract base class for all events related to creating or updating a recipe.
+
 abstract class CreateRecipeEvent extends Equatable {
-  /// Creates a [CreateRecipeEvent].
   const CreateRecipeEvent();
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
-/// Event triggered when the user submits a new recipe.
 class SubmitRecipe extends CreateRecipeEvent {
-  /// The title of the recipe.
   final String title;
-
-  /// The description of the recipe.
   final String description;
-
-  /// Whether the recipe is visible to the public.
+  final String ingredients;
+  final String instructions;
+  final int timeMinutes;
   final bool isPublic;
+  final Uint8List? imageBytes;
 
-  /// Creates a [SubmitRecipe] event.
   const SubmitRecipe({
     required this.title,
     required this.description,
+    required this.ingredients,
+    required this.instructions,
+    required this.timeMinutes,
     required this.isPublic,
+    this.imageBytes,
   });
 
   @override
-  List<Object> get props => [title, description, isPublic];
+  List<Object?> get props => [
+        title,
+        description,
+        ingredients,
+        instructions,
+        timeMinutes,
+        isPublic,
+        imageBytes,
+      ];
 }
 
-/// Event triggered when the user updates an existing recipe.
 class UpdateRecipe extends CreateRecipeEvent {
-  /// The ID of the recipe being updated.
   final String id;
-
-  /// The new title of the recipe.
   final String title;
-
-  /// The new description of the recipe.
   final String description;
-
-  /// The new visibility status of the recipe.
+  final String ingredients;
+  final String instructions;
   final bool isPublic;
+  final Uint8List? newImageBytes;
+  final String? currentImageUrl;
 
-  /// Creates an [UpdateRecipe] event.
   const UpdateRecipe({
     required this.id,
     required this.title,
     required this.description,
+    required this.ingredients,
+    required this.instructions,
     required this.isPublic,
+    this.newImageBytes,
+    this.currentImageUrl,
   });
 
   @override
-  List<Object> get props => [id, title, description, isPublic];
+  List<Object?> get props => [
+        id,
+        title,
+        description,
+        ingredients,
+        instructions,
+        isPublic,
+        newImageBytes,
+        currentImageUrl,
+      ];
 }

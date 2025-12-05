@@ -1,91 +1,53 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/features/explore/bloc/explore_event.dart';
 import 'package:furtable/features/explore/bloc/explore_state.dart';
-import 'package:furtable/features/explore/models/recipe_model.dart';
+import 'package:furtable/features/explore/repositories/recipe_repository.dart';
 
-/// Manages the state of the explore screen, including loading recipes
-/// and handling pagination.
 class ExploreBloc extends Bloc<ExploreEvent, ExploreState> {
-  /// Creates an [ExploreBloc] with an initial state.
+  final RecipeRepository _recipeRepo = RecipeRepository();
+  StreamSubscription? _recipesSubscription; // Щоб слухати базу
+
   ExploreBloc() : super(const ExploreState()) {
     on<LoadRecipesEvent>(_onLoadRecipes);
+    on<RecipesUpdated>(_onRecipesUpdated); // Нова внутрішня подія
   }
 
-  /// Generates a list of mock recipes for testing purposes.
-  List<Recipe> _generateMockRecipes(int startIndex, int count) {
-    return List.generate(count, (index) {
-      final id = startIndex + index;
-      final images = [
-        'assets/images/salmon.png',
-        'assets/images/pasta.png',
-        'assets/images/sushi.png',
-        'assets/images/burger.png',
-        'assets/images/cake.png',
-        'assets/images/salad.png',
-      ];
-
-      return Recipe(
-        id: '$id',
-        title: 'Recipe #$id (Tasty Food)',
-        author: 'Chef #$id',
-        imageUrl: images[id % images.length],
-        likes: '${(id * 100) + 50}',
-        timeMinutes: 30 + (id % 4) * 10,
-        ingredients: ['Ingredient 1', 'Ingredient 2'],
-        steps: ['Step 1', 'Step 2'],
-      );
-    });
-  }
-
-  /// Handles the [LoadRecipesEvent] to fetch recipes.
-  ///
-  /// Supports pagination by appending new recipes to the existing list.
   Future<void> _onLoadRecipes(
     LoadRecipesEvent event,
     Emitter<ExploreState> emit,
   ) async {
-    if (state.hasReachedMax) return;
+    // Якщо вже слухаємо - нічого не робити
+    if (_recipesSubscription != null) return;
 
-    try {
-      if (state.status == ExploreStatus.initial) {
-        // Explicitly set the status to loading.
-        emit(state.copyWith(status: ExploreStatus.loading));
+    emit(state.copyWith(status: ExploreStatus.loading));
 
-        await Future.delayed(const Duration(seconds: 1));
+    // Підписуємося на потік даних з Firestore
+    _recipesSubscription = _recipeRepo.getPublicRecipes().listen(
+      (recipes) {
+        add(RecipesUpdated(recipes));
+      },
+      onError: (error) {
+        // Обробка помилки в потоці
+        print("Firestore Error: $error");
+      },
+    );
+  }
 
-        final newRecipes = _generateMockRecipes(0, 10);
-        return emit(
-          state.copyWith(
-            status: ExploreStatus.success,
-            recipes: newRecipes,
-            hasReachedMax: false,
-          ),
-        );
-      }
+  // Коли приходять нові дані з бази -> оновлюємо UI
+  void _onRecipesUpdated(RecipesUpdated event, Emitter<ExploreState> emit) {
+    emit(
+      state.copyWith(
+        status: ExploreStatus.success,
+        recipes: event.recipes,
+        hasReachedMax: true, // Для простоти (без пагінації)
+      ),
+    );
+  }
 
-      // Logic for loading more recipes (pagination).
-      await Future.delayed(const Duration(milliseconds: 800));
-      final currentLength = state.recipes.length;
-      final moreRecipes = _generateMockRecipes(currentLength, 10);
-
-      if (currentLength >= 40) {
-        emit(state.copyWith(hasReachedMax: true));
-      } else {
-        emit(
-          state.copyWith(
-            status: ExploreStatus.success,
-            recipes: List.of(state.recipes)..addAll(moreRecipes),
-            hasReachedMax: false,
-          ),
-        );
-      }
-    } catch (e) {
-      emit(
-        state.copyWith(
-          status: ExploreStatus.failure,
-          errorMessage: 'Failed to fetch recipes',
-        ),
-      );
-    }
+  @override
+  Future<void> close() {
+    _recipesSubscription?.cancel();
+    return super.close();
   }
 }

@@ -18,65 +18,89 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
 
   // Mock list of recipes for search (simulating an API response).
   final List<Recipe> _allRecipes = [
-    const Recipe(
+    Recipe(
       id: '1',
+      authorId: 'u1',
+      authorName: 'ChefMaria',
       title: 'Grilled Salmon Teriyaki',
-      author: 'ChefMaria',
+      description: 'Tasty fish',
       imageUrl: 'assets/images/salmon.png',
-      likes: '2.4k',
+      likesCount: 2400,
       timeMinutes: 45,
       ingredients: [],
       steps: [],
+      isPublic: true,
+      createdAt: DateTime.now(),
     ),
-    const Recipe(
+    Recipe(
       id: '2',
+      authorId: 'u2',
       title: 'Creamy Mushroom Pasta',
-      author: 'ItalianNonna',
+      authorName: 'ItalianNonna',
+      description: 'Authentic Italian pasta',
       imageUrl: 'assets/images/pasta.png',
-      likes: '1.8k',
+      likesCount: 1800,
       timeMinutes: 30,
       ingredients: [],
       steps: [],
+      isPublic: true,
+      createdAt: DateTime.now(),
     ),
-    const Recipe(
+    Recipe(
       id: '3',
+      authorId: 'u3',
       title: 'Dragon Roll Sushi',
-      author: 'SushiMaster',
+      authorName: 'SushiMaster',
+      description: 'Fresh sushi roll',
       imageUrl: 'assets/images/sushi.png',
-      likes: '3.1k',
+      likesCount: 3100,
       timeMinutes: 60,
       ingredients: [],
       steps: [],
+      isPublic: true,
+      createdAt: DateTime.now(),
     ),
-    const Recipe(
+    Recipe(
       id: '4',
+      authorId: 'u4',
       title: 'Classic Beef Burger',
-      author: 'GrillKing',
+      authorName: 'GrillKing',
+      description: 'Juicy beef burger',
       imageUrl: 'assets/images/burger.png',
-      likes: '956',
+      likesCount: 956,
       timeMinutes: 25,
       ingredients: [],
       steps: [],
+      isPublic: true,
+      createdAt: DateTime.now(),
     ),
-    const Recipe(
+    Recipe(
       id: '5',
+      authorId: 'u5',
       title: 'Carrot Cake',
-      author: 'SweetTooth',
+      authorName: 'SweetTooth',
+      description: 'Sweet and moist cake',
       imageUrl: 'assets/images/cake.png',
-      likes: '4.2k',
+      likesCount: 4200,
       timeMinutes: 50,
       ingredients: [],
       steps: [],
+      isPublic: true,
+      createdAt: DateTime.now(),
     ),
-    const Recipe(
+    Recipe(
       id: '6',
+      authorId: 'u6',
       title: 'Fresh Garden Salad',
-      author: 'HealthyEats',
+      authorName: 'HealthyEats',
+      description: 'Crispy and fresh',
       imageUrl: 'assets/images/salad.png',
-      likes: '1.2k',
+      likesCount: 1200,
       timeMinutes: 15,
       ingredients: [],
       steps: [],
+      isPublic: true,
+      createdAt: DateTime.now(),
     ),
   ];
 
@@ -131,7 +155,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     // C. Perform search.
     final results = _allRecipes.where((recipe) {
       return recipe.title.toLowerCase().contains(query) ||
-          recipe.author.toLowerCase().contains(query);
+          recipe.authorName.toLowerCase().contains(query);
     }).toList();
 
     // D. Show results.

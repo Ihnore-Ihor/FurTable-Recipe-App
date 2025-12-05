@@ -55,14 +55,31 @@ class _RecipeCardState extends State<RecipeCard> {
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: Hero(
-                // Ensure the tag is unique using the ID.
                 tag: 'recipe_image_${widget.id}',
-                child: Image.asset(
-                  widget.imageUrl,
-                  fit: BoxFit.cover,
-                  width: double.infinity, // Fill column width.
-                  height: cardWidth, // Make it square.
-                ),
+                child: widget.imageUrl.startsWith('http')
+                    ? Image.network(
+                        widget.imageUrl,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: cardWidth,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey[200],
+                            alignment: Alignment.center,
+                            child: const Icon(Icons.broken_image,
+                                color: Colors.grey),
+                          );
+                        },
+                      )
+                    : Image.asset(
+                        widget.imageUrl,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: cardWidth,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(color: Colors.grey[200]);
+                        },
+                      ),
               ),
             ),
             Positioned(

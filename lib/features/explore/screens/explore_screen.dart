@@ -184,7 +184,7 @@ class _ExploreViewState extends State<ExploreView> {
                         id: recipe.id,
                         imageUrl: recipe.imageUrl,
                         title: recipe.title,
-                        author: recipe.author,
+                        author: recipe.authorName,
                         likes: recipe.likes,
                       ),
                     );

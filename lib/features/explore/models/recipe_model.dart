@@ -1,52 +1,95 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
-/// Represents a recipe with its details.
 class Recipe extends Equatable {
-  /// The unique identifier of the recipe.
   final String id;
-
-  /// The title of the recipe.
+  final String authorId;
+  final String authorName;
   final String title;
-
-  /// The author of the recipe.
-  final String author;
-
-  /// The URL or path to the recipe image.
+  final String description;
   final String imageUrl;
-
-  /// The number of likes formatted as a string.
-  final String likes;
-
-  /// The preparation time in minutes.
+  final int likesCount;
   final int timeMinutes;
-
-  /// The list of ingredients required.
   final List<String> ingredients;
-
-  /// The list of cooking steps.
   final List<String> steps;
+  final bool isPublic;
+  final DateTime createdAt;
 
-  /// Creates a [Recipe] instance.
   const Recipe({
     required this.id,
+    required this.authorId,
+    required this.authorName,
     required this.title,
-    required this.author,
+    required this.description,
     required this.imageUrl,
-    required this.likes,
+    this.likesCount = 0,
     required this.timeMinutes,
     required this.ingredients,
     required this.steps,
+    this.isPublic = true,
+    required this.createdAt,
   });
 
+  // Перетворення з Firestore (читання)
+  factory Recipe.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return Recipe(
+      id: doc.id,
+      authorId: data['authorId'] ?? '',
+      authorName: data['authorName'] ?? 'Unknown',
+      title: data['title'] ?? '',
+      description: data['description'] ?? '',
+      imageUrl: data['imageUrl'] ?? '',
+      likesCount: data['likesCount'] ?? 0,
+      timeMinutes: data['timeMinutes'] ?? 0,
+      ingredients: List<String>.from(data['ingredients'] ?? []),
+      steps: List<String>.from(data['steps'] ?? []),
+      isPublic: data['isPublic'] ?? true,
+      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+    );
+  }
+
+  // Перетворення в Firestore (запис)
+  Map<String, dynamic> toFirestore() {
+    return {
+      'authorId': authorId,
+      'authorName': authorName,
+      'title': title,
+      'description': description,
+      'imageUrl': imageUrl,
+      'likesCount': likesCount,
+      'timeMinutes': timeMinutes,
+      'ingredients': ingredients,
+      'steps': steps,
+      'isPublic': isPublic,
+      'createdAt': Timestamp.fromDate(createdAt),
+      // Ключові слова для пошуку
+      'searchKeywords': _generateKeywords(title),
+    };
+  }
+
+  List<String> _generateKeywords(String title) {
+    List<String> keywords = [];
+    String temp = "";
+    for (int i = 0; i < title.length; i++) {
+      temp = temp + title[i].toLowerCase();
+      keywords.add(temp);
+    }
+    return keywords;
+  }
+
+  // Цей геттер потрібен, щоб старий код міг звертатися до recipe.likes
+  String get likes {
+    if (likesCount >= 1000) {
+      return '${(likesCount / 1000).toStringAsFixed(1)}k';
+    }
+    return likesCount.toString();
+  }
+
+  // Цей геттер потрібен, щоб старий код міг звертатися до recipe.author
+  // (бо в новій моделі поле називається authorName)
+  String get author => authorName;
+
   @override
-  List<Object?> get props => [
-    id,
-    title,
-    author,
-    imageUrl,
-    likes,
-    timeMinutes,
-    ingredients,
-    steps,
-  ];
+  List<Object?> get props => [id, authorId, title, imageUrl, likesCount, isPublic];
 }
