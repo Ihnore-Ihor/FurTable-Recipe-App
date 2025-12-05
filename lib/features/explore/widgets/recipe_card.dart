@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:furtable/core/app_theme.dart';
 
+/// A card widget displaying a brief summary of a recipe.
 class RecipeCard extends StatefulWidget {
   final String id;
   final String imageUrl;
   final String title;
-  final String author; 
+  final String author;
   final String likes;
   final bool isFavorite;
   final VoidCallback? onFavoriteToggle;
 
+  /// Creates a [RecipeCard].
   const RecipeCard({
     super.key,
     required this.id,
@@ -39,7 +41,7 @@ class _RecipeCardState extends State<RecipeCard> {
               borderRadius: BorderRadius.circular(10),
               child: Hero(
                 tag: 'recipe_image_${widget.id}',
-                child: widget.imageUrl.startsWith('http') 
+                child: widget.imageUrl.startsWith('http')
                     ? Image.network(
                         widget.imageUrl,
                         fit: BoxFit.cover,
@@ -88,7 +90,7 @@ class _RecipeCardState extends State<RecipeCard> {
                     children: [
                       Icon(
                         widget.isFavorite ? Icons.favorite : Icons.favorite_border,
-                        color: widget.isFavorite ? AppTheme.darkCharcoal : AppTheme.darkCharcoal,
+                        color: AppTheme.darkCharcoal, // Dark color for both
                         size: 14,
                       ),
                       const SizedBox(width: 4),
@@ -108,9 +110,9 @@ class _RecipeCardState extends State<RecipeCard> {
           overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 4),
-        // Тільки текст автора, без аватарки
+        // Just author text, no avatar
         Text(
-          widget.author, 
+          widget.author,
           style: Theme.of(context).textTheme.bodyMedium
         ),
       ],

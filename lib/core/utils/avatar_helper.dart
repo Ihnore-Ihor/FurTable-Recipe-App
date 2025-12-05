@@ -1,11 +1,12 @@
+/// Helper class for managing user avatars.
 class AvatarHelper {
-  // Список доступних аватарів для вибору
+  /// List of available avatar assets for selection.
   static const List<String> avatars = [
-    'assets/images/legoshi_eating_auth.png', // Вовк
-    'assets/images/gohin_empty.png',         // Панда
-    'assets/images/legom_posing.png',        // Курка
+    'assets/images/legoshi_eating_auth.png', // Wolf
+    'assets/images/gohin_empty.png',         // Panda
+    'assets/images/legom_posing.png',        // Chicken
   ];
 
-  // Дефолтний аватар, якщо користувач ще не вибрав
+  /// The default avatar asset path if none is selected.
   static const String defaultAvatar = 'assets/images/legoshi_eating_auth.png';
 }

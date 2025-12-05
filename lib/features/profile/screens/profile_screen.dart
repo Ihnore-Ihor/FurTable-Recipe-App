@@ -29,12 +29,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    // 1. МИТТЄВА ІНІЦІАЛІЗАЦІЯ
-    // Ми беремо дані, які вже є в пам'яті, тому картинка з'явиться одразу
+    // 1. INSTANT INITIALIZATION
+    // We use data already in memory so the image appears immediately.
     _user = FirebaseAuth.instance.currentUser;
     
-    // 2. Оновлення у фоні
-    // Це потрібно тільки для перевірки emailVerified або якщо дані змінилися на іншому пристрої
+    // 2. Background refresh
+    // Required to check emailVerified or if data changed on another device.
     _refreshUser();
   }
 
@@ -44,7 +44,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       await currentUser.reload(); 
       if (mounted) {
         setState(() {
-          // Оновлюємо стан тільки після завершення запиту
+          // Update state only after request completes.
           _user = FirebaseAuth.instance.currentUser;
         });
       }
@@ -175,7 +175,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 height: 110,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white, // <--- ВАЖЛИВО: Білий фон під картинкою
+                  color: Colors.white, // IMPORTANT: White background under image
                   border: Border.all(color: AppTheme.darkCharcoal, width: 2),
                   image: DecorationImage(
                     image: AssetImage(
@@ -302,7 +302,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       );
 
                       if (result == true) {
-                        _refreshUser(); // <--- Викликаємо оновлення
+                        _refreshUser(); // Call refresh
                       }
                     },
                   ),

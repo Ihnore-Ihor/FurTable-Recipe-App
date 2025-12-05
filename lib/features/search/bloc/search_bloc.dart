@@ -1,13 +1,15 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/core/services/local_storage_service.dart';
-import 'package:furtable/features/explore/repositories/recipe_repository.dart'; // Імпорт
+import 'package:furtable/features/explore/repositories/recipe_repository.dart';
 import 'package:furtable/features/search/bloc/search_event.dart';
 import 'package:furtable/features/search/bloc/search_state.dart';
 
+/// Manages the state of the search screen, including history and search results.
 class SearchBloc extends Bloc<SearchEvent, SearchState> {
   final _storage = LocalStorageService();
-  final _recipeRepo = RecipeRepository(); // Репозиторій
+  final _recipeRepo = RecipeRepository();
 
+  /// Creates a [SearchBloc] and registers event handlers.
   SearchBloc() : super(SearchInitial()) {
     on<LoadSearchHistory>(_onLoadHistory);
     on<ClearSearchHistory>(_onClearHistory);
@@ -47,19 +49,19 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   }
 
   Future<void> _onQuerySubmitted(SearchQuerySubmitted event, Emitter<SearchState> emit) async {
-    final query = event.query.trim(); // Не робимо toLowerCase тут, репозиторій сам розбереться
+    final query = event.query.trim(); // No toLowerCase here, the repository handles it.
     if (query.isEmpty) return;
 
     await _storage.saveSearchQuery(query);
     emit(SearchLoading());
 
     try {
-      // Викликаємо серверний пошук
+      // Call server search.
       final results = await _recipeRepo.searchRecipes(query);
 
-      // (Опціонально) Якщо хочемо супер-точність, можна додатково відфільтрувати 
-      // результати на клієнті, щоб переконатися, що ВСІ слова із запиту є в назві.
-      // Але для базового варіанту достатньо результату з бази.
+      // (Optional) For higher precision, we could filter results on the client
+      // to ensure ALL words from the query are in the title.
+      // But for this basic implementation, the database result is sufficient.
 
       if (results.isEmpty) {
         emit(SearchEmpty());
@@ -67,7 +69,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
         emit(SearchSuccess(results));
       }
     } catch (e) {
-      // У разі помилки мережі
+      // Handle network errors.
       print("Search Error: $e");
       emit(SearchEmpty());
     }

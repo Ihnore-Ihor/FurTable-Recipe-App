@@ -1,18 +1,20 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:furtable/features/explore/repositories/recipe_repository.dart'; // Імпорт
+import 'package:furtable/features/explore/repositories/recipe_repository.dart';
 import 'package:furtable/features/favorites/bloc/favorites_event.dart';
 import 'package:furtable/features/favorites/bloc/favorites_state.dart';
 
+/// Manages the state of the user's favorite recipes.
 class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
   final RecipeRepository _recipeRepo = RecipeRepository();
   StreamSubscription? _favoritesSubscription;
 
+  /// Creates a [FavoritesBloc].
   FavoritesBloc() : super(FavoritesLoading()) {
     on<LoadFavorites>(_onLoadFavorites);
     on<ToggleFavorite>(_onToggleFavorite);
-    on<FavoritesUpdated>(_onFavoritesUpdated); // Нова подія (створимо нижче)
+    on<FavoritesUpdated>(_onFavoritesUpdated);
   }
 
   Future<void> _onLoadFavorites(LoadFavorites event, Emitter<FavoritesState> emit) async {
@@ -39,16 +41,16 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
-    // ОПТИМІСТИЧНЕ ОНОВЛЕННЯ (Для миттєвої реакції UI)
-    // Ми не чекаємо сервера, щоб перефарбувати сердечко.
-    // Але оскільки FavoritesBloc керує списком, а не однією карткою, 
-    // тут ми просто викликаємо репозиторій. Стрім (getFavorites) сам оновить список, коли сервер підтвердить.
+    // OPTIMISTIC UPDATE (For instant UI reaction)
+    // We don't wait for the server to recolor the heart.
+    // However, since FavoritesBloc manages the list, not a single card,
+    // we simply call the repository here. The stream (getFavorites) will update the list when the server confirms.
     
     try {
       await _recipeRepo.toggleFavorite(user.uid, event.recipe);
     } catch (e) {
       print("Toggle error: $e");
-      // Тут можна показати помилку, якщо транзакція провалилася
+      // Could handle error here if transaction fails.
     }
   }
 

@@ -2,14 +2,16 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/features/explore/models/recipe_model.dart';
-import 'package:furtable/features/explore/repositories/recipe_repository.dart'; // <--- Репозиторій
+import 'package:furtable/features/explore/repositories/recipe_repository.dart';
 import 'package:furtable/features/my_recipes/bloc/my_recipes_event.dart';
 import 'package:furtable/features/my_recipes/bloc/my_recipes_state.dart';
 
+/// Manages the state of the user's recipes.
 class MyRecipesBloc extends Bloc<MyRecipesEvent, MyRecipesState> {
   final RecipeRepository _recipeRepo = RecipeRepository();
   StreamSubscription? _recipesSubscription;
 
+  /// Creates a [MyRecipesBloc].
   MyRecipesBloc() : super(MyRecipesLoading()) {
     on<LoadMyRecipes>(_onLoadMyRecipes);
     on<MyRecipesUpdated>(_onMyRecipesUpdated);
@@ -20,7 +22,7 @@ class MyRecipesBloc extends Bloc<MyRecipesEvent, MyRecipesState> {
     LoadMyRecipes event,
     Emitter<MyRecipesState> emit,
   ) async {
-    // Якщо вже є підписка - скасовуємо стару (на всяк випадок)
+    // If a subscription already exists, cancel it.
     await _recipesSubscription?.cancel();
     
     emit(MyRecipesLoading());
@@ -32,19 +34,19 @@ class MyRecipesBloc extends Bloc<MyRecipesEvent, MyRecipesState> {
         return;
       }
 
-      // Підписуємося на стрім рецептів ТІЛЬКИ ЦЬОГО користувача
+      // Subscribe to the stream of recipes for this user only.
       _recipesSubscription = _recipeRepo.getMyRecipes(user.uid).listen(
         (allRecipes) {
-          // Коли приходять дані, ми їх сортуємо
+          // Filter recipes when data arrives.
           final public = allRecipes.where((r) => r.isPublic).toList();
           final private = allRecipes.where((r) => !r.isPublic).toList();
 
-          // І відправляємо подію оновлення
+          // Dispatch updated event.
           add(MyRecipesUpdated(publicRecipes: public, privateRecipes: private));
         },
         onError: (error) {
           print("MyRecipes Error: $error");
-          // Тут важко емітити стан напряму з listen, тому краще обробляти помилки в UI або через окрему подію Error
+          // Errors from stream are handled here.
         },
       );
     } catch (e) {
@@ -52,7 +54,7 @@ class MyRecipesBloc extends Bloc<MyRecipesEvent, MyRecipesState> {
     }
   }
 
-  // Обробник оновлення (просто оновлює стан UI)
+  // Handler for updates (updates UI state).
   void _onMyRecipesUpdated(
     MyRecipesUpdated event,
     Emitter<MyRecipesState> emit,
@@ -63,17 +65,17 @@ class MyRecipesBloc extends Bloc<MyRecipesEvent, MyRecipesState> {
     ));
   }
 
-  // Видалення (тепер реальне!)
+  // Handles recipe deletion.
   Future<void> _onDeleteRecipe(
     DeleteRecipeEvent event,
     Emitter<MyRecipesState> emit,
   ) async {
     try {
-      // Видаляємо з бази. Стрім вище автоматично побачить зміни і оновить список.
-      // Нам НЕ треба вручну правити списки тут.
+      // Delete from database. The stream above will automatically detect changes and update the list.
+      // We do NOT need to manually update the lists here.
       await _recipeRepo.deleteRecipe(event.recipeId);
     } catch (e) {
-      // Можна додати стан помилки видалення, але для простоти покажемо в консоль
+      // Error handling for deletion (could emit error state).
       print("Error deleting: $e");
     }
   }

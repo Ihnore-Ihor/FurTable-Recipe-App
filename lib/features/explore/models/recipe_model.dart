@@ -1,11 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
+/// Represents a recipe in the application.
 class Recipe extends Equatable {
   final String id;
   final String authorId;
   final String authorName;
-  final String authorAvatarUrl; // <--- НОВЕ ПОЛЕ
+  final String authorAvatarUrl; // New field
   final String title;
   final String description;
   final String imageUrl;
@@ -16,11 +17,12 @@ class Recipe extends Equatable {
   final bool isPublic;
   final DateTime createdAt;
 
+  /// Creates a [Recipe] instance.
   const Recipe({
     required this.id,
     required this.authorId,
     required this.authorName,
-    this.authorAvatarUrl = 'assets/images/legoshi_eating_auth.png', // Дефолт
+    this.authorAvatarUrl = 'assets/images/legoshi_eating_auth.png', // Default
     required this.title,
     required this.description,
     required this.imageUrl,
@@ -32,6 +34,7 @@ class Recipe extends Equatable {
     required this.createdAt,
   });
 
+  /// Creates a [Recipe] from a Firestore document.
   factory Recipe.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return Recipe(
@@ -39,7 +42,7 @@ class Recipe extends Equatable {
       authorId: data['authorId'] ?? '',
       authorName: data['authorName'] ?? 'Unknown',
       authorAvatarUrl: data['authorAvatarUrl'] ??
-          'assets/images/legoshi_eating_auth.png', // Читаємо
+          'assets/images/legoshi_eating_auth.png', // Read from DB
       title: data['title'] ?? '',
       description: data['description'] ?? '',
       imageUrl: data['imageUrl'] ?? '',
@@ -52,11 +55,12 @@ class Recipe extends Equatable {
     );
   }
 
+  /// Converts the recipe to a Map for Firestore storage.
   Map<String, dynamic> toFirestore() {
     return {
       'authorId': authorId,
       'authorName': authorName,
-      'authorAvatarUrl': authorAvatarUrl, // Пишемо
+      'authorAvatarUrl': authorAvatarUrl, // Write to DB
       'title': title,
       'description': description,
       'imageUrl': imageUrl,
@@ -70,17 +74,17 @@ class Recipe extends Equatable {
     };
   }
 
-  // Розумна генерація: розбиваємо на слова, і для кожного слова робимо префікси
+  /// Smart keyword generation: splits text into words and generates prefixes for each.
   static List<String> generateKeywords(String title, String authorName) {
     Set<String> keywords = {};
 
-    // 1. Додаємо слова з назви
+    // 1. Add words from title
     final titleWords = title.toLowerCase().split(' ');
     for (var word in titleWords) {
       if (word.trim().isEmpty) continue;
-      
-      // Генеруємо префікси для КОЖНОГО слова
-      // Наприклад "Seafood Pasta" -> 
+
+      // Generate prefixes for EACH word
+      // E.g. "Seafood Pasta" ->
       // "s", "se", "sea" ... "seafood"
       // "p", "pa", "pas" ... "pasta"
       String temp = "";
@@ -90,7 +94,7 @@ class Recipe extends Equatable {
       }
     }
 
-    // 2. Додаємо слова з імені автора (так само)
+    // 2. Add words from author name (similarly)
     final authorWords = authorName.toLowerCase().split(' ');
     for (var word in authorWords) {
       if (word.trim().isEmpty) continue;
@@ -104,8 +108,8 @@ class Recipe extends Equatable {
     return keywords.toList();
   }
 
-  // --- СУМІСНІСТЬ (GETTERS) ---
-  // Це виправляє помилки "undefined getter"
+  // --- GETTERS COMPATIBILITY ---
+  // Fixes "undefined getter" errors
   String get author => authorName;
 
   String get likes {

@@ -1,32 +1,34 @@
-import 'package:firebase_auth/firebase_auth.dart'; // Імпорт
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/features/explore/repositories/recipe_repository.dart';
 import 'package:furtable/features/profile/bloc/profile_event.dart';
 import 'package:furtable/features/profile/bloc/profile_state.dart';
 
+/// Manages the state of the user profile, including updates and password changes.
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final RecipeRepository _recipeRepo = RecipeRepository();
 
+  /// Creates a [ProfileBloc] and registers event handlers.
   ProfileBloc() : super(ProfileInitial()) {
     
-    // Оновлення нікнейму та аватара
+    // Updates nickname and avatar.
     on<UpdateProfileInfo>((event, emit) async {
       emit(ProfileLoading());
       try {
         final user = FirebaseAuth.instance.currentUser;
         if (user != null) {
-          // 1. Оновлюємо Auth профіль
+          // 1. Update Auth profile
           await user.updateDisplayName(event.nickname);
-          // Оновлюємо "посилання" на фото (тут буде наш локальний шлях)
+          // Update photo URL (using local path for this implementation)
           await user.updatePhotoURL(event.avatarPath);
           
           try {
              await user.reload().timeout(const Duration(seconds: 5));
           } catch (_) {
-             // Ігноруємо помилку reload, головне що update пройшов
+             // Ignore reload error, as long as update succeeded.
           }
 
-          // 2. Оновлюємо всі рецепти цього користувача в базі!
+          // 2. Update all recipes authored by this user in the database.
           await _recipeRepo.updateAuthorDetails(
             user.uid, 
             event.nickname, 
@@ -42,20 +44,20 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       }
     });
 
-    // Зміна пароля
+    // Changes the user's password.
     on<ChangePassword>((event, emit) async {
       emit(ProfileLoading());
       try {
         final user = FirebaseAuth.instance.currentUser;
         if (user != null && user.email != null) {
-          // 1. Спочатку треба переавтентифікуватися (вимога безпеки)
+          // 1. Re-authenticate first (security requirement).
           final cred = EmailAuthProvider.credential(
             email: user.email!, 
             password: event.currentPassword
           );
           await user.reauthenticateWithCredential(cred);
 
-          // 2. Тепер міняємо пароль
+          // 2. Now change the password.
           await user.updatePassword(event.newPassword);
           emit(const ProfileSuccess("Password changed successfully"));
         }

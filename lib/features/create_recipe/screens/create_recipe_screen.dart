@@ -1,18 +1,20 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:flutter/cupertino.dart'; // Для пікера часу
+import 'package:flutter/cupertino.dart'; // For CupertinoTimerPicker
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/features/create_recipe/bloc/create_recipe_bloc.dart';
 import 'package:furtable/features/create_recipe/bloc/create_recipe_event.dart';
 import 'package:furtable/features/create_recipe/bloc/create_recipe_state.dart';
 import 'package:furtable/features/explore/models/recipe_model.dart';
 
+/// Screen for creating or editing a recipe.
 class CreateRecipeScreen extends StatelessWidget {
+  /// The recipe to edit, if in edit mode.
   final Recipe? recipeToEdit;
 
+  /// Creates a [CreateRecipeScreen].
   const CreateRecipeScreen({super.key, this.recipeToEdit});
 
   @override
@@ -24,6 +26,7 @@ class CreateRecipeScreen extends StatelessWidget {
   }
 }
 
+/// The view implementation for [CreateRecipeScreen].
 class CreateRecipeView extends StatefulWidget {
   final Recipe? recipeToEdit;
   const CreateRecipeView({super.key, this.recipeToEdit});
@@ -40,7 +43,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
   final _descriptionController = TextEditingController();
   final _ingredientsController = TextEditingController();
   final _instructionsController = TextEditingController();
-  final _timeController = TextEditingController(); // Час
+  final _timeController = TextEditingController();
 
   bool _isPublic = true;
   Uint8List? _selectedImageBytes;
@@ -117,9 +120,9 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
           id: widget.recipeToEdit!.id,
           title: title,
           description: desc,
-          ingredients: ingredients, // Виправляємо missing argument
-          instructions: instructions, // Виправляємо missing argument
-          timeMinutes: time, // Виправляємо missing argument
+          ingredients: ingredients,
+          instructions: instructions,
+          timeMinutes: time,
           isPublic: _isPublic,
           currentImageUrl: widget.recipeToEdit!.imageUrl,
           newImageBytes: _selectedImageBytes,
@@ -130,9 +133,9 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
         SubmitRecipe(
           title: title,
           description: desc,
-          ingredients: ingredients, // Виправляємо missing argument
-          instructions: instructions, // Виправляємо missing argument
-          timeMinutes: time, // Виправляємо missing argument
+          ingredients: ingredients,
+          instructions: instructions,
+          timeMinutes: time,
           isPublic: _isPublic,
           imageBytes: _selectedImageBytes,
         ),
@@ -240,7 +243,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                             ),
                           )
                         : (isEditing &&
-                              widget.recipeToEdit!.imageUrl.isNotEmpty)
+                                widget.recipeToEdit!.imageUrl.isNotEmpty)
                         ? ClipRRect(
                             borderRadius: BorderRadius.circular(12),
                             child: Image.network(
@@ -290,70 +293,69 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
 
                 const SizedBox(height: 24),
                 _buildLabel('Cooking Time *'),
-                    GestureDetector(
-                      onTap: () {
-                        // 1. Початкове значення (або 30, якщо пусте)
-                        int currentMinutes =
-                            int.tryParse(_timeController.text) ?? 30;
-                        // 2. Тимчасова змінна, яка буде змінюватися при скролі
-                        Duration tempDuration =
-                            Duration(minutes: currentMinutes);
+                GestureDetector(
+                  onTap: () {
+                    // 1. Initial value (or 30 if empty)
+                    int currentMinutes =
+                        int.tryParse(_timeController.text) ?? 30;
+                    // 2. Temporary variable for scrolling
+                    Duration tempDuration =
+                        Duration(minutes: currentMinutes);
 
-                        showModalBottomSheet(
-                          context: context,
-                          backgroundColor: Colors.white,
-                          builder: (BuildContext builder) {
-                            return Container(
-                              height: 300,
-                              color: Colors.white,
-                              child: Column(
-                                children: [
-                                  Container(
-                                    color: Colors.grey[100],
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 16, vertical: 8),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        TextButton(
-                                          onPressed: () {
-                                            // 3. МОМЕНТ ІСТИНИ: При натисканні Done ми
-                                            // записуємо те, що зараз в tempDuration
-                                            setState(() {
-                                              _timeController.text =
-                                                  tempDuration.inMinutes
-                                                      .toString();
-                                            });
-                                            Navigator.pop(context);
-                                          },
-                                          child: const Text('Done',
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  color:
-                                                      AppTheme.darkCharcoal)),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: CupertinoTimerPicker(
-                                      mode: CupertinoTimerPickerMode.hm,
-                                      // Початкове положення пікера
-                                      initialTimerDuration:
-                                          Duration(minutes: currentMinutes),
-                                      onTimerDurationChanged:
-                                          (Duration newDuration) {
-                                        // 4. Просто оновлюємо тимчасову змінну
-                                        tempDuration = newDuration;
+                    showModalBottomSheet(
+                      context: context,
+                      backgroundColor: Colors.white,
+                      builder: (BuildContext builder) {
+                        return Container(
+                          height: 300,
+                          color: Colors.white,
+                          child: Column(
+                            children: [
+                              Container(
+                                color: Colors.grey[100],
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 8),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    TextButton(
+                                      onPressed: () {
+                                        // 3. On 'Done', save the tempDuration
+                                        setState(() {
+                                          _timeController.text =
+                                              tempDuration.inMinutes
+                                                  .toString();
+                                        });
+                                        Navigator.pop(context);
                                       },
+                                      child: const Text('Done',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color:
+                                                  AppTheme.darkCharcoal)),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            );
-                          },
+                              Expanded(
+                                child: CupertinoTimerPicker(
+                                  mode: CupertinoTimerPickerMode.hm,
+                                  initialTimerDuration:
+                                      Duration(minutes: currentMinutes),
+                                  onTimerDurationChanged:
+                                      (Duration newDuration) {
+                                    // 4. Update temporary variable
+                                    tempDuration = newDuration;
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
                         );
-                      },  child: Container(
+                      },
+                    );
+                  },
+                  child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: Colors.white,

@@ -35,7 +35,7 @@ class _EditProfileViewState extends State<EditProfileView> {
   final _nicknameController = TextEditingController();
   final _emailController = TextEditingController();
   
-  // Зберігаємо шлях до вибраної картинки
+  // Stores the path to the selected avatar.
   String _selectedAvatarPath = AvatarHelper.defaultAvatar;
   bool _hasChanges = false;
   late String _initialNickname;
@@ -47,7 +47,7 @@ class _EditProfileViewState extends State<EditProfileView> {
     final user = FirebaseAuth.instance.currentUser;
     
     _initialNickname = user?.displayName ?? 'Legoshi Fan1';
-    // Якщо у юзера є фото в профілі - беремо його, інакше дефолт
+    // Use user's current photo URL or default avatar.
     _initialAvatar = user?.photoURL ?? AvatarHelper.defaultAvatar;
 
     _nicknameController.text = _initialNickname;
@@ -70,7 +70,7 @@ class _EditProfileViewState extends State<EditProfileView> {
     }
   }
 
-  // --- ГОЛОВНА ФІШКА: Меню вибору аватара ---
+  // --- AVATAR PICKER SHEET ---
   void _showAvatarPicker() {
     showModalBottomSheet(
       context: context,
@@ -97,7 +97,7 @@ class _EditProfileViewState extends State<EditProfileView> {
               Expanded(
                 child: GridView.builder(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 4, // 4 в ряд
+                    crossAxisCount: 4, // 4 items per row
                     crossAxisSpacing: 16,
                     mainAxisSpacing: 16,
                   ),
@@ -112,7 +112,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                           _selectedAvatarPath = path;
                           _checkForChanges();
                         });
-                        Navigator.pop(context); // Закриваємо шторку
+                        Navigator.pop(context); // Close sheet
                       },
                       child: Container(
                         decoration: BoxDecoration(
@@ -138,11 +138,11 @@ class _EditProfileViewState extends State<EditProfileView> {
 
   void _saveProfile() {
     if (_formKey.currentState!.validate()) {
-      // Передаємо і нік, і новий шлях до аватара
+      // Send both nickname and new avatar path.
       context.read<ProfileBloc>().add(
         UpdateProfileInfo(
           nickname: _nicknameController.text,
-          avatarPath: _selectedAvatarPath, // <--- Треба оновити івент!
+          avatarPath: _selectedAvatarPath, // Update event with new avatar
         ),
       );
     }
@@ -163,7 +163,7 @@ class _EditProfileViewState extends State<EditProfileView> {
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(const SnackBar(content: Text('Profile updated!')));
-          // ПОВЕРТАЄМО true, щоб попередити попередній екран
+          // Return true to notify previous screen to refresh.
           Navigator.pop(context, true);
         }
       },
@@ -233,7 +233,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                   child: Column(
                     children: [
                       GestureDetector(
-                        onTap: _showAvatarPicker, // <--- Викликаємо наше меню
+                        onTap: _showAvatarPicker, // Open avatar picker
                         child: Stack(
                           children: [
                             Container(
@@ -255,7 +255,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                                 child: CircleAvatar(
                                   radius: 50,
                                   backgroundColor: Colors.transparent,
-                                  backgroundImage: AssetImage(_selectedAvatarPath), // <--- Показуємо вибране
+                                  backgroundImage: AssetImage(_selectedAvatarPath), // Show selected
                                 ),
                               ),
                             ),

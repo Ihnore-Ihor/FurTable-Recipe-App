@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart'; // <--- НОВЕ
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/core/app_theme.dart';
@@ -7,17 +7,21 @@ import 'package:furtable/features/favorites/bloc/favorites_bloc.dart';
 import 'package:furtable/features/favorites/bloc/favorites_event.dart';
 import 'package:furtable/features/favorites/bloc/favorites_state.dart';
 
+/// Screen displaying the detailed view of a recipe.
 class RecipeDetailsScreen extends StatelessWidget {
-  final Recipe initialRecipe; // Перейменували для ясності
+  /// The initial recipe data.
+  final Recipe initialRecipe; // Renamed for clarity
 
-  // Приймаємо початкові дані, щоб показати їх поки грузиться оновлення
+  /// Creates a [RecipeDetailsScreen] with initial data.
+  ///
+  /// Initial data is shown while fetching updates.
   const RecipeDetailsScreen({super.key, required this.initialRecipe});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.offWhite,
-      // AppBar залишаємо тут, щоб кнопка "Назад" працювала завжди
+      // AppBar remains here so the Back button always works
       appBar: AppBar(
         backgroundColor: AppTheme.offWhite,
         leading: IconButton(
@@ -25,7 +29,7 @@ class RecipeDetailsScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
-          // Лайк виносимо сюди, він працює окремо через BLoC
+          // Like button handled via BLoC
           BlocBuilder<FavoritesBloc, FavoritesState>(
             builder: (context, state) {
               bool isFavorite = false;
@@ -46,32 +50,32 @@ class RecipeDetailsScreen extends StatelessWidget {
           const SizedBox(width: 8),
         ],
       ),
-      
-      // --- ГОЛОВНА ЗМІНА: StreamBuilder ---
+
+      // --- MAIN CHANGE: StreamBuilder ---
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance
             .collection('recipes')
             .doc(initialRecipe.id)
             .snapshots(),
         builder: (context, snapshot) {
-          // 1. Визначаємо, які дані показувати
+          // 1. Determine which data to show
           Recipe recipe;
 
           if (snapshot.hasData && snapshot.data!.exists) {
-            // Якщо прийшли свіжі дані з бази - беремо їх
+            // If fresh data from DB, use it
             recipe = Recipe.fromFirestore(snapshot.data!);
           } else {
-            // Поки вантажиться (або помилка) - показуємо ті, що передали при вході
+            // While loading (or error), show initial data
             recipe = initialRecipe;
           }
 
-          // 2. Малюємо UI (той самий код, що й раніше, але використовуємо змінну recipe)
+          // 2. Draw UI (same code as before, but using the recipe variable)
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Картинка
+                // Image
                 Hero(
                   tag: 'recipe_image_${recipe.id}',
                   child: ClipRRect(
@@ -89,13 +93,13 @@ class RecipeDetailsScreen extends StatelessWidget {
                             width: double.infinity,
                             height: 250,
                             fit: BoxFit.cover,
-                             errorBuilder: (_, __, ___) => Container(height: 250, color: Colors.grey),
+                            errorBuilder: (_, __, ___) => Container(height: 250, color: Colors.grey),
                           ),
                   ),
                 ),
                 const SizedBox(height: 24),
 
-                // Заголовок
+                // Title
                 Text(
                   recipe.title,
                   style: const TextStyle(
@@ -105,23 +109,23 @@ class RecipeDetailsScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
 
-                // Автор + Аватар
+                // Author + Avatar
                 Row(
                   children: [
-                    // --- ВІДНОВЛЕНА АВАТАРКА ---
+                    // --- RESTORED AVATAR ---
                     Container(
                       padding: const EdgeInsets.all(2),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: AppTheme.darkCharcoal, 
-                          width: 1.5 // Трохи товстіша рамка для стилю
+                          color: AppTheme.darkCharcoal,
+                          width: 1.5 // Slightly thicker border for style
                         ),
                       ),
                       child: CircleAvatar(
-                        radius: 16, // Розмір аватара
+                        radius: 16, // Avatar size
                         backgroundColor: Colors.white,
-                        // Використовуємо шлях з моделі або дефолтний
+                        // Use path from model or default
                         backgroundImage: AssetImage(
                           (recipe.authorAvatarUrl.isNotEmpty)
                               ? recipe.authorAvatarUrl
@@ -137,29 +141,29 @@ class RecipeDetailsScreen extends StatelessWidget {
                       style: const TextStyle(
                         fontFamily: 'Inter',
                         fontSize: 16,
-                        fontWeight: FontWeight.w600, // Трохи жирніше для акценту
-                        color: AppTheme.darkCharcoal, // Темний колір (раніше був сірий)
+                        fontWeight: FontWeight.w600, // Slightly bolder for accent
+                        color: AppTheme.darkCharcoal, // Dark color
                       ),
                     ),
                   ],
                 ),
 
                 const SizedBox(height: 24),
-                // ... Решта полів (Опис, Інгредієнти, Кроки) без змін ...
+                // ... Rest of fields (Description, Ingredients, Steps) unchanged ...
                 const Text('Description', style: TextStyle(fontFamily: 'Inter', fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
                 const SizedBox(height: 8),
                 Text(recipe.description.isNotEmpty ? recipe.description : 'No description.', style: const TextStyle(fontFamily: 'Inter', fontSize: 15, height: 1.5, color: AppTheme.mediumGray)),
-                
+
                 const SizedBox(height: 24),
                 const Text('Ingredients', style: TextStyle(fontFamily: 'Inter', fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
                 const SizedBox(height: 12),
                 ...recipe.ingredients.map((i) => Padding(padding: const EdgeInsets.only(bottom: 8), child: Text("• $i", style: const TextStyle(fontSize: 15, color: AppTheme.darkCharcoal)))),
-                
+
                 const SizedBox(height: 24),
                 const Text('Instructions', style: TextStyle(fontFamily: 'Inter', fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
                 const SizedBox(height: 12),
                 ...recipe.steps.map((s) => Padding(padding: const EdgeInsets.only(bottom: 12), child: Text(s, style: const TextStyle(fontSize: 15, color: AppTheme.darkCharcoal)))),
-                
+
                 const SizedBox(height: 40),
               ],
             ),

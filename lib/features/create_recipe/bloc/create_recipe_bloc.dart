@@ -6,15 +6,18 @@ import 'package:furtable/features/create_recipe/bloc/create_recipe_state.dart';
 import 'package:furtable/features/explore/models/recipe_model.dart';
 import 'package:furtable/features/explore/repositories/recipe_repository.dart';
 
+/// Manages the state of recipe creation and updates.
 class CreateRecipeBloc extends Bloc<CreateRecipeEvent, CreateRecipeState> {
   final RecipeRepository _recipeRepo = RecipeRepository();
   final StorageRepository _storageRepo = StorageRepository();
 
+  /// Creates a [CreateRecipeBloc].
   CreateRecipeBloc() : super(CreateRecipeInitial()) {
     on<SubmitRecipe>(_onSubmit);
     on<UpdateRecipe>(_onUpdate);
   }
 
+  /// Handles the recipe submission event.
   Future<void> _onSubmit(
     SubmitRecipe event,
     Emitter<CreateRecipeState> emit,
@@ -26,7 +29,7 @@ class CreateRecipeBloc extends Bloc<CreateRecipeEvent, CreateRecipeState> {
 
       String imageUrl = '';
 
-      // 1. Вантажимо картинку в Supabase
+      // 1. Upload image to Storage (simulated Supabase/Firebase)
       if (event.imageBytes != null) {
         imageUrl = await _storageRepo.uploadImageBytes(
           event.imageBytes!,
@@ -36,9 +39,9 @@ class CreateRecipeBloc extends Bloc<CreateRecipeEvent, CreateRecipeState> {
         imageUrl = 'https://placehold.co/600x400/png?text=No+Image';
       }
 
-      // 2. Створюємо об'єкт рецепту
+      // 2. Create the recipe object
       final recipe = Recipe(
-        id: '', // ID дасть Firestore
+        id: '', // ID will be assigned by Firestore
         authorId: user.uid,
         authorName: user.displayName ?? 'Chef',
         title: event.title,
@@ -52,7 +55,7 @@ class CreateRecipeBloc extends Bloc<CreateRecipeEvent, CreateRecipeState> {
         createdAt: DateTime.now(),
       );
 
-      // 3. Зберігаємо текст у Firestore
+      // 3. Save data to Firestore
       await _recipeRepo.createRecipe(recipe);
 
       emit(CreateRecipeSuccess());
@@ -61,6 +64,7 @@ class CreateRecipeBloc extends Bloc<CreateRecipeEvent, CreateRecipeState> {
     }
   }
 
+  /// Handles the recipe update event.
   Future<void> _onUpdate(
     UpdateRecipe event,
     Emitter<CreateRecipeState> emit,
@@ -86,8 +90,7 @@ class CreateRecipeBloc extends Bloc<CreateRecipeEvent, CreateRecipeState> {
         description: event.description,
         imageUrl: imageUrl,
         likesCount: 0,
-        timeMinutes:
-            event.timeMinutes, // <--- ВИКОРИСТОВУЄМО НОВЕ ПОЛЕ (було 45)
+        timeMinutes: event.timeMinutes, // Using the new field (previously 45)
         ingredients: event.ingredients.split('\n'),
         steps: event.instructions.split('\n'),
         isPublic: event.isPublic,
