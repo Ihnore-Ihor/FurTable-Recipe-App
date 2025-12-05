@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/features/explore/models/recipe_model.dart';
+import 'package:furtable/features/favorites/bloc/favorites_bloc.dart';
+import 'package:furtable/features/favorites/bloc/favorites_event.dart';
+import 'package:furtable/features/favorites/bloc/favorites_state.dart';
 
-/// Screen displaying the details of a specific recipe.
 class RecipeDetailsScreen extends StatelessWidget {
-  /// The recipe to display.
   final Recipe recipe;
 
-  /// Creates a [RecipeDetailsScreen].
   const RecipeDetailsScreen({super.key, required this.recipe});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.offWhite,
-      // Transparent or white AppBar with navigation buttons.
       appBar: AppBar(
         backgroundColor: AppTheme.offWhite,
         leading: IconButton(
@@ -22,10 +22,27 @@ class RecipeDetailsScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.favorite, color: AppTheme.darkCharcoal),
-            onPressed: () {
-              // Like logic to be implemented later.
+          // --- ЛОГІКА ЛАЙКА ---
+          BlocBuilder<FavoritesBloc, FavoritesState>(
+            builder: (context, state) {
+              bool isFavorite = false;
+              
+              // Перевіряємо, чи є поточний рецепт у списку завантажених улюблених
+              if (state is FavoritesLoaded) {
+                isFavorite = state.recipes.any((r) => r.id == recipe.id);
+              }
+
+              return IconButton(
+                // Змінюємо іконку та колір залежно від стану
+                icon: Icon(
+                  isFavorite ? Icons.favorite : Icons.favorite_border,
+                  color: isFavorite ? AppTheme.darkCharcoal : AppTheme.darkCharcoal,
+                ),
+                onPressed: () {
+                  // Відправляємо подію в глобальний блок
+                  context.read<FavoritesBloc>().add(ToggleFavorite(recipe));
+                },
+              );
             },
           ),
           const SizedBox(width: 8),
@@ -36,7 +53,7 @@ class RecipeDetailsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Recipe Image
+            // 1. Картинка рецепту
             Hero(
               tag: 'recipe_image_${recipe.id}',
               child: ClipRRect(
@@ -47,20 +64,27 @@ class RecipeDetailsScreen extends StatelessWidget {
                         width: double.infinity,
                         height: 250,
                         fit: BoxFit.cover,
-                        errorBuilder: (ctx, err, stack) =>
-                            Container(color: Colors.grey),
+                        errorBuilder: (ctx, err, stack) => Container(
+                          height: 250,
+                          color: Colors.grey[300],
+                          child: const Icon(Icons.broken_image, color: Colors.grey),
+                        ),
                       )
                     : Image.asset(
                         recipe.imageUrl,
                         width: double.infinity,
                         height: 250,
                         fit: BoxFit.cover,
+                        errorBuilder: (ctx, err, stack) => Container(
+                          height: 250,
+                          color: Colors.grey[300],
+                        ),
                       ),
               ),
             ),
             const SizedBox(height: 24),
 
-            // Title
+            // 2. Заголовок
             Text(
               recipe.title,
               style: const TextStyle(
@@ -71,35 +95,22 @@ class RecipeDetailsScreen extends StatelessWidget {
                 height: 1.2,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
 
-            // Author (Avatar + Name)
-            Row(
-              children: [
-                // Placeholder avatar (can be replaced with author image from model).
-                const CircleAvatar(
-                  radius: 20,
-                  backgroundImage: AssetImage(
-                    'assets/images/legoshi_eating_auth.png',
-                  ),
-                  backgroundColor: Colors.transparent,
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  recipe.authorName,
-                  style: const TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: AppTheme.darkCharcoal,
-                  ),
-                ),
-              ],
+            // 3. Автор (БЕЗ АВАТАРА, ТІЛЬКИ ТЕКСТ)
+            Text(
+              'by ${recipe.authorName}',
+              style: const TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: AppTheme.mediumGray, // Сірий колір для автора
+              ),
             ),
 
             const SizedBox(height: 24),
 
-            // Description
+            // 4. Опис
             const Text(
               'Description',
               style: TextStyle(
@@ -124,7 +135,7 @@ class RecipeDetailsScreen extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            // Ingredients
+            // 5. Інгредієнти
             const Text(
               'Ingredients',
               style: TextStyle(
@@ -135,41 +146,41 @@ class RecipeDetailsScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            ...recipe.ingredients.map(
-              (ingredient) => Padding(
-                padding: const EdgeInsets.only(bottom: 10.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Bullet point
-                    Container(
-                      margin: const EdgeInsets.only(top: 6),
-                      width: 6,
-                      height: 6,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF9CA3AF),
-                        shape: BoxShape.circle,
+            if (recipe.ingredients.isEmpty)
+              const Text('No ingredients listed.', style: TextStyle(color: AppTheme.mediumGray)),
+            
+            ...recipe.ingredients.map((ingredient) => Padding(
+              padding: const EdgeInsets.only(bottom: 10.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(top: 6),
+                    width: 6,
+                    height: 6,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF9CA3AF),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      ingredient,
+                      style: const TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 15,
+                        color: AppTheme.darkCharcoal,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        ingredient,
-                        style: const TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 15,
-                          color: AppTheme.darkCharcoal,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ),
+            )),
 
             const SizedBox(height: 24),
 
-            // Instructions
+            // 6. Інструкції
             const Text(
               'Instructions',
               style: TextStyle(
@@ -180,6 +191,9 @@ class RecipeDetailsScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
+            if (recipe.steps.isEmpty)
+              const Text('No instructions listed.', style: TextStyle(color: AppTheme.mediumGray)),
+
             ...recipe.steps.asMap().entries.map((entry) {
               int idx = entry.key + 1;
               String step = entry.value;
@@ -188,7 +202,6 @@ class RecipeDetailsScreen extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Numbered circle
                     Container(
                       width: 24,
                       height: 24,
@@ -222,7 +235,7 @@ class RecipeDetailsScreen extends StatelessWidget {
                 ),
               );
             }),
-
+            
             const SizedBox(height: 40),
           ],
         ),
