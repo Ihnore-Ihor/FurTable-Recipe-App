@@ -24,3 +24,10 @@ class ToggleFavorite extends FavoritesEvent {
   @override
   List<Object> get props => [recipe];
 }
+
+class FavoritesUpdated extends FavoritesEvent {
+  final List<Recipe> recipes;
+  const FavoritesUpdated(this.recipes);
+  @override
+  List<Object> get props => [recipes];
+}

@@ -111,8 +111,10 @@ class RecipeDetailsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'A perfectly grilled salmon glazed with homemade teriyaki sauce. This dish combines the richness of fresh salmon with the sweet and savory flavors.',
-              style: TextStyle(
+              recipe.description.isNotEmpty 
+                  ? recipe.description 
+                  : 'No description provided.',
+              style: const TextStyle(
                 fontFamily: 'Inter',
                 fontSize: 15,
                 height: 1.5,

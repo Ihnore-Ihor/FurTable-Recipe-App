@@ -1,8 +1,9 @@
-import 'dart:typed_data'; // Для роботи з байтами картинки
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Для фільтрації вводу цифр
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:image_picker/image_picker.dart'; // Для вибору фото
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter/cupertino.dart'; // Для пікера часу
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/features/create_recipe/bloc/create_recipe_bloc.dart';
 import 'package:furtable/features/create_recipe/bloc/create_recipe_event.dart';
@@ -39,10 +40,10 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
   final _descriptionController = TextEditingController();
   final _ingredientsController = TextEditingController();
   final _instructionsController = TextEditingController();
-  final _timeController = TextEditingController(); // <--- НОВЕ: ЧАС
-  
-  bool _isPublic = true; // За замовчуванням публічний
-  Uint8List? _selectedImageBytes; // <--- НОВЕ: Зберігаємо фото
+  final _timeController = TextEditingController(); // Час
+
+  bool _isPublic = true;
+  Uint8List? _selectedImageBytes;
 
   @override
   void initState() {
@@ -53,7 +54,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
       _descriptionController.text = r.description;
       _ingredientsController.text = r.ingredients.join('\n');
       _instructionsController.text = r.steps.join('\n');
-      _timeController.text = r.timeMinutes.toString(); // Заповнюємо час
+      _timeController.text = r.timeMinutes.toString();
       _isPublic = r.isPublic;
     }
   }
@@ -68,7 +69,6 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
     super.dispose();
   }
 
-  // --- ФУНКЦІЯ ВИБОРУ ФОТО ---
   Future<void> _pickImage() async {
     try {
       final ImagePicker picker = ImagePicker();
@@ -81,10 +81,18 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error picking image: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error picking image: $e')));
     }
+  }
+
+  String _formatDuration(int minutes) {
+    final duration = Duration(minutes: minutes);
+    final h = duration.inHours;
+    final m = duration.inMinutes.remainder(60);
+    if (h > 0) return '${h}h ${m}m';
+    return '${m}m';
   }
 
   void _submitForm() {
@@ -97,35 +105,38 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
       return;
     }
 
-    // Парсимо час (якщо пусто або 0, ставимо дефолт)
-    int time = int.tryParse(_timeController.text) ?? 30;
+    final title = _titleController.text.trim();
+    final desc = _descriptionController.text.trim();
+    final ingredients = _ingredientsController.text.trim();
+    final instructions = _instructionsController.text.trim();
+    final time = int.tryParse(_timeController.text) ?? 30;
 
     if (widget.recipeToEdit != null) {
-        // Логіка оновлення (UpdateRecipe)...
-        context.read<CreateRecipeBloc>().add(
-          UpdateRecipe(
-            id: widget.recipeToEdit!.id,
-            title: _titleController.text.trim(),
-            description: _descriptionController.text.trim(),
-            ingredients: _ingredientsController.text.trim(),
-            instructions: _instructionsController.text.trim(),
-            isPublic: _isPublic,
-            currentImageUrl: widget.recipeToEdit!.imageUrl,
-            newImageBytes: _selectedImageBytes,
-          ),
-        );
+      context.read<CreateRecipeBloc>().add(
+        UpdateRecipe(
+          id: widget.recipeToEdit!.id,
+          title: title,
+          description: desc,
+          ingredients: ingredients, // Виправляємо missing argument
+          instructions: instructions, // Виправляємо missing argument
+          timeMinutes: time, // Виправляємо missing argument
+          isPublic: _isPublic,
+          currentImageUrl: widget.recipeToEdit!.imageUrl,
+          newImageBytes: _selectedImageBytes,
+        ),
+      );
     } else {
       context.read<CreateRecipeBloc>().add(
-            SubmitRecipe(
-              title: _titleController.text.trim(),
-              description: _descriptionController.text.trim(),
-              ingredients: _ingredientsController.text.trim(),
-              instructions: _instructionsController.text.trim(),
-              timeMinutes: time, // <--- Передаємо час
-              isPublic: _isPublic,
-              imageBytes: _selectedImageBytes, // <--- Передаємо фото
-            ),
-          );
+        SubmitRecipe(
+          title: title,
+          description: desc,
+          ingredients: ingredients, // Виправляємо missing argument
+          instructions: instructions, // Виправляємо missing argument
+          timeMinutes: time, // Виправляємо missing argument
+          isPublic: _isPublic,
+          imageBytes: _selectedImageBytes,
+        ),
+      );
     }
   }
 
@@ -137,7 +148,10 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
       listener: (context, state) {
         if (state is CreateRecipeSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Success!'), backgroundColor: AppTheme.darkCharcoal),
+            SnackBar(
+              content: Text(isEditing ? 'Recipe updated!' : 'Success!'),
+              backgroundColor: AppTheme.darkCharcoal,
+            ),
           );
           Navigator.pop(context, true);
         } else if (state is CreateRecipeFailure) {
@@ -160,15 +174,29 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
               child: BlocBuilder<CreateRecipeBloc, CreateRecipeState>(
                 builder: (context, state) {
                   return ElevatedButton(
-                    onPressed: state is CreateRecipeLoading ? null : _submitForm,
+                    onPressed: state is CreateRecipeLoading
+                        ? null
+                        : _submitForm,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.darkCharcoal,
                       foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                     child: state is CreateRecipeLoading
-                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                        : const Text('Save', style: TextStyle(fontWeight: FontWeight.w600)),
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text(
+                            'Save',
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
                   );
                 },
               ),
@@ -183,12 +211,18 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Recipe Image', style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w700, fontSize: 16, color: AppTheme.darkCharcoal)),
+                const Text(
+                  'Recipe Image',
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                    color: AppTheme.darkCharcoal,
+                  ),
+                ),
                 const SizedBox(height: 12),
-                
-                // --- ЗОНА ВИБОРУ ФОТО ---
                 GestureDetector(
-                  onTap: _pickImage, // <--- ТУТ ПІДКЛЮЧЕНО ФУНКЦІЮ
+                  onTap: _pickImage,
                   child: Container(
                     height: 200,
                     width: double.infinity,
@@ -200,72 +234,185 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                     child: _selectedImageBytes != null
                         ? ClipRRect(
                             borderRadius: BorderRadius.circular(12),
-                            child: Image.memory(_selectedImageBytes!, fit: BoxFit.cover),
+                            child: Image.memory(
+                              _selectedImageBytes!,
+                              fit: BoxFit.cover,
+                            ),
                           )
                         : (isEditing &&
-                                widget.recipeToEdit!.imageUrl.isNotEmpty)
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: widget.recipeToEdit!.imageUrl
-                                        .startsWith('http')
-                                    ? Image.network(
-                                        widget.recipeToEdit!.imageUrl,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) =>
-                                            const Icon(Icons.error),
-                                      )
-                                    : Image.asset(
-                                        widget.recipeToEdit!.imageUrl,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) =>
-                                            const Icon(Icons.error),
-                                      ),
-                              )
-                            : const Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.file_upload_outlined, size: 32, color: AppTheme.mediumGray),
-                                  SizedBox(height: 8),
-                                  Text('Tap to add photo', style: TextStyle(fontFamily: 'Inter', color: AppTheme.mediumGray, fontSize: 14)),
-                                ],
+                              widget.recipeToEdit!.imageUrl.isNotEmpty)
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.network(
+                              widget.recipeToEdit!.imageUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) =>
+                                  const Icon(Icons.image),
+                            ),
+                          )
+                        : const Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.file_upload_outlined,
+                                size: 32,
+                                color: AppTheme.mediumGray,
                               ),
+                              SizedBox(height: 8),
+                              Text(
+                                'Tap to add photo',
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  color: AppTheme.mediumGray,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 24),
                 _buildLabel('Recipe Title *'),
-                _buildTextFormField(controller: _titleController, hintText: 'Enter title...', validator: (v) => v!.isEmpty ? 'Required' : null),
-                
-                const SizedBox(height: 24),
-                _buildLabel('Description'),
-                _buildTextFormField(controller: _descriptionController, hintText: 'Describe it...', maxLines: 3),
-
-                // --- ПОЛЕ ЧАСУ ---
-                const SizedBox(height: 24),
-                _buildLabel('Cooking Time (minutes) *'),
                 _buildTextFormField(
-                  controller: _timeController,
-                  hintText: 'e.g. 45',
-                  // Дозволяємо вводити тільки цифри
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  keyboardType: TextInputType.number,
+                  controller: _titleController,
+                  hintText: 'Enter title...',
                   validator: (v) => v!.isEmpty ? 'Required' : null,
                 ),
 
                 const SizedBox(height: 24),
+                _buildLabel('Description'),
+                _buildTextFormField(
+                  controller: _descriptionController,
+                  hintText: 'Describe it...',
+                  maxLines: 3,
+                ),
+
+                const SizedBox(height: 24),
+                _buildLabel('Cooking Time *'),
+                    GestureDetector(
+                      onTap: () {
+                        // 1. Початкове значення (або 30, якщо пусте)
+                        int currentMinutes =
+                            int.tryParse(_timeController.text) ?? 30;
+                        // 2. Тимчасова змінна, яка буде змінюватися при скролі
+                        Duration tempDuration =
+                            Duration(minutes: currentMinutes);
+
+                        showModalBottomSheet(
+                          context: context,
+                          backgroundColor: Colors.white,
+                          builder: (BuildContext builder) {
+                            return Container(
+                              height: 300,
+                              color: Colors.white,
+                              child: Column(
+                                children: [
+                                  Container(
+                                    color: Colors.grey[100],
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 8),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        TextButton(
+                                          onPressed: () {
+                                            // 3. МОМЕНТ ІСТИНИ: При натисканні Done ми
+                                            // записуємо те, що зараз в tempDuration
+                                            setState(() {
+                                              _timeController.text =
+                                                  tempDuration.inMinutes
+                                                      .toString();
+                                            });
+                                            Navigator.pop(context);
+                                          },
+                                          child: const Text('Done',
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color:
+                                                      AppTheme.darkCharcoal)),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: CupertinoTimerPicker(
+                                      mode: CupertinoTimerPickerMode.hm,
+                                      // Початкове положення пікера
+                                      initialTimerDuration:
+                                          Duration(minutes: currentMinutes),
+                                      onTimerDurationChanged:
+                                          (Duration newDuration) {
+                                        // 4. Просто оновлюємо тимчасову змінну
+                                        tempDuration = newDuration;
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                      },  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          _timeController.text.isEmpty
+                              ? 'Select time'
+                              : _formatDuration(
+                                  int.tryParse(_timeController.text) ?? 0,
+                                ),
+                        ),
+                        const Icon(
+                          Icons.access_time,
+                          color: AppTheme.mediumGray,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
                 _buildLabel('Ingredients *'),
-                _buildTextFormField(controller: _ingredientsController, hintText: 'One per line...', maxLines: 6, validator: (v) => v!.isEmpty ? 'Required' : null),
-                
+                _buildTextFormField(
+                  controller: _ingredientsController,
+                  hintText: 'One per line...',
+                  maxLines: 6,
+                  validator: (v) => v!.isEmpty ? 'Required' : null,
+                ),
+
                 const SizedBox(height: 24),
                 _buildLabel('Instructions *'),
-                _buildTextFormField(controller: _instructionsController, hintText: 'One per line...', maxLines: 8, validator: (v) => v!.isEmpty ? 'Required' : null),
-                
+                _buildTextFormField(
+                  controller: _instructionsController,
+                  hintText: 'One per line...',
+                  maxLines: 8,
+                  validator: (v) => v!.isEmpty ? 'Required' : null,
+                ),
+
                 const SizedBox(height: 24),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Make Public', style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.bold, fontSize: 16)),
-                    Switch.adaptive(value: _isPublic, activeColor: AppTheme.darkCharcoal, onChanged: (v) => setState(() => _isPublic = v)),
+                    const Text(
+                      'Make Public',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    Switch.adaptive(
+                      value: _isPublic,
+                      activeColor: AppTheme.darkCharcoal,
+                      onChanged: (v) => setState(() => _isPublic = v),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 40),
@@ -277,28 +424,38 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
     );
   }
 
-  Widget _buildLabel(String text) => Padding(padding: const EdgeInsets.only(bottom: 12), child: Text(text, style: const TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.bold, fontSize: 16)));
+  Widget _buildLabel(String text) => Padding(
+    padding: const EdgeInsets.only(bottom: 12),
+    child: Text(
+      text,
+      style: const TextStyle(
+        fontFamily: 'Inter',
+        fontWeight: FontWeight.bold,
+        fontSize: 16,
+        color: AppTheme.darkCharcoal,
+      ),
+    ),
+  );
 
   Widget _buildTextFormField({
     required TextEditingController controller,
     required String hintText,
     int maxLines = 1,
     String? Function(String?)? validator,
-    List<TextInputFormatter>? inputFormatters,
-    TextInputType? keyboardType,
   }) {
     return TextFormField(
       controller: controller,
       maxLines: maxLines,
       minLines: maxLines > 1 ? 3 : 1,
       validator: validator,
-      inputFormatters: inputFormatters,
-      keyboardType: keyboardType,
       decoration: InputDecoration(
         hintText: hintText,
         filled: true,
         fillColor: Colors.white,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
       ),
     );
   }

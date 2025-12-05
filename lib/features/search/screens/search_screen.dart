@@ -8,6 +8,9 @@ import 'package:furtable/features/explore/widgets/recipe_card.dart';
 import 'package:furtable/features/search/bloc/search_bloc.dart';
 import 'package:furtable/features/search/bloc/search_event.dart';
 import 'package:furtable/features/search/bloc/search_state.dart';
+import 'package:furtable/features/favorites/bloc/favorites_bloc.dart';
+import 'package:furtable/features/favorites/bloc/favorites_event.dart';
+import 'package:furtable/features/favorites/bloc/favorites_state.dart';
 import 'package:furtable/features/profile/screens/profile_screen.dart';
 
 /// Screen for searching recipes by title or author.
@@ -302,12 +305,24 @@ class _SearchViewState extends State<SearchView> {
                             ),
                           );
                         },
-                        child: RecipeCard(
-                          id: recipe.id,
-                          imageUrl: recipe.imageUrl,
-                          title: recipe.title,
-                          author: recipe.authorName,
-                          likes: recipe.likes,
+                        child: BlocBuilder<FavoritesBloc, FavoritesState>(
+                          builder: (context, favState) {
+                            bool isFav = false;
+                            if (favState is FavoritesLoaded) {
+                              isFav = favState.recipes.any((r) => r.id == recipe.id);
+                            }
+                            return RecipeCard(
+                              id: recipe.id,
+                              imageUrl: recipe.imageUrl,
+                              title: recipe.title,
+                              author: recipe.authorName,
+                              likes: recipe.likes,
+                              isFavorite: isFav,
+                              onFavoriteToggle: () {
+                                context.read<FavoritesBloc>().add(ToggleFavorite(recipe));
+                              },
+                            );
+                          },
                         ),
                       );
                     },

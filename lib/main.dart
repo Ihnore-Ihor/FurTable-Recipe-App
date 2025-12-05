@@ -6,6 +6,9 @@ import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/features/auth/screens/auth_screen.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:furtable/features/favorites/bloc/favorites_bloc.dart';
+import 'package:furtable/features/favorites/bloc/favorites_event.dart';
 
 /// The entry point of the application.
 ///
@@ -32,7 +35,16 @@ Future<void> main() async {
       await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
       print('Firebase initialized: ${Firebase.apps.length}');
       print('Analytics collection enabled.');
-      runApp(const MyApp());
+      runApp(
+        MultiBlocProvider(
+          providers: [
+            BlocProvider<FavoritesBloc>(
+              create: (context) => FavoritesBloc()..add(LoadFavorites()),
+            ),
+          ],
+          child: const MyApp(),
+        ),
+      );
     },
   );
 }

@@ -15,19 +15,25 @@ class CreateRecipeBloc extends Bloc<CreateRecipeEvent, CreateRecipeState> {
     on<UpdateRecipe>(_onUpdate);
   }
 
-  Future<void> _onSubmit(SubmitRecipe event, Emitter<CreateRecipeState> emit) async {
+  Future<void> _onSubmit(
+    SubmitRecipe event,
+    Emitter<CreateRecipeState> emit,
+  ) async {
     emit(CreateRecipeLoading());
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) throw Exception("User not logged in");
 
       String imageUrl = '';
-      
+
       // 1. Вантажимо картинку в Supabase
       if (event.imageBytes != null) {
-        imageUrl = await _storageRepo.uploadImageBytes(event.imageBytes!, 'recipe_images');
+        imageUrl = await _storageRepo.uploadImageBytes(
+          event.imageBytes!,
+          'recipe_images',
+        );
       } else {
-        imageUrl = 'https://placehold.co/600x400/png?text=No+Image'; 
+        imageUrl = 'https://placehold.co/600x400/png?text=No+Image';
       }
 
       // 2. Створюємо об'єкт рецепту
@@ -37,7 +43,7 @@ class CreateRecipeBloc extends Bloc<CreateRecipeEvent, CreateRecipeState> {
         authorName: user.displayName ?? 'Chef',
         title: event.title,
         description: event.description,
-        imageUrl: imageUrl, 
+        imageUrl: imageUrl,
         likesCount: 0,
         timeMinutes: event.timeMinutes,
         ingredients: event.ingredients.split('\n'),
@@ -55,39 +61,41 @@ class CreateRecipeBloc extends Bloc<CreateRecipeEvent, CreateRecipeState> {
     }
   }
 
-  Future<void> _onUpdate(UpdateRecipe event, Emitter<CreateRecipeState> emit) async {
+  Future<void> _onUpdate(
+    UpdateRecipe event,
+    Emitter<CreateRecipeState> emit,
+  ) async {
     emit(CreateRecipeLoading());
     try {
-      // 1. Визначаємо URL картинки
-      // Якщо завантажили нову - беремо нову URL, інакше залишаємо стару
       String imageUrl = event.currentImageUrl ?? '';
 
       if (event.newImageBytes != null) {
-         imageUrl = await _storageRepo.uploadImageBytes(event.newImageBytes!, 'recipe_images');
+        imageUrl = await _storageRepo.uploadImageBytes(
+          event.newImageBytes!,
+          'recipe_images',
+        );
       }
 
-      // 2. Створюємо оновлений об'єкт
-      // Для спрощення беремо поточного юзера як автора (або можна було б передати authorId в івенті)
       final user = FirebaseAuth.instance.currentUser;
-      
+
       final recipe = Recipe(
         id: event.id,
-        authorId: user?.uid ?? '', 
+        authorId: user?.uid ?? '',
         authorName: user?.displayName ?? 'Chef',
         title: event.title,
         description: event.description,
         imageUrl: imageUrl,
-        likesCount: 0, // В ідеалі треба зберегти старі лайки, але в UpdateRecipe ми їх не передали. Хай буде 0 для лаби.
-        timeMinutes: 45,
+        likesCount: 0,
+        timeMinutes:
+            event.timeMinutes, // <--- ВИКОРИСТОВУЄМО НОВЕ ПОЛЕ (було 45)
         ingredients: event.ingredients.split('\n'),
         steps: event.instructions.split('\n'),
         isPublic: event.isPublic,
-        createdAt: DateTime.now(), // Оновлюємо дату
+        createdAt: DateTime.now(),
       );
 
-      // 3. Оновлюємо в базі
       await _recipeRepo.updateRecipe(recipe);
-      
+
       emit(CreateRecipeSuccess());
     } catch (e) {
       emit(CreateRecipeFailure(e.toString()));

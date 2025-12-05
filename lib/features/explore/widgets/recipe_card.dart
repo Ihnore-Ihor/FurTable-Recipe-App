@@ -1,24 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:furtable/core/app_theme.dart';
 
-/// A card widget displaying a recipe summary.
 class RecipeCard extends StatefulWidget {
-  /// The unique identifier of the recipe.
   final String id;
-
-  /// The URL or path to the recipe image.
   final String imageUrl;
-
-  /// The title of the recipe.
   final String title;
+  final String author; // Використовуємо геттер з моделі
+  final String likes; // Використовуємо геттер з моделі
+  final bool isFavorite;
+  final VoidCallback? onFavoriteToggle;
 
-  /// The author of the recipe.
-  final String author;
-
-  /// The number of likes formatted as a string.
-  final String likes;
-
-  /// Creates a [RecipeCard].
   const RecipeCard({
     super.key,
     required this.id,
@@ -26,6 +17,8 @@ class RecipeCard extends StatefulWidget {
     required this.title,
     required this.author,
     required this.likes,
+    this.isFavorite = false,
+    this.onFavoriteToggle,
   });
 
   @override
@@ -33,18 +26,9 @@ class RecipeCard extends StatefulWidget {
 }
 
 class _RecipeCardState extends State<RecipeCard> {
-  bool _isFavorited = false;
-
-  void _toggleFavorite() {
-    setState(() {
-      _isFavorited = !_isFavorited;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    // Calculate card width to avoid layout errors.
+    // Розрахунок ширини для адаптивності
     final cardWidth = (MediaQuery.of(context).size.width - 48) / 2;
 
     return Column(
@@ -64,10 +48,13 @@ class _RecipeCardState extends State<RecipeCard> {
                         height: cardWidth,
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
+                            width: double.infinity,
+                            height: cardWidth,
                             color: Colors.grey[200],
-                            alignment: Alignment.center,
-                            child: const Icon(Icons.broken_image,
-                                color: Colors.grey),
+                            child: const Icon(
+                              Icons.broken_image,
+                              color: Colors.grey,
+                            ),
                           );
                         },
                       )
@@ -77,7 +64,11 @@ class _RecipeCardState extends State<RecipeCard> {
                         width: double.infinity,
                         height: cardWidth,
                         errorBuilder: (context, error, stackTrace) {
-                          return Container(color: Colors.grey[200]);
+                          return Container(
+                            width: double.infinity,
+                            height: cardWidth,
+                            color: Colors.grey[200],
+                          );
                         },
                       ),
               ),
@@ -86,7 +77,7 @@ class _RecipeCardState extends State<RecipeCard> {
               bottom: 8,
               right: 8,
               child: GestureDetector(
-                onTap: _toggleFavorite,
+                onTap: widget.onFavoriteToggle,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
@@ -107,12 +98,17 @@ class _RecipeCardState extends State<RecipeCard> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        _isFavorited ? Icons.favorite : Icons.favorite_border,
+                        widget.isFavorite
+                            ? Icons.favorite
+                            : Icons.favorite_border,
                         color: AppTheme.darkCharcoal,
                         size: 14,
                       ),
                       const SizedBox(width: 4),
-                      Text(widget.likes, style: textTheme.labelSmall),
+                      Text(
+                        widget.likes,
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
                     ],
                   ),
                 ),
@@ -123,12 +119,12 @@ class _RecipeCardState extends State<RecipeCard> {
         const SizedBox(height: 12),
         Text(
           widget.title,
-          style: textTheme.titleLarge,
+          style: Theme.of(context).textTheme.titleLarge,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 4),
-        Text(widget.author, style: textTheme.bodyMedium),
+        Text(widget.author, style: Theme.of(context).textTheme.bodyMedium),
       ],
     );
   }

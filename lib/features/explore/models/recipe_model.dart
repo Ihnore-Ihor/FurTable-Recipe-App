@@ -30,7 +30,6 @@ class Recipe extends Equatable {
     required this.createdAt,
   });
 
-  // Перетворення з Firestore (читання)
   factory Recipe.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return Recipe(
@@ -49,7 +48,6 @@ class Recipe extends Equatable {
     );
   }
 
-  // Перетворення в Firestore (запис)
   Map<String, dynamic> toFirestore() {
     return {
       'authorId': authorId,
@@ -63,22 +61,48 @@ class Recipe extends Equatable {
       'steps': steps,
       'isPublic': isPublic,
       'createdAt': Timestamp.fromDate(createdAt),
-      // Ключові слова для пошуку
       'searchKeywords': _generateKeywords(title),
     };
   }
 
+  // Розумна генерація: розбиваємо на слова, і для кожного слова робимо префікси
   List<String> _generateKeywords(String title) {
-    List<String> keywords = [];
-    String temp = "";
-    for (int i = 0; i < title.length; i++) {
-      temp = temp + title[i].toLowerCase();
-      keywords.add(temp);
+    Set<String> keywords = {};
+
+    // 1. Додаємо слова з назви
+    final titleWords = title.toLowerCase().split(' ');
+    for (var word in titleWords) {
+      if (word.trim().isEmpty) continue;
+      
+      // Генеруємо префікси для КОЖНОГО слова
+      // Наприклад "Seafood Pasta" -> 
+      // "s", "se", "sea" ... "seafood"
+      // "p", "pa", "pas" ... "pasta"
+      String temp = "";
+      for (int i = 0; i < word.length; i++) {
+        temp = temp + word[i];
+        keywords.add(temp);
+      }
     }
-    return keywords;
+
+    // 2. Додаємо слова з імені автора (так само)
+    final authorWords = authorName.toLowerCase().split(' ');
+    for (var word in authorWords) {
+      if (word.trim().isEmpty) continue;
+      String temp = "";
+      for (int i = 0; i < word.length; i++) {
+        temp = temp + word[i];
+        keywords.add(temp);
+      }
+    }
+
+    return keywords.toList();
   }
 
-  // Цей геттер потрібен, щоб старий код міг звертатися до recipe.likes
+  // --- СУМІСНІСТЬ (GETTERS) ---
+  // Це виправляє помилки "undefined getter"
+  String get author => authorName;
+
   String get likes {
     if (likesCount >= 1000) {
       return '${(likesCount / 1000).toStringAsFixed(1)}k';
@@ -86,10 +110,6 @@ class Recipe extends Equatable {
     return likesCount.toString();
   }
 
-  // Цей геттер потрібен, щоб старий код міг звертатися до recipe.author
-  // (бо в новій моделі поле називається authorName)
-  String get author => authorName;
-
   @override
-  List<Object?> get props => [id, authorId, title, imageUrl, likesCount, isPublic];
+  List<Object?> get props => [id, authorId, title, imageUrl, likesCount];
 }

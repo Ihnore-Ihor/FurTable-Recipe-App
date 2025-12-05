@@ -18,10 +18,7 @@ class FavoritesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => FavoritesBloc()..add(LoadFavorites()),
-      child: const FavoritesView(),
-    );
+    return const FavoritesView();
   }
 }
 
@@ -134,6 +131,10 @@ class FavoritesView extends StatelessWidget {
             title: recipe.title,
             author: recipe.authorName,
             likes: recipe.likes,
+            isFavorite: true, // Always true in Favorites screen
+            onFavoriteToggle: () {
+              context.read<FavoritesBloc>().add(ToggleFavorite(recipe));
+            },
           ),
         );
       },

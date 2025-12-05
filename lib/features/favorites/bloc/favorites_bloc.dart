@@ -1,86 +1,60 @@
+import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:furtable/features/explore/models/recipe_model.dart';
+import 'package:furtable/features/explore/repositories/recipe_repository.dart'; // Імпорт
 import 'package:furtable/features/favorites/bloc/favorites_event.dart';
 import 'package:furtable/features/favorites/bloc/favorites_state.dart';
 
-/// Manages the state of the favorites feature, including loading and toggling favorites.
 class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
-  /// Creates a [FavoritesBloc] with an initial loading state.
+  final RecipeRepository _recipeRepo = RecipeRepository();
+  StreamSubscription? _favoritesSubscription;
+
   FavoritesBloc() : super(FavoritesLoading()) {
     on<LoadFavorites>(_onLoadFavorites);
     on<ToggleFavorite>(_onToggleFavorite);
+    on<FavoritesUpdated>(_onFavoritesUpdated); // Нова подія (створимо нижче)
   }
 
-  // Initial list of favorites (simulating a database).
-  List<Recipe> _currentFavorites = [
-    Recipe(
-      id: '1',
-      authorId: 'u1',
-      title: 'Grilled Salmon Teriyaki',
-      authorName: 'ChefMaria',
-      description: 'Tasty fish',
-      imageUrl: 'assets/images/salmon.png',
-      likesCount: 2400,
-      timeMinutes: 45,
-      ingredients: ['Salmon', 'Soy Sauce'],
-      steps: ['Cook it'],
-      isPublic: true,
-      createdAt: DateTime.now(),
-    ),
-    Recipe(
-      id: '3',
-      authorId: 'u3',
-      title: 'Dragon Roll Sushi',
-      authorName: 'SushiMaster',
-      description: 'Fresh sushi roll',
-      imageUrl: 'assets/images/sushi.png',
-      likesCount: 3100,
-      timeMinutes: 60,
-      ingredients: ['Rice', 'Fish'],
-      steps: ['Roll it'],
-      isPublic: true,
-      createdAt: DateTime.now(),
-    ),
-  ];
-
-  /// Handles the [LoadFavorites] event to fetch the list of favorite recipes.
-  Future<void> _onLoadFavorites(
-    LoadFavorites event,
-    Emitter<FavoritesState> emit,
-  ) async {
+  Future<void> _onLoadFavorites(LoadFavorites event, Emitter<FavoritesState> emit) async {
+    await _favoritesSubscription?.cancel();
     emit(FavoritesLoading());
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      emit(const FavoritesError("User not logged in"));
+      return;
+    }
+
+    _favoritesSubscription = _recipeRepo.getFavorites(user.uid).listen(
+      (recipes) => add(FavoritesUpdated(recipes)),
+      onError: (e) => print("Favorites Error: $e"),
+    );
+  }
+
+  void _onFavoritesUpdated(FavoritesUpdated event, Emitter<FavoritesState> emit) {
+    emit(FavoritesLoaded(event.recipes));
+  }
+
+  Future<void> _onToggleFavorite(ToggleFavorite event, Emitter<FavoritesState> emit) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    // ОПТИМІСТИЧНЕ ОНОВЛЕННЯ (Для миттєвої реакції UI)
+    // Ми не чекаємо сервера, щоб перефарбувати сердечко.
+    // Але оскільки FavoritesBloc керує списком, а не однією карткою, 
+    // тут ми просто викликаємо репозиторій. Стрім (getFavorites) сам оновить список, коли сервер підтвердить.
+    
     try {
-      // Simulate network delay.
-      await Future.delayed(const Duration(milliseconds: 800));
-      emit(FavoritesLoaded(List.from(_currentFavorites)));
+      await _recipeRepo.toggleFavorite(user.uid, event.recipe);
     } catch (e) {
-      emit(const FavoritesError("Failed to load favorites"));
+      print("Toggle error: $e");
+      // Тут можна показати помилку, якщо транзакція провалилася
     }
   }
 
-  /// Handles the [ToggleFavorite] event to add or remove a recipe from favorites.
-  Future<void> _onToggleFavorite(
-    ToggleFavorite event,
-    Emitter<FavoritesState> emit,
-  ) async {
-    if (state is FavoritesLoaded) {
-      final currentList = (state as FavoritesLoaded).recipes;
-      final exists = currentList.any((r) => r.id == event.recipe.id);
-
-      List<Recipe> newList;
-      if (exists) {
-        // Remove from favorites.
-        newList = currentList.where((r) => r.id != event.recipe.id).toList();
-      } else {
-        // Add to favorites.
-        newList = List.from(currentList)..add(event.recipe);
-      }
-
-      // Update local cache.
-      _currentFavorites = newList;
-
-      // Emit new state.
-      emit(FavoritesLoaded(newList));
-    }
+  @override
+  Future<void> close() {
+    _favoritesSubscription?.cancel();
+    return super.close();
   }
 }

@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 import 'package:equatable/equatable.dart';
 
-
 abstract class CreateRecipeEvent extends Equatable {
   const CreateRecipeEvent();
   @override
@@ -29,25 +28,27 @@ class SubmitRecipe extends CreateRecipeEvent {
 
   @override
   List<Object?> get props => [
-        title,
-        description,
-        ingredients,
-        instructions,
-        timeMinutes,
-        isPublic,
-        imageBytes,
-      ];
+    title,
+    description,
+    ingredients,
+    instructions,
+    timeMinutes,
+    isPublic,
+    imageBytes,
+  ];
 }
 
+// 👇 ОНОВЛЕНИЙ КЛАС UpdateRecipe 👇
 class UpdateRecipe extends CreateRecipeEvent {
   final String id;
   final String title;
   final String description;
   final String ingredients;
   final String instructions;
+  final int timeMinutes; // <--- ДОДАНО
   final bool isPublic;
-  final Uint8List? newImageBytes;
   final String? currentImageUrl;
+  final Uint8List? newImageBytes;
 
   const UpdateRecipe({
     required this.id,
@@ -55,20 +56,22 @@ class UpdateRecipe extends CreateRecipeEvent {
     required this.description,
     required this.ingredients,
     required this.instructions,
+    required this.timeMinutes, // <--- ДОДАНО
     required this.isPublic,
-    this.newImageBytes,
     this.currentImageUrl,
+    this.newImageBytes,
   });
 
   @override
   List<Object?> get props => [
-        id,
-        title,
-        description,
-        ingredients,
-        instructions,
-        isPublic,
-        newImageBytes,
-        currentImageUrl,
-      ];
+    id,
+    title,
+    description,
+    ingredients,
+    instructions,
+    timeMinutes,
+    isPublic,
+    currentImageUrl,
+    newImageBytes,
+  ];
 }

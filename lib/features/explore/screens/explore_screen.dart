@@ -9,6 +9,9 @@ import 'package:furtable/features/explore/bloc/explore_event.dart';
 import 'package:furtable/features/explore/bloc/explore_state.dart';
 import 'package:furtable/features/explore/screens/recipe_details_screen.dart';
 import 'package:furtable/features/explore/widgets/recipe_card.dart';
+import 'package:furtable/features/favorites/bloc/favorites_bloc.dart';
+import 'package:furtable/features/favorites/bloc/favorites_event.dart';
+import 'package:furtable/features/favorites/bloc/favorites_state.dart';
 import 'package:furtable/features/profile/screens/profile_screen.dart';
 
 /// The main screen for exploring recipes.
@@ -179,13 +182,27 @@ class _ExploreViewState extends State<ExploreView> {
                           ),
                         );
                       },
-                      child: RecipeCard(
-                        // Pass ID for Hero animation tag.
-                        id: recipe.id,
-                        imageUrl: recipe.imageUrl,
-                        title: recipe.title,
-                        author: recipe.authorName,
-                        likes: recipe.likes,
+                      child: BlocBuilder<FavoritesBloc, FavoritesState>(
+                        builder: (context, favState) {
+                          bool isFav = false;
+                          if (favState is FavoritesLoaded) {
+                            // Перевіряємо, чи є цей рецепт в списку улюблених
+                            isFav = favState.recipes.any((r) => r.id == recipe.id);
+                          }
+
+                          return RecipeCard(
+                            // Pass ID for Hero animation tag.
+                            id: recipe.id,
+                            imageUrl: recipe.imageUrl,
+                            title: recipe.title,
+                            author: recipe.authorName,
+                            likes: recipe.likes,
+                            isFavorite: isFav,
+                            onFavoriteToggle: () {
+                              context.read<FavoritesBloc>().add(ToggleFavorite(recipe));
+                            },
+                          );
+                        },
                       ),
                     );
                   },
