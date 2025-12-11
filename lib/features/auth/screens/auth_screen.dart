@@ -591,6 +591,7 @@ class _AuthScreenState extends State<AuthScreen> {
           isPassword: true,
           validator: (val) =>
               (val?.isEmpty ?? true) ? 'Please fill in this field' : null,
+          onSubmitted: _handleAuthentication,
         ),
         const SizedBox(height: 32),
         _buildAuthButton(
@@ -638,6 +639,7 @@ class _AuthScreenState extends State<AuthScreen> {
             }
             return null;
           },
+          onSubmitted: _handleAuthentication,
         ),
         const SizedBox(height: 32),
         _buildAuthButton(
@@ -655,11 +657,18 @@ class _AuthScreenState extends State<AuthScreen> {
     required String hintText,
     bool isPassword = false,
     String? Function(String?)? validator,
+    VoidCallback? onSubmitted,
   }) {
     return TextFormField(
       controller: controller,
       obscureText: isPassword && !_isPasswordVisible,
       validator: validator,
+      textInputAction: onSubmitted != null ? TextInputAction.done : TextInputAction.next,
+      onFieldSubmitted: (_) {
+        if (onSubmitted != null) {
+          onSubmitted();
+        }
+      },
       decoration: InputDecoration(
         hintText: hintText,
         errorStyle: const TextStyle(color: Color(0xFFDC2626), fontSize: 14),
