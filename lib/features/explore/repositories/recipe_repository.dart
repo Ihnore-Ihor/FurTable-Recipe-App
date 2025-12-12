@@ -73,19 +73,33 @@ class RecipeRepository {
     final recipeRef = _recipesRef.doc(recipe.id);
 
     return FirebaseFirestore.instance.runTransaction((transaction) async {
-      // 1. Check if user already liked this recipe
-      final snapshot = await transaction.get(userFavRef);
+      final userFavSnapshot = await transaction.get(userFavRef);
+      // 1. Read main recipe state
+      final recipeSnapshot = await transaction.get(recipeRef);
 
-      if (snapshot.exists) {
-        // --- IF LIKED -> REMOVE ---
+      if (userFavSnapshot.exists) {
+        // --- REMOVE FROM FAVORITES ---
+        
+        // Remove from personal list in any case
         transaction.delete(userFavRef);
-        transaction.update(recipeRef, {
-          'likesCount': FieldValue.increment(-1),
-        });
+
+        // Decrease counter ONLY IF recipe still exists
+        if (recipeSnapshot.exists) {
+          transaction.update(recipeRef, {
+            'likesCount': FieldValue.increment(-1),
+          });
+        }
       } else {
-        // --- IF NOT LIKED -> ADD ---
-        // Add +1 to local model before saving to favorites,
-        // so favorites immediately show the correct count.
+        // --- ADD TO FAVORITES ---
+        
+        // If main recipe doesn't exist, we can't like it
+        if (!recipeSnapshot.exists) {
+          throw FirebaseException(
+              plugin: 'cloud_firestore',
+              code: 'not-found',
+              message: 'Recipe no longer exists');
+        }
+
         final recipeToSave = Recipe(
           id: recipe.id,
           authorId: recipe.authorId,
@@ -94,7 +108,7 @@ class RecipeRepository {
           title: recipe.title,
           description: recipe.description,
           imageUrl: recipe.imageUrl,
-          likesCount: recipe.likesCount + 1, // +1 for profile display
+          likesCount: recipe.likesCount + 1,
           timeMinutes: recipe.timeMinutes,
           ingredients: recipe.ingredients,
           steps: recipe.steps,
