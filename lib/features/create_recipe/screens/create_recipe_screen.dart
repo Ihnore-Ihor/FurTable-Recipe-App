@@ -75,18 +75,27 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
   Future<void> _pickImage() async {
     try {
       final ImagePicker picker = ImagePicker();
-      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+      final XFile? image = await picker.pickImage(
+        source: ImageSource.gallery,
+        // --- COMPRESSION LOGIC ---
+        imageQuality: 70, // Compresses quality to 70% (imperceptible to the eye, but significantly reduces file size).
+        maxWidth: 1024,   // Resizes image if wider than 1024px (4K resolution is unnecessary for recipe thumbnails).
+      );
 
       if (image != null) {
         final bytes = await image.readAsBytes();
+        
+        // (Optional) Log file size to console.
+        // print("File size: ${(bytes.lengthInBytes / 1024).toStringAsFixed(2)} KB");
+
         setState(() {
           _selectedImageBytes = bytes;
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error picking image: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error picking image: $e')),
+      );
     }
   }
 
