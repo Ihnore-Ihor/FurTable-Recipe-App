@@ -10,6 +10,7 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/features/favorites/bloc/favorites_bloc.dart';
 import 'package:furtable/features/favorites/bloc/favorites_event.dart';
+import 'package:furtable/core/env/env.dart';
 
 /// The entry point of the application.
 ///
@@ -18,8 +19,7 @@ import 'package:furtable/features/favorites/bloc/favorites_event.dart';
 Future<void> main() async {
   await SentryFlutter.init(
     (options) {
-      options.dsn =
-          'https://f77e57d73056fface889a159b59b46c9@o4510320340172800.ingest.de.sentry.io/4510320357408848';
+      options.dsn = Env.sentryDsn;
       options.tracesSampleRate = 1.0;
     },
     appRunner: () async {
