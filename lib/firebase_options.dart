@@ -2,6 +2,7 @@
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
+import 'core/env/env.dart';
 
 /// Default [FirebaseOptions] for the current platform.
 ///
@@ -48,14 +49,14 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCInx-HkXQYzfpzY1A9e37zHtSdAdQUuoQ',
-    appId: '1:119425224593:web:edf5ca4ea2f5eb9fb35430',
-    messagingSenderId: '119425224593',
-    projectId: 'furtable',
-    authDomain: 'furtable.firebaseapp.com',
-    storageBucket: 'furtable.firebasestorage.app',
-    measurementId: 'G-ZPD8D1J3F8',
+  static final FirebaseOptions web = FirebaseOptions(
+    apiKey: Env.fbApiKey,
+    appId: Env.fbAppId,
+    messagingSenderId: Env.fbMessagingSenderId,
+    projectId: Env.fbProjectId,
+    authDomain: Env.fbAuthDomain,
+    storageBucket: Env.fbStorageBucket,
+    measurementId: Env.fbMeasurementId,
   );
 
   /// Firebase options for the Web platform.
