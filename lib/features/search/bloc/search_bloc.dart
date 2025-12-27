@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:furtable/core/services/local_storage_service.dart';
 import 'package:furtable/features/explore/repositories/recipe_repository.dart';
 import 'package:furtable/features/search/bloc/search_event.dart';
@@ -17,11 +18,14 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     on<SearchQuerySubmitted>(_onQuerySubmitted);
   }
 
+  // Helper to get current User UID
+  String get _currentUserId => FirebaseAuth.instance.currentUser?.uid ?? '';
+
   Future<void> _onLoadHistory(
     LoadSearchHistory event,
     Emitter<SearchState> emit,
   ) async {
-    final history = await _storage.getSearchHistory();
+    final history = await _storage.getSearchHistory(_currentUserId);
     if (history.isNotEmpty) {
       emit(SearchHistoryLoaded(history));
     } else {
@@ -33,7 +37,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     ClearSearchHistory event,
     Emitter<SearchState> emit,
   ) async {
-    await _storage.clearHistory();
+    await _storage.clearHistory(_currentUserId);
     emit(SearchInitial());
   }
 
@@ -52,7 +56,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     final query = event.query.trim(); // No toLowerCase here, the repository handles it.
     if (query.isEmpty) return;
 
-    await _storage.saveSearchQuery(query);
+    await _storage.saveSearchQuery(query, _currentUserId);
     emit(SearchLoading());
 
     try {
