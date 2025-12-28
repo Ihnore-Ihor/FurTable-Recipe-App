@@ -3,10 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/features/explore/repositories/recipe_repository.dart';
 import 'package:furtable/features/profile/bloc/profile_event.dart';
 import 'package:furtable/features/profile/bloc/profile_state.dart';
+import 'package:furtable/features/profile/repositories/user_repository.dart';
 
 /// Manages the state of the user profile, including updates and password changes.
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final RecipeRepository _recipeRepo = RecipeRepository();
+  final UserRepository _userRepo = UserRepository();
 
   /// Creates a [ProfileBloc] and registers event handlers.
   ProfileBloc() : super(ProfileInitial()) {
@@ -27,8 +29,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           } catch (_) {
              // Ignore reload error, as long as update succeeded.
           }
+          // 2. Update Collection Users (Source of Truth)
+          await _userRepo.saveUserProfile(user.uid, event.nickname, event.avatarPath);
 
-          // 2. Update all recipes authored by this user in the database.
+          // 3. Update all recipes authored by this user in the database.
           await _recipeRepo.updateAuthorDetails(
             user.uid, 
             event.nickname, 

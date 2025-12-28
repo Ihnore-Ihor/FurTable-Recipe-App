@@ -28,4 +28,16 @@ class StorageRepository {
       throw Exception('Firebase Storage upload failed: $e');
     }
   }
+
+  /// Deletes an image from Firebase Storage using its URL.
+  Future<void> deleteImage(String imageUrl) async {
+    try {
+      // Firebase can find the file ref from its full download URL
+      final ref = _storage.refFromURL(imageUrl);
+      await ref.delete();
+    } catch (e) {
+      // Ignore errors (e.g., file already deleted or broken URL) 
+      // to avoid blocking the main recipe deletion process.
+    }
+  }
 }

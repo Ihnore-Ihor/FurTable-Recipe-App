@@ -13,6 +13,7 @@ import 'package:furtable/features/my_recipes/bloc/my_recipes_state.dart';
 import 'package:furtable/features/favorites/bloc/favorites_bloc.dart';
 import 'package:furtable/features/favorites/bloc/favorites_event.dart';
 import 'package:furtable/features/favorites/bloc/favorites_state.dart';
+import 'package:furtable/features/profile/screens/profile_screen.dart';
 
 /// Screen displaying the recipes created by the current user.
 ///
@@ -49,6 +50,15 @@ class MyRecipesView extends StatelessWidget {
           ),
           automaticallyImplyLeading: false,
           actions: [
+            IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                );
+              },
+              icon: const Icon(Icons.person_outline, color: AppTheme.darkCharcoal),
+            ),
             IconButton(
               onPressed: () {
                 Navigator.push(

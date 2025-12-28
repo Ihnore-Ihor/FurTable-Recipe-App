@@ -178,8 +178,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   color: Colors.white, // IMPORTANT: White background under image
                   border: Border.all(color: AppTheme.darkCharcoal, width: 2),
                   image: DecorationImage(
-                    image: AssetImage(
-                        _user?.photoURL ?? AvatarHelper.defaultAvatar),
+                    image: AvatarHelper.getAvatarProvider(_user?.photoURL),
                     fit: BoxFit.cover,
                   ),
                 ),

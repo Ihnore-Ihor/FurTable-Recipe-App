@@ -122,7 +122,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                               : null,
                         ),
                         child: CircleAvatar(
-                          backgroundImage: AssetImage(path),
+                          backgroundImage: AvatarHelper.getAvatarProvider(path),
                         ),
                       ),
                     );
@@ -255,7 +255,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                                 child: CircleAvatar(
                                   radius: 50,
                                   backgroundColor: Colors.transparent,
-                                  backgroundImage: AssetImage(_selectedAvatarPath), // Show selected
+                                  backgroundImage: AvatarHelper.getAvatarProvider(_selectedAvatarPath), // Show selected
                                 ),
                               ),
                             ),

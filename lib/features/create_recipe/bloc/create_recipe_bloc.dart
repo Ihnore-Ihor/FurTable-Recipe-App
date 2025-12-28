@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/core/repositories/storage_repository.dart';
 import 'package:furtable/features/create_recipe/bloc/create_recipe_event.dart';
 import 'package:furtable/features/create_recipe/bloc/create_recipe_state.dart';
+import 'package:furtable/core/utils/avatar_helper.dart';
 import 'package:furtable/features/explore/models/recipe_model.dart';
 import 'package:furtable/features/explore/repositories/recipe_repository.dart';
 
@@ -24,8 +25,13 @@ class CreateRecipeBloc extends Bloc<CreateRecipeEvent, CreateRecipeState> {
   ) async {
     emit(CreateRecipeLoading());
     try {
-      final user = FirebaseAuth.instance.currentUser;
+      var user = FirebaseAuth.instance.currentUser;
       if (user == null) throw Exception("User not logged in");
+
+      // FORCE refresh to get latest profile updates (name/avatar)
+      await user.reload();
+      user = FirebaseAuth.instance.currentUser; // Get refreshed user
+      if (user == null) throw Exception("User session invalid");
 
       String imageUrl = '';
 
@@ -44,6 +50,7 @@ class CreateRecipeBloc extends Bloc<CreateRecipeEvent, CreateRecipeState> {
         id: '', // ID will be assigned by Firestore
         authorId: user.uid,
         authorName: user.displayName ?? 'Chef',
+        authorAvatarUrl: user.photoURL ?? AvatarHelper.defaultAvatar,
         title: event.title,
         description: event.description,
         imageUrl: imageUrl,
@@ -73,24 +80,34 @@ class CreateRecipeBloc extends Bloc<CreateRecipeEvent, CreateRecipeState> {
     try {
       String imageUrl = event.currentImageUrl ?? '';
 
+      // If user selected a NEW photo
       if (event.newImageBytes != null) {
-        imageUrl = await _storageRepo.uploadImageBytes(
-          event.newImageBytes!,
-          'recipe_images',
-        );
+
+         // 1. FIRST delete the OLD photo
+         // Check if it's a Firebase Storage link (not a placeholder or asset)
+         if (imageUrl.isNotEmpty && imageUrl.contains('firebasestorage')) {
+            try {
+              await _storageRepo.deleteImage(imageUrl);
+            } catch (e) {
+              // Continue even if old image deletion fails
+            }
+         }
+         
+         // 2. THEN upload the NEW photo
+         imageUrl = await _storageRepo.uploadImageBytes(event.newImageBytes!, 'recipe_images');
       }
 
       final user = FirebaseAuth.instance.currentUser;
-
+      
       final recipe = Recipe(
         id: event.id,
-        authorId: user?.uid ?? '',
+        authorId: user?.uid ?? '', 
         authorName: user?.displayName ?? 'Chef',
         title: event.title,
         description: event.description,
-        imageUrl: imageUrl,
-        likesCount: 0,
-        timeMinutes: event.timeMinutes, // Using the new field (previously 45)
+        imageUrl: imageUrl, // New or existing URL
+        likesCount: 0, // Resetting likes on edit (per requirements)
+        timeMinutes: event.timeMinutes,
         ingredients: event.ingredients.split('\n'),
         steps: event.instructions.split('\n'),
         isPublic: event.isPublic,
@@ -98,7 +115,7 @@ class CreateRecipeBloc extends Bloc<CreateRecipeEvent, CreateRecipeState> {
       );
 
       await _recipeRepo.updateRecipe(recipe);
-
+      
       emit(CreateRecipeSuccess());
     } catch (e) {
       emit(CreateRecipeFailure(e.toString()));

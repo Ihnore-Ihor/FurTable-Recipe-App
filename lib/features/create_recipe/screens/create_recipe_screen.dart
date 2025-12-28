@@ -101,10 +101,15 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
 
   String _formatDuration(int minutes) {
     final duration = Duration(minutes: minutes);
-    final h = duration.inHours;
-    final m = duration.inMinutes.remainder(60);
-    if (h > 0) return '${h}h ${m}m';
-    return '${m}m';
+    final d = duration.inDays;
+    final h = duration.inHours % 24;
+    final m = duration.inMinutes % 60;
+    
+    String result = '';
+    if (d > 0) result += '${d}d ';
+    if (h > 0) result += '${h}h ';
+    result += '${m}m';
+    return result;
   }
 
   void _submitForm() {
@@ -347,15 +352,58 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                                 ),
                               ),
                               Expanded(
-                                child: CupertinoTimerPicker(
-                                  mode: CupertinoTimerPickerMode.hm,
-                                  initialTimerDuration:
-                                      Duration(minutes: currentMinutes),
-                                  onTimerDurationChanged:
-                                      (Duration newDuration) {
-                                    // 4. Update temporary variable
-                                    tempDuration = newDuration;
-                                  },
+                                child: StatefulBuilder(
+                                  builder: (context, setState) {
+                                    return Row(
+                                      children: [
+                                        // Days
+                                        _buildPickerColumn(
+                                          title: 'Days',
+                                          count: 32, // 0..31
+                                          initialItem: tempDuration.inDays,
+                                          onChanged: (val) {
+                                            setState(() {
+                                              tempDuration = Duration(
+                                                days: val,
+                                                hours: tempDuration.inHours % 24,
+                                                minutes: tempDuration.inMinutes % 60,
+                                              );
+                                            });
+                                          },
+                                        ),
+                                        // Hours
+                                        _buildPickerColumn(
+                                          title: 'Hours',
+                                          count: 24,
+                                          initialItem: tempDuration.inHours % 24,
+                                          onChanged: (val) {
+                                            setState(() {
+                                              tempDuration = Duration(
+                                                days: tempDuration.inDays,
+                                                hours: val,
+                                                minutes: tempDuration.inMinutes % 60,
+                                              );
+                                            });
+                                          },
+                                        ),
+                                        // Minutes
+                                        _buildPickerColumn(
+                                          title: 'Mins',
+                                          count: 60,
+                                          initialItem: tempDuration.inMinutes % 60,
+                                          onChanged: (val) {
+                                            setState(() {
+                                              tempDuration = Duration(
+                                                days: tempDuration.inDays,
+                                                hours: tempDuration.inHours % 24,
+                                                minutes: val,
+                                              );
+                                            });
+                                          },
+                                        ),
+                                      ],
+                                    );
+                                  }
                                 ),
                               ),
                             ],
@@ -467,6 +515,34 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
         ),
+      ),
+    );
+  }
+
+  Widget _buildPickerColumn({
+    required String title,
+    required int count,
+    required int initialItem,
+    required ValueChanged<int> onChanged,
+  }) {
+    return Expanded(
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          Expanded(
+            child: CupertinoPicker(
+              scrollController: FixedExtentScrollController(initialItem: initialItem),
+              itemExtent: 32,
+              onSelectedItemChanged: onChanged,
+              children: List<Widget>.generate(count, (int index) {
+                return Center(child: Text(index.toString()));
+              }),
+            ),
+          ),
+        ],
       ),
     );
   }

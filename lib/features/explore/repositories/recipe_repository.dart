@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart'; // For debugPrint
 import 'package:furtable/features/explore/models/recipe_model.dart';
 
 /// Repository for handling recipe-related operations in Firestore.
@@ -40,9 +42,38 @@ class RecipeRepository {
     await _recipesRef.doc(recipe.id).update(recipe.toFirestore());
   }
 
-  /// Deletes a recipe.
+  /// Deletes a recipe and removes it from all users' favorites.
   Future<void> deleteRecipe(String recipeId) async {
-    await _recipesRef.doc(recipeId).delete();
+    final batch = FirebaseFirestore.instance.batch();
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) throw Exception("User not logged in");
+
+    try {
+      // 1. Delete favorites (Collection Group)
+      final favoritesGroup = FirebaseFirestore.instance.collectionGroup('favorites');
+      
+      // IMPORTANT: We add filter by authorId.
+      // This satisfies security rules effectively asking only for docs where WE are the author.
+      final snapshots = await favoritesGroup
+          .where('recipeId', isEqualTo: recipeId)
+          .where('authorId', isEqualTo: user.uid) // <--- ADDED THIS
+          .get();
+
+      for (var doc in snapshots.docs) {
+        batch.delete(doc.reference);
+      }
+    } catch (e) {
+      debugPrint("Warning: Could not cleanup favorites: $e");
+      // Don't rethrow, ensure we at least delete the recipe itself
+    }
+
+    // 2. Delete the recipe itself
+    final recipeRef = _recipesRef.doc(recipeId);
+    batch.delete(recipeRef);
+
+    // 3. Commit
+    await batch.commit();
   }
 
   /// Performs a search for recipes on the server.
@@ -62,7 +93,9 @@ class RecipeRepository {
     return snapshot.docs.map((doc) => Recipe.fromFirestore(doc)).toList();
   }
 
-  /// Toggles the favorite status of a recipe using a transaction.
+  /// Toggles the favorite status of a recipe within a transaction.
+  ///
+  /// Stores only the reference (ID and addedAt) in the user's subcollection.
   Future<void> toggleFavorite(String userId, Recipe recipe) async {
     final userFavRef = FirebaseFirestore.instance
         .collection('users')
@@ -74,13 +107,12 @@ class RecipeRepository {
 
     return FirebaseFirestore.instance.runTransaction((transaction) async {
       final userFavSnapshot = await transaction.get(userFavRef);
-      // 1. Read main recipe state
+      // 1. Read main recipe state (to check existence and update count)
       final recipeSnapshot = await transaction.get(recipeRef);
 
       if (userFavSnapshot.exists) {
         // --- REMOVE FROM FAVORITES ---
         
-        // Remove from personal list in any case
         transaction.delete(userFavRef);
 
         // Decrease counter ONLY IF recipe still exists
@@ -100,23 +132,13 @@ class RecipeRepository {
               message: 'Recipe no longer exists');
         }
 
-        final recipeToSave = Recipe(
-          id: recipe.id,
-          authorId: recipe.authorId,
-          authorName: recipe.authorName,
-          authorAvatarUrl: recipe.authorAvatarUrl, // Save avatar
-          title: recipe.title,
-          description: recipe.description,
-          imageUrl: recipe.imageUrl,
-          likesCount: recipe.likesCount + 1,
-          timeMinutes: recipe.timeMinutes,
-          ingredients: recipe.ingredients,
-          steps: recipe.steps,
-          isPublic: recipe.isPublic,
-          createdAt: recipe.createdAt,
-        );
+        // Save ONLY minimal data (ID and addedAt)
+        transaction.set(userFavRef, {
+          'addedAt': FieldValue.serverTimestamp(),
+          'recipeId': recipe.id,
+          'authorId': recipe.authorId, // Used for security rules (cascading delete)
+        });
 
-        transaction.set(userFavRef, recipeToSave.toFirestore());
         transaction.update(recipeRef, {
           'likesCount': FieldValue.increment(1),
         });
@@ -124,55 +146,71 @@ class RecipeRepository {
     });
   }
 
-  /// Batch updates author details in all their recipes.
-  Future<void> updateAuthorDetails(
-      String userId, String newName, String newAvatar) async {
-    // 2. Create a batch for atomic update
+  // --- CASCADING UPDATE: User Profile Changes ---
+  Future<void> updateAuthorDetails(String userId, String newName, String newAvatar) async {
+    // 1. Find all recipes by this author
+    final snapshot = await _recipesRef.where('authorId', isEqualTo: userId).get();
+    
+    if (snapshot.docs.isEmpty) return;
+
     final batch = FirebaseFirestore.instance.batch();
 
-    // A. Update in main 'recipes' collection
-    final mainSnapshot =
-        await _recipesRef.where('authorId', isEqualTo: userId).get();
+    for (var doc in snapshot.docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      final title = data['title'] as String;
 
-    for (var doc in mainSnapshot.docs) {
       batch.update(doc.reference, {
         'authorName': newName,
         'authorAvatarUrl': newAvatar,
-        // Update search keywords because name changed!
-        'searchKeywords': Recipe.generateKeywords(doc['title'], newName),
+        // Update keywords because the author name is part of the search index
+        'searchKeywords': _generateKeywordsForUpdate(title, newName),
       });
     }
 
-    // B. Update in 'users/{userId}/favorites' (User's favorites)
-    // This fixes bug where "Favorites" keeps old nickname/photo
-    final favSnapshot = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .collection('favorites')
-        .where('authorId', isEqualTo: userId) // Find only own recipes in favorites
-        .get();
-
-    for (var doc in favSnapshot.docs) {
-      batch.update(doc.reference, {
-        'authorName': newName,
-        'authorAvatarUrl': newAvatar,
-        // searchKeywords usually not needed in favorites, but can update
-      });
-    }
-
-    // 3. Commit changes
+    // 2. Commit all updates atomically
     await batch.commit();
   }
 
-  /// Gets the list of favorite recipes (Stream).
+  // Helper to generate keywords (duplicated from Model to avoid circular deps or static constraints)
+  List<String> _generateKeywordsForUpdate(String title, String author) {
+    Set<String> keywords = {};
+    final words = "$title $author".toLowerCase().split(' ');
+    for (var word in words) {
+      String temp = "";
+      for (int i = 0; i < word.length; i++) {
+        temp += word[i];
+        keywords.add(temp);
+      }
+    }
+    return keywords.toList();
+  }
+
+  /// Gets the list of favorite recipes by fetching full documents from references.
   Stream<List<Recipe>> getFavorites(String userId) {
     return FirebaseFirestore.instance
         .collection('users')
         .doc(userId)
         .collection('favorites')
+        .orderBy('addedAt', descending: true)
         .snapshots()
-        .map((snapshot) {
-      return snapshot.docs.map((doc) => Recipe.fromFirestore(doc)).toList();
-    });
+        .asyncMap((snapshot) async {
+          // 1. Get all IDs from the favorites collection
+          final ids = snapshot.docs.map((doc) => doc.id).toList();
+          
+          if (ids.isEmpty) return [];
+
+          // 2. Fetch recipes from the main collection using the IDs.
+          // Firestore 'whereIn' supports up to 30 items (FieldPath.documentId).
+          // For a production app, we would chunk this. For this lab, 30 is fine.
+          
+          // Note: 'whereIn' doesn't guarantee order, so we might need to sort client-side 
+          // if strict 'addedAt' order is required.
+          
+          final recipesQuery = await _recipesRef
+              .where(FieldPath.documentId, whereIn: ids)
+              .get();
+
+          return recipesQuery.docs.map((doc) => Recipe.fromFirestore(doc)).toList();
+        });
   }
 }

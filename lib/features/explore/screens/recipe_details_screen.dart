@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/core/app_theme.dart';
+import 'package:furtable/core/utils/avatar_helper.dart';
 import 'package:furtable/features/explore/models/recipe_model.dart';
 import 'package:furtable/features/favorites/bloc/favorites_bloc.dart';
 import 'package:furtable/features/favorites/bloc/favorites_event.dart';
@@ -126,11 +127,7 @@ class RecipeDetailsScreen extends StatelessWidget {
                         radius: 16, // Avatar size
                         backgroundColor: Colors.white,
                         // Use path from model or default
-                        backgroundImage: AssetImage(
-                          (recipe.authorAvatarUrl.isNotEmpty)
-                              ? recipe.authorAvatarUrl
-                              : 'assets/images/legoshi_eating_auth.png'
-                        ),
+                        backgroundImage: AvatarHelper.getAvatarProvider(recipe.authorAvatarUrl),
                       ),
                     ),
                     const SizedBox(width: 12),
