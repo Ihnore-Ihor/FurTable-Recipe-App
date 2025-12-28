@@ -40,6 +40,7 @@ class CreateRecipeBloc extends Bloc<CreateRecipeEvent, CreateRecipeState> {
         imageUrl = await _storageRepo.uploadImageBytes(
           event.imageBytes!,
           'recipe_images',
+          user.uid, // <--- Pass user ID
         );
       } else {
         imageUrl = 'https://placehold.co/600x400/png?text=No+Image';
@@ -78,6 +79,9 @@ class CreateRecipeBloc extends Bloc<CreateRecipeEvent, CreateRecipeState> {
   ) async {
     emit(CreateRecipeLoading());
     try {
+      final user = FirebaseAuth.instance.currentUser; // <--- MOVED UP to get uid
+      if (user == null) throw Exception("User not logged in");
+
       String imageUrl = event.currentImageUrl ?? '';
 
       // If user selected a NEW photo
@@ -94,15 +98,17 @@ class CreateRecipeBloc extends Bloc<CreateRecipeEvent, CreateRecipeState> {
          }
          
          // 2. THEN upload the NEW photo
-         imageUrl = await _storageRepo.uploadImageBytes(event.newImageBytes!, 'recipe_images');
+         imageUrl = await _storageRepo.uploadImageBytes(
+            event.newImageBytes!, 
+            'recipe_images',
+            user.uid, // <--- Pass user ID
+         );
       }
-
-      final user = FirebaseAuth.instance.currentUser;
       
       final recipe = Recipe(
         id: event.id,
-        authorId: user?.uid ?? '', 
-        authorName: user?.displayName ?? 'Chef',
+        authorId: user.uid, 
+        authorName: user.displayName ?? 'Chef',
         title: event.title,
         description: event.description,
         imageUrl: imageUrl, // New or existing URL

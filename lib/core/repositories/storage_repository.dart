@@ -11,16 +11,22 @@ class StorageRepository {
   ///
   /// [data] is the image content in bytes.
   /// [folder] is the storage path where the image should be saved.
+  /// [userId] is the ID of the file owner (for security rules).
   /// Throws an [Exception] if the upload fails.
-  Future<String> uploadImageBytes(Uint8List data, String folder) async {
+  Future<String> uploadImageBytes(Uint8List data, String folder, String userId) async {
     try {
-      final String fileName = '${_uuid.v4()}.jpg';
+      // 1. Change extension to .webp
+      final String fileName = '${_uuid.v4()}.webp'; 
       final Reference ref = _storage.ref().child('$folder/$fileName');
 
-      final UploadTask uploadTask = ref.putData(
-        data,
-        SettableMetadata(contentType: 'image/jpeg'),
+      final metadata = SettableMetadata(
+        contentType: 'image/webp', // <--- Tell browser it's WebP
+        customMetadata: {
+          'owner': userId,
+        },
       );
+
+      final UploadTask uploadTask = ref.putData(data, metadata);
 
       final TaskSnapshot snapshot = await uploadTask;
       return await snapshot.ref.getDownloadURL();

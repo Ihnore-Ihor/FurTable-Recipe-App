@@ -40,6 +40,22 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-analytics.js"></script>
 </head>
 <body>
+  <!-- 1. Include heic2any library -->
+  <script src="heic2any.min.js" type="application/javascript"></script>
+
+  <!-- 2. Helper function for Flutter (from heckofaheic docs) -->
+  <script>
+    function executeHeic2any(blob, multiple, toType, quality, gifInterval) {
+      return heic2any({
+        blob,
+        multiple: multiple,
+        toType: toType,
+        quality: quality,
+        gifInterval: gifInterval
+      });
+    }
+  </script>
+
   <script src="flutter_bootstrap.js" async></script>
 
   <script>

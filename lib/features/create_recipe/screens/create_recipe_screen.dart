@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/cupertino.dart'; // For CupertinoTimerPicker
 import 'package:furtable/core/app_theme.dart';
+import 'package:furtable/core/utils/image_helper.dart'; // <--- Add import
 import 'package:furtable/features/create_recipe/bloc/create_recipe_bloc.dart';
 import 'package:furtable/features/create_recipe/bloc/create_recipe_event.dart';
 import 'package:furtable/features/create_recipe/bloc/create_recipe_state.dart';
@@ -75,28 +76,52 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
   Future<void> _pickImage() async {
     try {
       final ImagePicker picker = ImagePicker();
-      final XFile? image = await picker.pickImage(
-        source: ImageSource.gallery,
-        // --- COMPRESSION LOGIC ---
-        imageQuality: 70, // Compresses quality to 70% (imperceptible to the eye, but significantly reduces file size).
-        maxWidth: 1024,   // Resizes image if wider than 1024px (4K resolution is unnecessary for recipe thumbnails).
-      );
+      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
       if (image != null) {
+        // 1. Quick extension check
+        final extension = image.name.split('.').last.toLowerCase();
+        if (['pdf', 'doc', 'docx', 'exe', 'zip'].contains(extension)) {
+           _showError('Invalid file format. Please select an image (JPG, PNG).');
+           return;
+        }
+
         final bytes = await image.readAsBytes();
-        
-        // (Optional) Log file size to console.
-        // print("File size: ${(bytes.lengthInBytes / 1024).toStringAsFixed(2)} KB");
+
+        // 2. Deep byte check (using our helper)
+        if (!ImageHelper.isImage(bytes)) {
+           _showError('The selected file is not a valid image.');
+           return;
+        }
+
+        // 3. Compression (to ~100 KB)
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Compressing image...'), 
+            duration: Duration(milliseconds: 500),
+            backgroundColor: AppTheme.darkCharcoal,
+          ),
+        );
+
+        final compressedBytes = await ImageHelper.compressImage(bytes);
+
+        // For debugging
+        print("Original size: ${(bytes.lengthInBytes / 1024).toStringAsFixed(2)} KB");
+        print("Compressed size: ${(compressedBytes.lengthInBytes / 1024).toStringAsFixed(2)} KB");
 
         setState(() {
-          _selectedImageBytes = bytes;
+          _selectedImageBytes = compressedBytes;
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error picking image: $e')),
-      );
+      _showError('Error picking image: $e');
     }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
+    );
   }
 
   String _formatDuration(int minutes) {
