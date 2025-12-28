@@ -7,6 +7,7 @@ import 'package:furtable/features/explore/models/recipe_model.dart';
 import 'package:furtable/features/favorites/bloc/favorites_bloc.dart';
 import 'package:furtable/features/favorites/bloc/favorites_event.dart';
 import 'package:furtable/features/favorites/bloc/favorites_state.dart';
+import 'package:furtable/core/widgets/app_image.dart';
 
 /// Screen displaying the detailed view of a recipe.
 class RecipeDetailsScreen extends StatelessWidget {
@@ -43,7 +44,9 @@ class RecipeDetailsScreen extends StatelessWidget {
                   color: AppTheme.darkCharcoal,
                 ),
                 onPressed: () {
-                  context.read<FavoritesBloc>().add(ToggleFavorite(initialRecipe));
+                  context.read<FavoritesBloc>().add(
+                    ToggleFavorite(initialRecipe),
+                  );
                 },
               );
             },
@@ -79,23 +82,12 @@ class RecipeDetailsScreen extends StatelessWidget {
                 // Image
                 Hero(
                   tag: 'recipe_image_${recipe.id}',
-                  child: ClipRRect(
+                  child: AppImage(
+                    imagePath: recipe.imageUrl,
+                    width: double.infinity,
+                    height: 250,
+                    fit: BoxFit.cover,
                     borderRadius: BorderRadius.circular(16),
-                    child: recipe.imageUrl.startsWith('http')
-                        ? Image.network(
-                            recipe.imageUrl,
-                            width: double.infinity,
-                            height: 250,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(height: 250, color: Colors.grey),
-                          )
-                        : Image.asset(
-                            recipe.imageUrl,
-                            width: double.infinity,
-                            height: 250,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(height: 250, color: Colors.grey),
-                          ),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -104,8 +96,11 @@ class RecipeDetailsScreen extends StatelessWidget {
                 Text(
                   recipe.title,
                   style: const TextStyle(
-                    fontFamily: 'Inter', fontSize: 28, fontWeight: FontWeight.w800,
-                    color: AppTheme.darkCharcoal, height: 1.2,
+                    fontFamily: 'Inter',
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    color: AppTheme.darkCharcoal,
+                    height: 1.2,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -120,25 +115,28 @@ class RecipeDetailsScreen extends StatelessWidget {
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: AppTheme.darkCharcoal,
-                          width: 1.5 // Slightly thicker border for style
+                          width: 1.5, // Slightly thicker border for style
                         ),
                       ),
                       child: CircleAvatar(
                         radius: 16, // Avatar size
                         backgroundColor: Colors.white,
                         // Use path from model or default
-                        backgroundImage: AvatarHelper.getAvatarProvider(recipe.authorAvatarUrl),
+                        backgroundImage: AvatarHelper.getAvatarProvider(
+                          recipe.authorAvatarUrl,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
-                    // ---------------------------
 
+                    // ---------------------------
                     Text(
                       'by ${recipe.authorName}',
                       style: const TextStyle(
                         fontFamily: 'Inter',
                         fontSize: 16,
-                        fontWeight: FontWeight.w600, // Slightly bolder for accent
+                        fontWeight:
+                            FontWeight.w600, // Slightly bolder for accent
                         color: AppTheme.darkCharcoal, // Dark color
                       ),
                     ),
@@ -147,19 +145,75 @@ class RecipeDetailsScreen extends StatelessWidget {
 
                 const SizedBox(height: 24),
                 // ... Rest of fields (Description, Ingredients, Steps) unchanged ...
-                const Text('Description', style: TextStyle(fontFamily: 'Inter', fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
+                const Text(
+                  'Description',
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.darkCharcoal,
+                  ),
+                ),
                 const SizedBox(height: 8),
-                Text(recipe.description.isNotEmpty ? recipe.description : 'No description.', style: const TextStyle(fontFamily: 'Inter', fontSize: 15, height: 1.5, color: AppTheme.mediumGray)),
+                Text(
+                  recipe.description.isNotEmpty
+                      ? recipe.description
+                      : 'No description.',
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 15,
+                    height: 1.5,
+                    color: AppTheme.mediumGray,
+                  ),
+                ),
 
                 const SizedBox(height: 24),
-                const Text('Ingredients', style: TextStyle(fontFamily: 'Inter', fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
+                const Text(
+                  'Ingredients',
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.darkCharcoal,
+                  ),
+                ),
                 const SizedBox(height: 12),
-                ...recipe.ingredients.map((i) => Padding(padding: const EdgeInsets.only(bottom: 8), child: Text("• $i", style: const TextStyle(fontSize: 15, color: AppTheme.darkCharcoal)))),
+                ...recipe.ingredients.map(
+                  (i) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Text(
+                      "• $i",
+                      style: const TextStyle(
+                        fontSize: 15,
+                        color: AppTheme.darkCharcoal,
+                      ),
+                    ),
+                  ),
+                ),
 
                 const SizedBox(height: 24),
-                const Text('Instructions', style: TextStyle(fontFamily: 'Inter', fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
+                const Text(
+                  'Instructions',
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.darkCharcoal,
+                  ),
+                ),
                 const SizedBox(height: 12),
-                ...recipe.steps.map((s) => Padding(padding: const EdgeInsets.only(bottom: 12), child: Text(s, style: const TextStyle(fontSize: 15, color: AppTheme.darkCharcoal)))),
+                ...recipe.steps.map(
+                  (s) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Text(
+                      s,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        color: AppTheme.darkCharcoal,
+                      ),
+                    ),
+                  ),
+                ),
 
                 const SizedBox(height: 40),
               ],

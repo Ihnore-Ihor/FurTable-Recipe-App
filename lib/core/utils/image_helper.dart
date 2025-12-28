@@ -3,13 +3,12 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:heckofaheic/heckofaheic.dart';
 
 class ImageHelper {
-  // Goal: 100 KB
-  static const int targetSize = 100 * 1024; 
+  static const int targetSize = 100 * 1024; // 100 KB
 
   static Future<Uint8List> compressImage(Uint8List sourceBytes) async {
     Uint8List bytesToCompress = sourceBytes;
 
-    // 1. HEIC Conversion (if needed)
+    // 1. HEIC -> JPEG
     if (HeckOfAHeic.isHEIC(sourceBytes)) {
       try {
         bytesToCompress = await HeckOfAHeic.convert(
@@ -21,13 +20,13 @@ class ImageHelper {
       }
     }
 
-    // 2. Smart compression
+    // 2. COMPRESS -> WEBP
     int quality = 90;
-    int minWidth = 1080; // Start with Full HD
+    int minWidth = 1080;
     
     Uint8List resultBytes = bytesToCompress;
 
-    // Initial attempt to convert to WebP to unify format
+    // Initial pass
     try {
       resultBytes = await FlutterImageCompress.compressWithList(
         bytesToCompress,
@@ -38,16 +37,13 @@ class ImageHelper {
       );
     } catch (_) {}
 
-    // Loop: While size > 100KB
+    // Reduction loop
     while (resultBytes.lengthInBytes > targetSize) {
-      // Strategy: First reduce quality. If quality is already low - cut size.
-      
       if (quality > 50) {
-        quality -= 15; // Quickly reduce quality
+        quality -= 15;
       } else {
-        // If quality is already 50%, and file is still big -> reduce image size
-        minWidth = (minWidth * 0.8).toInt(); // -20% size
-        if (minWidth < 300) break; // Don't go smaller than 300px (avatar)
+        minWidth = (minWidth * 0.8).toInt();
+        if (minWidth < 300) break;
       }
 
       try {
@@ -63,14 +59,14 @@ class ImageHelper {
           resultBytes = compressed;
         }
       } catch (e) {
-        print("Compression error: $e");
-        break; // Exit to avoid hanging
+        break;
       }
     }
 
     return resultBytes;
   }
 
+  // Helper method separate from compressImage
   static bool isImage(Uint8List bytes) {
     if (bytes.length < 4) return false;
     return true; 

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:furtable/core/app_theme.dart';
+import 'package:furtable/core/services/local_storage_service.dart'; // <--- Import
 import 'package:furtable/features/profile/screens/change_password_screen.dart';
 
 /// Screen for managing account settings, including notifications and deletion.
@@ -17,6 +19,65 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
   bool _recipeUpdates = false;
   bool _pushNotifications = true;
   bool _recipeLikes = false;
+
+  late bool _isCacheEnabled;
+  late bool _isAutoClearEnabled;
+
+  @override
+  void initState() {
+    super.initState();
+    final storage = LocalStorageService();
+    // Assuming defaults are handled in service getter or we set them here if null
+    _isCacheEnabled = storage.isCacheEnabled;
+    _isAutoClearEnabled = storage.isAutoClearEnabled;
+  }
+
+  Future<void> _clearCache() async {
+    try {
+      await DefaultCacheManager().emptyCache(); // Clears image cache
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Image cache cleared successfully'),
+            backgroundColor: AppTheme.darkCharcoal,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error clearing cache: $e')),
+        );
+      }
+    }
+  }
+
+  void _showClearCacheDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Clear Cache?', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: const Text('This will remove all downloaded images from your device. They will be re-downloaded when needed.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: AppTheme.mediumGray)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.darkCharcoal, foregroundColor: Colors.white),
+            onPressed: () {
+              Navigator.pop(ctx);
+              _clearCache();
+            },
+            child: const Text('Clear'),
+          ),
+        ],
+      ),
+    );
+  }
 
   void _showDeleteConfirmation() {
     showDialog(
@@ -211,6 +272,58 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                 ],
               ),
             ),
+
+            // --- 4. STORAGE & CACHE ---
+            const SizedBox(height: 16), // Added spacing
+            
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: _cardDecoration,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                   const Text('Storage & Cache', style: _sectionHeaderStyle),
+                   const SizedBox(height: 24),
+                   
+                   // Switch 1: Enable Cache
+                   _buildSwitchRow(
+                     'Enable Image Caching',
+                     'Save images locally for faster loading',
+                     _isCacheEnabled,
+                     (val) {
+                       setState(() => _isCacheEnabled = val);
+                       LocalStorageService().setCacheEnabled(val);
+                     },
+                   ),
+                   const SizedBox(height: 24),
+                   
+                   // Switch 2: Auto-clear
+                   _buildSwitchRow(
+                     'Auto-clear on Startup',
+                     'Clear cache every time app starts',
+                     _isAutoClearEnabled,
+                     (val) {
+                       setState(() => _isAutoClearEnabled = val);
+                       LocalStorageService().setAutoClearEnabled(val);
+                     },
+                   ),
+                   
+                   const SizedBox(height: 24),
+                   const Divider(),
+                   
+                   // Clear Button
+                   ListTile(
+                     contentPadding: EdgeInsets.zero,
+                     title: const Text('Clear Image Cache Now', 
+                         style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w600, color: AppTheme.darkCharcoal)),
+                     trailing: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                     onTap: _showClearCacheDialog,
+                   ),
+                ],
+              ),
+            ),
+            
+            const SizedBox(height: 32),
 
             // Account deletion button.
             const SizedBox(height: 32),

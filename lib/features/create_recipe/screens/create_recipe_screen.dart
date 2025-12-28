@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/cupertino.dart'; // For CupertinoTimerPicker
 import 'package:furtable/core/app_theme.dart';
+import 'package:furtable/core/widgets/app_image.dart'; // <--- Import
 import 'package:furtable/core/utils/image_helper.dart'; // <--- Add import
 import 'package:furtable/features/create_recipe/bloc/create_recipe_bloc.dart';
 import 'package:furtable/features/create_recipe/bloc/create_recipe_event.dart';
@@ -283,14 +284,11 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                           )
                         : (isEditing &&
                                 widget.recipeToEdit!.imageUrl.isNotEmpty)
-                        ? ClipRRect(
+                        ? AppImage(
+                            imagePath: widget.recipeToEdit!.imageUrl,
+                            width: double.infinity,
+                            height: 200,
                             borderRadius: BorderRadius.circular(12),
-                            child: Image.network(
-                              widget.recipeToEdit!.imageUrl,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) =>
-                                  const Icon(Icons.image),
-                            ),
                           )
                         : const Column(
                             mainAxisAlignment: MainAxisAlignment.center,

@@ -52,6 +52,8 @@ dependencies:
   envied: ^1.3.2
   flutter_image_compress: ^2.4.0
   heckofaheic: ^0.0.7
+  cached_network_image: ^3.4.1
+  flutter_cache_manager: ^3.4.1
 
 dev_dependencies:
   flutter_test:

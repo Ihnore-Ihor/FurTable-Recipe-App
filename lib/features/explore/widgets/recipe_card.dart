@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:furtable/core/app_theme.dart';
+import 'package:furtable/core/widgets/app_image.dart';
 
 /// A card widget displaying a brief summary of a recipe.
 class RecipeCard extends StatefulWidget {
@@ -41,30 +42,12 @@ class _RecipeCardState extends State<RecipeCard> {
               borderRadius: BorderRadius.circular(10),
               child: Hero(
                 tag: 'recipe_image_${widget.id}',
-                child: widget.imageUrl.startsWith('http')
-                    ? Image.network(
-                        widget.imageUrl,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: cardWidth,
-                        errorBuilder: (context, error, stackTrace) => Container(
-                          width: double.infinity,
-                          height: cardWidth,
-                          color: Colors.grey[200],
-                          child: const Icon(Icons.broken_image, color: Colors.grey),
-                        ),
-                      )
-                    : Image.asset(
-                        widget.imageUrl,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: cardWidth,
-                        errorBuilder: (context, error, stackTrace) => Container(
-                           width: double.infinity,
-                           height: cardWidth,
-                           color: Colors.grey[200],
-                        ),
-                      ),
+                child: AppImage(
+                  imagePath: widget.imageUrl,
+                  width: double.infinity,
+                  height: cardWidth,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
             Positioned(
@@ -73,7 +56,10 @@ class _RecipeCardState extends State<RecipeCard> {
               child: GestureDetector(
                 onTap: widget.onFavoriteToggle,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(50),
@@ -89,12 +75,17 @@ class _RecipeCardState extends State<RecipeCard> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        widget.isFavorite ? Icons.favorite : Icons.favorite_border,
+                        widget.isFavorite
+                            ? Icons.favorite
+                            : Icons.favorite_border,
                         color: AppTheme.darkCharcoal, // Dark color for both
                         size: 14,
                       ),
                       const SizedBox(width: 4),
-                      Text(widget.likes, style: Theme.of(context).textTheme.labelSmall),
+                      Text(
+                        widget.likes,
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
                     ],
                   ),
                 ),
@@ -111,10 +102,7 @@ class _RecipeCardState extends State<RecipeCard> {
         ),
         const SizedBox(height: 4),
         // Just author text, no avatar
-        Text(
-          widget.author,
-          style: Theme.of(context).textTheme.bodyMedium
-        ),
+        Text(widget.author, style: Theme.of(context).textTheme.bodyMedium),
       ],
     );
   }
