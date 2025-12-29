@@ -13,6 +13,7 @@ import 'package:furtable/features/favorites/bloc/favorites_bloc.dart';
 import 'package:furtable/features/favorites/bloc/favorites_event.dart';
 import 'package:furtable/features/favorites/bloc/favorites_state.dart';
 import 'package:furtable/features/profile/screens/profile_screen.dart';
+import 'package:furtable/l10n/app_localizations.dart';
 
 /// The main screen for exploring recipes.
 ///
@@ -120,9 +121,9 @@ class _ExploreViewState extends State<ExploreView> {
     return Scaffold(
       backgroundColor: AppTheme.offWhite,
       appBar: AppBar(
-        title: const Padding(
-          padding: EdgeInsets.only(left: 8.0),
-          child: Text('Explore'),
+        title: Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: Text(AppLocalizations.of(context)!.explore),
         ),
         automaticallyImplyLeading: false,
         actions: [
@@ -220,13 +221,13 @@ class _ExploreViewState extends State<ExploreView> {
                                 color: AppTheme.mediumGray.withOpacity(0.5),
                               ),
                               const SizedBox(height: 8),
-                              Text(
-                                "You've reached the end",
-                                style: TextStyle(
-                                  color: AppTheme.mediumGray.withOpacity(0.5),
-                                  fontFamily: 'Inter',
+                                Text(
+                                  AppLocalizations.of(context)!.reachedEnd,
+                                  style: TextStyle(
+                                    color: AppTheme.mediumGray.withOpacity(0.5),
+                                    fontFamily: 'Inter',
+                                  ),
                                 ),
-                              ),
                             ],
                           )
                         : const CircularProgressIndicator(
@@ -260,23 +261,26 @@ class _ExploreViewState extends State<ExploreView> {
         currentIndex: 0,
         onTap: (index) => NavigationHelper.onItemTapped(context, index, 0),
 
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.explore_outlined),
-            activeIcon: Icon(Icons.explore),
-            label: 'Explore',
+            icon: const Icon(Icons.explore_outlined),
+            activeIcon: const Icon(Icons.explore),
+            label: AppLocalizations.of(context)!.explore,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.book_outlined),
-            activeIcon: Icon(Icons.book),
-            label: 'My Recipes',
+            icon: const Icon(Icons.book_outlined),
+            activeIcon: const Icon(Icons.book),
+            label: AppLocalizations.of(context)!.myRecipes,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.favorite_border),
-            activeIcon: Icon(Icons.favorite),
-            label: 'Favorites',
+            icon: const Icon(Icons.favorite_border),
+            activeIcon: const Icon(Icons.favorite),
+            label: AppLocalizations.of(context)!.favorites,
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.search), 
+            label: AppLocalizations.of(context)!.search,
+          ),
         ],
       ),
     );

@@ -4,6 +4,7 @@ import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/features/profile/bloc/profile_bloc.dart';
 import 'package:furtable/features/profile/bloc/profile_event.dart';
 import 'package:furtable/features/profile/bloc/profile_state.dart';
+import 'package:furtable/l10n/app_localizations.dart';
 
 /// Screen for changing the user's password.
 class ChangePasswordScreen extends StatelessWidget {
@@ -95,8 +96,8 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
       listener: (context, state) {
         if (state is ProfileSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Password updated!'),
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.passwordUpdated),
               backgroundColor: AppTheme.darkCharcoal,
             ),
           );
@@ -113,7 +114,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
       child: Scaffold(
         backgroundColor: AppTheme.offWhite,
         appBar: AppBar(
-          title: const Text('Change Password'),
+          title: Text(AppLocalizations.of(context)!.changePassword),
           centerTitle: true,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios_new, size: 20),
@@ -151,8 +152,8 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                               strokeWidth: 2,
                             ),
                           )
-                        : const Text(
-                            'Update',
+                        : Text(
+                            AppLocalizations.of(context)!.update,
                             style: TextStyle(fontWeight: FontWeight.w600),
                           ),
                   );
@@ -170,55 +171,55 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildLabel('Current Password'),
+                _buildLabel(AppLocalizations.of(context)!.currentPassword),
                 _buildPasswordField(
                   controller: _currentController,
                   obscure: _obscureCurrent,
                   onToggle: () =>
                       setState(() => _obscureCurrent = !_obscureCurrent),
-                  hint: 'Enter your current password',
+                  hint: AppLocalizations.of(context)!.enterCurrentPassword,
                 ),
                 const SizedBox(height: 24),
 
-                _buildLabel('New Password'),
+                _buildLabel(AppLocalizations.of(context)!.newPassword),
                 _buildPasswordField(
                   controller: _newController,
                   obscure: _obscureNew,
                   onToggle: () => setState(() => _obscureNew = !_obscureNew),
-                  hint: 'Enter your new password',
+                  hint: AppLocalizations.of(context)!.enterNewPassword,
                   // Validation errors for red text.
                   validator: (val) {
                     if (val != null && val.isNotEmpty) {
                       if (val.length < 8) {
-                        return 'Minimum 8 characters required';
+                        return AppLocalizations.of(context)!.minPassword;
                       }
                       if (!val.contains(RegExp(r'[0-9]'))) {
-                        return 'Must contain at least one number';
+                        return AppLocalizations.of(context)!.mustContainNumber;
                       }
                     }
                     return null;
                   },
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Minimum 8 characters, including one number',
+                Text(
+                  AppLocalizations.of(context)!.passwordRequirement,
                   style: TextStyle(color: AppTheme.mediumGray, fontSize: 12),
                 ),
 
                 const SizedBox(height: 24),
 
-                _buildLabel('Confirm New Password'),
+                _buildLabel(AppLocalizations.of(context)!.confirmNewPassword),
                 _buildPasswordField(
                   controller: _confirmController,
                   obscure: _obscureConfirm,
                   onToggle: () =>
                       setState(() => _obscureConfirm = !_obscureConfirm),
-                  hint: 'Confirm your new password',
+                  hint: AppLocalizations.of(context)!.confirmYourPassword,
                   validator: (val) {
                     if (val != null &&
                         val.isNotEmpty &&
                         val != _newController.text) {
-                      return 'Passwords do not match';
+                      return AppLocalizations.of(context)!.passwordsDoNotMatch;
                     }
                     return null;
                   },

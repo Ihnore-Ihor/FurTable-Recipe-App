@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/features/feedback/bloc/feedback_bloc.dart';
+import 'package:furtable/l10n/app_localizations.dart';
 
 /// Screen for users to submit feedback.
 class FeedbackScreen extends StatelessWidget {
@@ -53,8 +54,8 @@ class _FeedbackViewState extends State<FeedbackView> {
       listener: (context, state) {
         if (state is FeedbackSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Thank you for your feedback!'),
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.feedbackThanks),
               backgroundColor: AppTheme.darkCharcoal,
             ),
           );
@@ -62,7 +63,7 @@ class _FeedbackViewState extends State<FeedbackView> {
         } else if (state is FeedbackFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(state.error),
+              content: Text(AppLocalizations.of(context)!.feedbackError(state.error)),
               backgroundColor: Colors.redAccent,
             ),
           );
@@ -71,7 +72,7 @@ class _FeedbackViewState extends State<FeedbackView> {
       child: Scaffold(
         backgroundColor: AppTheme.offWhite,
         appBar: AppBar(
-          title: const Text('Send Feedback'),
+          title: Text(AppLocalizations.of(context)!.sendFeedback),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios_new, size: 20),
             onPressed: () => Navigator.pop(context),
@@ -82,8 +83,8 @@ class _FeedbackViewState extends State<FeedbackView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Tell us about your experience...',
+              Text(
+                AppLocalizations.of(context)!.tellUsExperience,
                 style: TextStyle(
                   fontFamily: 'Inter',
                   fontWeight: FontWeight.w700,
@@ -105,9 +106,9 @@ class _FeedbackViewState extends State<FeedbackView> {
                     maxLines: null,
                     maxLength: 1000,
                     style: const TextStyle(color: AppTheme.darkCharcoal),
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText:
-                          'Share your thoughts, suggestions, or report any issues...',
+                          AppLocalizations.of(context)!.feedbackHint,
                       hintStyle: TextStyle(color: AppTheme.mediumGray),
                       contentPadding: EdgeInsets.all(16),
                       border: InputBorder.none,
@@ -125,7 +126,7 @@ class _FeedbackViewState extends State<FeedbackView> {
 
               const SizedBox(height: 24),
               Text(
-                'Your email address ($email) will be included with this feedback.',
+                AppLocalizations.of(context)!.emailIncluded(email),
                 style: const TextStyle(
                   color: AppTheme.mediumGray,
                   fontSize: 13,
@@ -161,8 +162,8 @@ class _FeedbackViewState extends State<FeedbackView> {
                                 strokeWidth: 2,
                               ),
                             )
-                          : const Text(
-                              'Send Feedback',
+                          : Text(
+                              AppLocalizations.of(context)!.sendFeedback,
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,

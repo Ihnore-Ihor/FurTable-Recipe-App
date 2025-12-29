@@ -5,7 +5,8 @@ import 'package:flutter/cupertino.dart'; // For CupertinoTimerPicker
 import 'package:flutter/services.dart'; // For TextInputFormatter
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/core/widgets/app_image.dart'; // <--- Import
-import 'package:furtable/core/utils/image_helper.dart'; // <--- Add import
+import 'package:furtable/core/utils/image_helper.dart';
+import 'package:furtable/l10n/app_localizations.dart';
 import 'package:furtable/features/create_recipe/bloc/create_recipe_bloc.dart';
 import 'package:furtable/features/create_recipe/bloc/create_recipe_event.dart';
 import 'package:furtable/features/create_recipe/bloc/create_recipe_state.dart';
@@ -96,10 +97,11 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
         }
 
         // 3. Compression (to ~100 KB)
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Compressing image...'),
-            duration: Duration(milliseconds: 500),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.compressingImage),
+            duration: const Duration(milliseconds: 500),
             backgroundColor: AppTheme.darkCharcoal,
           ),
         );
@@ -107,12 +109,8 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
         final compressedBytes = await ImageHelper.compressImage(bytes);
 
         // For debugging
-        print(
-          "Original size: ${(bytes.lengthInBytes / 1024).toStringAsFixed(2)} KB",
-        );
-        print(
-          "Compressed size: ${(compressedBytes.lengthInBytes / 1024).toStringAsFixed(2)} KB",
-        );
+        // print("Original size...");
+        // print("Compressed size...");
 
         setState(() {
           _selectedImageBytes = compressedBytes;
@@ -136,9 +134,9 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
     final m = duration.inMinutes % 60;
 
     String result = '';
-    if (d > 0) result += '${d}d ';
-    if (h > 0) result += '${h}h ';
-    result += '${m}m';
+    if (d > 0) result += '$d${AppLocalizations.of(context)!.days} ';
+    if (h > 0) result += '$h${AppLocalizations.of(context)!.hours} ';
+    result += '$m${AppLocalizations.of(context)!.mins}';
     return result;
   }
 
@@ -196,7 +194,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
         if (state is CreateRecipeSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(isEditing ? 'Recipe updated!' : 'Success!'),
+              content: Text(isEditing ? AppLocalizations.of(context)!.recipeUpdated : AppLocalizations.of(context)!.recipeCreated),
               backgroundColor: AppTheme.darkCharcoal,
             ),
           );
@@ -210,7 +208,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
       child: Scaffold(
         backgroundColor: AppTheme.offWhite,
         appBar: AppBar(
-          title: Text(isEditing ? 'Edit Recipe' : 'Create Recipe'),
+          title: Text(isEditing ? AppLocalizations.of(context)!.editRecipe : AppLocalizations.of(context)!.createRecipe),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios_new, size: 20),
             onPressed: () => Navigator.pop(context),
@@ -240,9 +238,9 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                               strokeWidth: 2,
                             ),
                           )
-                        : const Text(
-                            'Save',
-                            style: TextStyle(fontWeight: FontWeight.w600),
+                        : Text(
+                            AppLocalizations.of(context)!.save,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
                   );
                 },
@@ -258,9 +256,9 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Recipe Image',
-                  style: TextStyle(
+                Text(
+                  AppLocalizations.of(context)!.recipeImage,
+                  style: const TextStyle(
                     fontFamily: 'Inter',
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
@@ -294,7 +292,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                             height: 200,
                             borderRadius: BorderRadius.circular(12),
                           )
-                        : const Column(
+                        : Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
@@ -304,8 +302,8 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                               ),
                               SizedBox(height: 8),
                               Text(
-                                'Tap to add photo',
-                                style: TextStyle(
+                                AppLocalizations.of(context)!.tapToAddPhoto,
+                                style: const TextStyle(
                                   fontFamily: 'Inter',
                                   color: AppTheme.mediumGray,
                                   fontSize: 14,
@@ -317,23 +315,23 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                 ),
 
                 const SizedBox(height: 24),
-                _buildLabel('Recipe Title *'),
+                _buildLabel('${AppLocalizations.of(context)!.recipeTitle} *'),
                 _buildTextFormField(
                   controller: _titleController,
-                  hintText: 'Enter title...',
-                  validator: (v) => v!.isEmpty ? 'Required' : null,
+                  hintText: AppLocalizations.of(context)!.enterTitle,
+                  validator: (v) => v!.isEmpty ? AppLocalizations.of(context)!.requiredField : null,
                 ),
 
                 const SizedBox(height: 24),
-                _buildLabel('Description'),
+                _buildLabel(AppLocalizations.of(context)!.description),
                 _buildTextFormField(
                   controller: _descriptionController,
-                  hintText: 'Describe it...',
+                  hintText: AppLocalizations.of(context)!.describeRecipe,
                   maxLines: 3,
                 ),
 
                 const SizedBox(height: 24),
-                _buildLabel('Cooking Time *'),
+                _buildLabel('${AppLocalizations.of(context)!.cookTime} *'),
                 GestureDetector(
                   onTap: () {
                     // 1. Initial value (or 30 if empty)
@@ -370,9 +368,9 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                                         });
                                         Navigator.pop(context);
                                       },
-                                      child: const Text(
-                                        'Done',
-                                        style: TextStyle(
+                                      child: Text(
+                                        AppLocalizations.of(context)!.done,
+                                        style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                           color: AppTheme.darkCharcoal,
                                         ),
@@ -388,7 +386,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                                       children: [
                                         // Days
                                         _buildPickerColumn(
-                                          title: 'Days',
+                                          title: AppLocalizations.of(context)!.days,
                                           count: 32, // 0..31
                                           initialItem: tempDuration.inDays,
                                           onChanged: (val) {
@@ -405,7 +403,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                                         ),
                                         // Hours
                                         _buildPickerColumn(
-                                          title: 'Hours',
+                                          title: AppLocalizations.of(context)!.hours,
                                           count: 24,
                                           initialItem:
                                               tempDuration.inHours % 24,
@@ -422,7 +420,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                                         ),
                                         // Minutes
                                         _buildPickerColumn(
-                                          title: 'Mins',
+                                          title: AppLocalizations.of(context)!.mins,
                                           count: 60,
                                           initialItem:
                                               tempDuration.inMinutes % 60,
@@ -459,7 +457,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                       children: [
                         Text(
                           _timeController.text.isEmpty
-                              ? 'Select time'
+                              ? AppLocalizations.of(context)!.selectTime
                               : _formatDuration(
                                   int.tryParse(_timeController.text) ?? 0,
                                 ),
@@ -474,32 +472,30 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                 ),
 
                 const SizedBox(height: 24),
-                _buildLabel('Ingredients *'),
+                _buildLabel('${AppLocalizations.of(context)!.ingredients} *'),
                 _buildTextFormField(
                   controller: _ingredientsController,
-                  hintText:
-                      'Example:\n2 Eggs\n200g Flour\n1 cup Milk\n(Each on a new line)',
+                  hintText: AppLocalizations.of(context)!.enterIngredientHint,
                   maxLines: 6,
-                  validator: (v) => v!.isEmpty ? 'Required' : null,
+                  validator: (v) => v!.isEmpty ? AppLocalizations.of(context)!.requiredField : null,
                 ),
 
                 const SizedBox(height: 24),
-                _buildLabel('Instructions *'),
+                _buildLabel('${AppLocalizations.of(context)!.instructions} *'),
                 _buildTextFormField(
                   controller: _instructionsController,
-                  hintText:
-                      'Example:\nMix eggs and flour.\nAdd milk gradually.\nBake at 180C.\n(Each step on a new line)',
+                  hintText: AppLocalizations.of(context)!.enterInstructionHint,
                   maxLines: 8,
-                  validator: (v) => v!.isEmpty ? 'Required' : null,
+                  validator: (v) => v!.isEmpty ? AppLocalizations.of(context)!.requiredField : null,
                 ),
 
                 const SizedBox(height: 24),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'Make Public',
-                      style: TextStyle(
+                    Text(
+                      AppLocalizations.of(context)!.makePublic,
+                      style: const TextStyle(
                         fontFamily: 'Inter',
                         fontWeight: FontWeight.bold,
                         fontSize: 16,

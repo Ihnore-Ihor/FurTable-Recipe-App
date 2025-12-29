@@ -74,7 +74,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       }
     } catch (e) {
       // Handle network errors.
-      print("Search Error: $e");
+      // Search Error: $e
       emit(SearchEmpty());
     }
   }

@@ -8,6 +8,7 @@ import 'package:furtable/features/explore/models/recipe_model.dart';
 import 'package:furtable/features/favorites/bloc/favorites_bloc.dart';
 import 'package:furtable/features/favorites/bloc/favorites_event.dart';
 import 'package:furtable/features/favorites/bloc/favorites_state.dart';
+import 'package:furtable/l10n/app_localizations.dart';
 
 /// Screen displaying the detailed view of a recipe with interactive checklists.
 class RecipeDetailsScreen extends StatefulWidget {
@@ -114,7 +115,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      'by ${recipe.authorName}',
+                      AppLocalizations.of(context)!.byAuthor(recipe.authorName),
                       style: const TextStyle(
                         fontFamily: 'Inter', fontSize: 16, fontWeight: FontWeight.w600,
                         color: AppTheme.darkCharcoal,
@@ -124,17 +125,17 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                 ),
 
                 const SizedBox(height: 24),
-                const Text('Description', style: TextStyle(fontFamily: 'Inter', fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
+                Text(AppLocalizations.of(context)!.description, style: const TextStyle(fontFamily: 'Inter', fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
                 const SizedBox(height: 8),
-                Text(recipe.description.isNotEmpty ? recipe.description : 'No description provided.', style: const TextStyle(fontFamily: 'Inter', fontSize: 15, height: 1.5, color: AppTheme.mediumGray)),
+                Text(recipe.description.isNotEmpty ? recipe.description : AppLocalizations.of(context)!.noDescription, style: const TextStyle(fontFamily: 'Inter', fontSize: 15, height: 1.5, color: AppTheme.mediumGray)),
                 
                 const SizedBox(height: 24),
                 
                 // --- INGREDIENTS WITH CHECKBOXES ---
-                const Text('Ingredients', style: TextStyle(fontFamily: 'Inter', fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
+                Text(AppLocalizations.of(context)!.ingredients, style: const TextStyle(fontFamily: 'Inter', fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
                 const SizedBox(height: 12),
                 if (recipe.ingredients.isEmpty)
-                  const Text('No ingredients listed.', style: TextStyle(color: AppTheme.mediumGray)),
+                  Text(AppLocalizations.of(context)!.noIngredients, style: const TextStyle(color: AppTheme.mediumGray)),
                 
                 ...recipe.ingredients.map((ingredient) {
                   final isDone = _completedIngredients.contains(ingredient);
@@ -181,10 +182,10 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                 const SizedBox(height: 24),
 
                 // --- INSTRUCTIONS WITH CHECKBOXES ---
-                const Text('Instructions', style: TextStyle(fontFamily: 'Inter', fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
+                Text(AppLocalizations.of(context)!.instructions, style: const TextStyle(fontFamily: 'Inter', fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
                 const SizedBox(height: 16),
                 if (recipe.steps.isEmpty)
-                  const Text('No instructions listed.', style: TextStyle(color: AppTheme.mediumGray)),
+                  Text(AppLocalizations.of(context)!.noInstructions, style: const TextStyle(color: AppTheme.mediumGray)),
 
                 ...recipe.steps.asMap().entries.map((entry) {
                   int idx = entry.key;
@@ -216,7 +217,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Step ${idx + 1}',
+                                    AppLocalizations.of(context)!.step(idx + 1),
                                     style: const TextStyle(
                                       fontFamily: 'Inter',
                                       fontSize: 12,

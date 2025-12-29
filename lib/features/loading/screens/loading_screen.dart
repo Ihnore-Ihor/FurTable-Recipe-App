@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:furtable/core/app_theme.dart';
+import 'package:furtable/l10n/app_localizations.dart';
 
 /// A simple loading screen displaying a spinner and an image.
 class LoadingScreen extends StatelessWidget {
@@ -15,8 +16,8 @@ class LoadingScreen extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
 
           children: [
-            const Text(
-              'In progress...',
+            Text(
+              AppLocalizations.of(context)!.inProgress,
               style: TextStyle(
                 fontFamily: 'Inter',
                 fontSize: 18,

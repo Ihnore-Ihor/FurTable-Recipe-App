@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/core/utils/avatar_helper.dart'; // Import Helper
+import 'package:furtable/l10n/app_localizations.dart';
 import 'package:furtable/features/explore/screens/explore_screen.dart';
 import 'package:furtable/features/profile/repositories/user_repository.dart';
 
@@ -37,7 +38,6 @@ class _AuthScreenState extends State<AuthScreen> {
   @override
   void initState() {
     super.initState();
-    print("ANALYTICS: Logging AuthScreen view...");
     _analytics.logScreenView(screenName: 'AuthScreen');
   }
 
@@ -125,7 +125,7 @@ class _AuthScreenState extends State<AuthScreen> {
       }
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') {
-        _showAccountExistsDialog(context);
+        if (mounted) _showAccountExistsDialog(context);
       } else {
         String message = 'An error occurred. Please check your credentials.';
         if (e.code == 'weak-password') {
@@ -169,17 +169,17 @@ class _AuthScreenState extends State<AuthScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
           ),
-          title: const Text(
-            'Account Exists',
-            style: TextStyle(
+          title: Text(
+            AppLocalizations.of(context)!.error,
+            style: const TextStyle(
               fontFamily: 'Inter',
               fontWeight: FontWeight.w700,
               color: AppTheme.darkCharcoal,
             ),
           ),
-          content: const Text(
-            'It looks like you already have an account associated with this email.\nDid you sign in with Google before?',
-            style: TextStyle(
+          content: Text(
+            AppLocalizations.of(context)!.emailNotVerified,
+            style: const TextStyle(
               fontFamily: 'Inter',
               color: AppTheme.mediumGray,
               fontSize: 16,
@@ -188,9 +188,9 @@ class _AuthScreenState extends State<AuthScreen> {
           actionsPadding: const EdgeInsets.all(24),
           actions: [
             TextButton(
-              child: const Text(
-                'Cancel',
-                style: TextStyle(
+              child: Text(
+                AppLocalizations.of(context)!.cancel,
+                style: const TextStyle(
                   fontFamily: 'Inter',
                   color: AppTheme.mediumGray,
                   fontWeight: FontWeight.w500,
@@ -213,9 +213,9 @@ class _AuthScreenState extends State<AuthScreen> {
                   vertical: 12,
                 ),
               ),
-              child: const Text(
-                'Sign In with Google',
-                style: TextStyle(
+              child: Text(
+                AppLocalizations.of(context)!.continueWithGoogle,
+                style: const TextStyle(
                   fontFamily: 'Inter',
                   fontWeight: FontWeight.w600,
                 ),
@@ -302,7 +302,7 @@ class _AuthScreenState extends State<AuthScreen> {
     return showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
           backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(
@@ -345,7 +345,7 @@ class _AuthScreenState extends State<AuthScreen> {
             TextButton(
               child: const Text('Cancel'),
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(dialogContext).pop();
                 if (mounted) setState(() => _isLoading = false);
               },
             ),
@@ -362,7 +362,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 final password = passwordController.text;
                 if (password.isEmpty) return;
 
-                if (mounted) Navigator.of(context).pop();
+                if (mounted) Navigator.of(dialogContext).pop();
                 setState(() => _isLoading = true);
 
                 try {
@@ -499,26 +499,26 @@ class _AuthScreenState extends State<AuthScreen> {
             _buildAuthTabs(),
             const SizedBox(height: 32),
             if (_isLoginView) ...[
-              const Text(
-                'Welcome Back',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              Text(
+                AppLocalizations.of(context)!.welcomeBack,
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Fill out the information below...',
-                style: TextStyle(color: AppTheme.mediumGray, fontSize: 16),
+              Text(
+                AppLocalizations.of(context)!.fillInfo,
+                style: const TextStyle(color: AppTheme.mediumGray, fontSize: 16),
               ),
               const SizedBox(height: 32),
               _buildLoginForm(),
             ] else ...[
-              const Text(
-                'Create Account',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              Text(
+                AppLocalizations.of(context)!.signUp,
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Let\'s get started...',
-                style: TextStyle(color: AppTheme.mediumGray, fontSize: 16),
+              Text(
+                AppLocalizations.of(context)!.letsGetStarted,
+                style: const TextStyle(color: AppTheme.mediumGray, fontSize: 16),
               ),
               const SizedBox(height: 32),
               _buildRegistrationForm(),
@@ -547,13 +547,13 @@ class _AuthScreenState extends State<AuthScreen> {
       child: Row(
         children: [
           _buildTab(
-            'Create Account',
+            AppLocalizations.of(context)!.signUp,
             !_isLoginView,
             buttonStyle: noSplashButtonStyle,
             onTap: () => _switchTab(false),
           ),
           _buildTab(
-            'Log In',
+            AppLocalizations.of(context)!.login,
             _isLoginView,
             buttonStyle: noSplashButtonStyle,
             onTap: () => _switchTab(true),
@@ -603,22 +603,22 @@ class _AuthScreenState extends State<AuthScreen> {
       children: [
         _buildTextField(
           controller: _emailController,
-          hintText: 'Email',
+          hintText: AppLocalizations.of(context)!.email,
           validator: (val) =>
-              (val?.isEmpty ?? true) ? 'Please fill in this field' : null,
+              (val?.isEmpty ?? true) ? AppLocalizations.of(context)!.requiredField : null,
         ),
         const SizedBox(height: 16),
         _buildTextField(
           controller: _passwordController,
-          hintText: 'Password',
+          hintText: AppLocalizations.of(context)!.password,
           isPassword: true,
           validator: (val) =>
-              (val?.isEmpty ?? true) ? 'Please fill in this field' : null,
+              (val?.isEmpty ?? true) ? AppLocalizations.of(context)!.requiredField : null,
           onSubmitted: _handleAuthentication,
         ),
         const SizedBox(height: 32),
         _buildAuthButton(
-          text: 'Sign In',
+          text: AppLocalizations.of(context)!.signIn,
           onPressed: _handleAuthentication,
           isLoading: _isLoading,
         ),
@@ -632,10 +632,10 @@ class _AuthScreenState extends State<AuthScreen> {
       children: [
         _buildTextField(
           controller: _emailController,
-          hintText: 'Email',
+          hintText: AppLocalizations.of(context)!.email,
           validator: (value) {
             if (value == null || !RegExp(r'\S+@\S+\.\S+').hasMatch(value)) {
-              return 'Please enter a valid email address';
+              return AppLocalizations.of(context)!.invalidEmail;
             }
             return null;
           },
@@ -643,10 +643,10 @@ class _AuthScreenState extends State<AuthScreen> {
         const SizedBox(height: 16),
         _buildTextField(
           controller: _nicknameController,
-          hintText: 'Nickname',
+          hintText: AppLocalizations.of(context)!.nickname,
           validator: (value) {
             if (value == null || value.length < 3) {
-              return 'Nickname must be at least 3 characters';
+              return AppLocalizations.of(context)!.requiredField; // Simplified
             }
             return null;
           },
@@ -654,11 +654,11 @@ class _AuthScreenState extends State<AuthScreen> {
         const SizedBox(height: 16),
         _buildTextField(
           controller: _passwordController,
-          hintText: 'Password',
+          hintText: AppLocalizations.of(context)!.password,
           isPassword: true,
           validator: (value) {
             if (value == null || value.length < 8) {
-              return 'Minimum 8 characters required';
+              return AppLocalizations.of(context)!.minPassword;
             }
             return null;
           },
@@ -666,7 +666,7 @@ class _AuthScreenState extends State<AuthScreen> {
         ),
         const SizedBox(height: 32),
         _buildAuthButton(
-          text: 'Get Started',
+          text: AppLocalizations.of(context)!.getStarted,
           onPressed: _handleAuthentication,
           isLoading: _isLoading,
         ),
@@ -735,14 +735,14 @@ class _AuthScreenState extends State<AuthScreen> {
 
   /// Builds the divider with "OR" text.
   Widget _buildDivider() {
-    return const Row(
+    return Row(
       children: [
         Expanded(child: Divider(color: Colors.black26)),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 16),
           child: Text(
-            'OR',
-            style: TextStyle(
+            AppLocalizations.of(context)!.or,
+            style: const TextStyle(
               color: AppTheme.mediumGray,
               fontWeight: FontWeight.w500,
             ),
@@ -760,9 +760,9 @@ class _AuthScreenState extends State<AuthScreen> {
       child: OutlinedButton.icon(
         onPressed: _isLoading ? null : _signInWithGoogle,
         icon: SvgPicture.asset('assets/icons/google_logo.svg', height: 20),
-        label: const Text(
-          'Continue with Google',
-          style: TextStyle(
+        label: Text(
+          AppLocalizations.of(context)!.continueWithGoogle,
+          style: const TextStyle(
             color: AppTheme.darkCharcoal,
             fontSize: 16,
             fontWeight: FontWeight.w500,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:furtable/core/app_theme.dart';
+import 'package:furtable/l10n/app_localizations.dart';
 
 /// Screen displaying Frequently Asked Questions.
 class FAQScreen extends StatelessWidget {
@@ -11,7 +12,7 @@ class FAQScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppTheme.offWhite,
       appBar: AppBar(
-        title: const Text('FAQ'), // Title matches menu item.
+        title: Text(AppLocalizations.of(context)!.faq), // Title matches menu item.
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, size: 20),
@@ -20,9 +21,9 @@ class FAQScreen extends StatelessWidget {
       ),
       body: ListView(
         padding: const EdgeInsets.all(20),
-        children: const [
+        children: [
           Text(
-            'FAQ',
+            AppLocalizations.of(context)!.faq,
             style: TextStyle(
               fontFamily: 'Inter',
               fontWeight: FontWeight.w800,
@@ -33,27 +34,24 @@ class FAQScreen extends StatelessWidget {
           SizedBox(height: 16),
 
           FAQItem(
-            question: "How do I create a recipe?",
-            answer:
-                "Go to the 'My Recipes' tab (book icon) and tap the '+' icon in the top right corner.",
+            question: AppLocalizations.of(context)!.faqQ1,
+            answer: AppLocalizations.of(context)!.faqA1,
           ),
           FAQItem(
-            question: "Can I make my recipes private?",
-            answer:
-                "Yes! When creating or editing a recipe, toggle the 'Make this recipe public' switch off.",
+            question: AppLocalizations.of(context)!.faqQ2,
+            answer: AppLocalizations.of(context)!.faqA2,
           ),
           FAQItem(
-            question: "How do I change my password?",
-            answer: "Navigate to Profile > Account Settings > Change Password.",
+            question: AppLocalizations.of(context)!.faqQ3,
+            answer: AppLocalizations.of(context)!.faqA3,
           ),
           FAQItem(
-            question: "Is FurTable free?",
-            answer: "Yes, FurTable is completely free to use for everyone.",
+            question: AppLocalizations.of(context)!.faqQ4,
+            answer: AppLocalizations.of(context)!.faqA4,
           ),
           FAQItem(
-            question: "How do I delete my account?",
-            answer:
-                "Go to Profile > Account Settings and select 'Delete Account' at the bottom.",
+            question: AppLocalizations.of(context)!.faqQ5,
+            answer: AppLocalizations.of(context)!.faqA5,
           ),
         ],
       ),

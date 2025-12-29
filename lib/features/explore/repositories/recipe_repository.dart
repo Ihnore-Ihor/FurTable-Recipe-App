@@ -105,45 +105,41 @@ class RecipeRepository {
 
     final recipeRef = _recipesRef.doc(recipe.id);
 
-    return FirebaseFirestore.instance.runTransaction((transaction) async {
-      final userFavSnapshot = await transaction.get(userFavRef);
-      // 1. Read main recipe state (to check existence and update count)
-      final recipeSnapshot = await transaction.get(recipeRef);
+    try {
+      return FirebaseFirestore.instance.runTransaction((transaction) async {
+        final userFavSnapshot = await transaction.get(userFavRef);
+        final recipeSnapshot = await transaction.get(recipeRef);
 
-      if (userFavSnapshot.exists) {
-        // --- REMOVE FROM FAVORITES ---
-        
-        transaction.delete(userFavRef);
+        if (userFavSnapshot.exists) {
+          // 1. REMOVE FAVORITE
+          transaction.delete(userFavRef);
+          
+          if (recipeSnapshot.exists) {
+            transaction.update(recipeRef, {
+              'likesCount': FieldValue.increment(-1),
+            });
+          }
+        } else {
+          // 2. ADD FAVORITE (References only!)
+          if (!recipeSnapshot.exists) return;
 
-        // Decrease counter ONLY IF recipe still exists
-        if (recipeSnapshot.exists) {
+          // IMPORTANT: Store minimal dataset so security rules (isAuthor) 
+          // can verify this effectively
+          transaction.set(userFavRef, {
+            'recipeId': recipe.id,
+            'authorId': recipe.authorId, // Original recipe author ID
+            'addedAt': FieldValue.serverTimestamp(),
+          });
+
           transaction.update(recipeRef, {
-            'likesCount': FieldValue.increment(-1),
+            'likesCount': FieldValue.increment(1),
           });
         }
-      } else {
-        // --- ADD TO FAVORITES ---
-        
-        // If main recipe doesn't exist, we can't like it
-        if (!recipeSnapshot.exists) {
-          throw FirebaseException(
-              plugin: 'cloud_firestore',
-              code: 'not-found',
-              message: 'Recipe no longer exists');
-        }
-
-        // Save ONLY minimal data (ID and addedAt)
-        transaction.set(userFavRef, {
-          'addedAt': FieldValue.serverTimestamp(),
-          'recipeId': recipe.id,
-          'authorId': recipe.authorId, // Used for security rules (cascading delete)
-        });
-
-        transaction.update(recipeRef, {
-          'likesCount': FieldValue.increment(1),
-        });
-      }
-    });
+      });
+    } catch (e) {
+      print("Firestore Transaction Error: $e");
+      rethrow; // Propagate error to Bloc
+    }
   }
 
   // --- CASCADING UPDATE: User Profile Changes ---

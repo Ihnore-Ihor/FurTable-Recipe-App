@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:furtable/core/app_theme.dart';
-import 'package:furtable/core/services/local_storage_service.dart'; // <--- Import
+import 'package:furtable/core/services/local_storage_service.dart';
 import 'package:furtable/features/profile/screens/change_password_screen.dart';
+import 'package:furtable/l10n/app_localizations.dart';
+import 'package:furtable/core/bloc/locale/locale_cubit.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// Screen for managing account settings, including notifications and deletion.
 class AccountSettingsScreen extends StatefulWidget {
@@ -32,8 +35,8 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Image cache cleared successfully'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.clearCacheSuccess),
             backgroundColor: AppTheme.darkCharcoal,
           ),
         );
@@ -41,7 +44,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error clearing cache: $e')),
+          SnackBar(content: Text('${AppLocalizations.of(context)!.errorClearingCache}: $e')),
         );
       }
     }
@@ -53,12 +56,12 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
       builder: (ctx) => AlertDialog(
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Clear Cache?', style: TextStyle(fontWeight: FontWeight.bold)),
-        content: const Text('This will remove all downloaded images from your device. They will be re-downloaded when needed.'),
+        title: Text(AppLocalizations.of(context)!.clearCacheDialogTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
+        content: Text(AppLocalizations.of(context)!.clearCacheDialogDesc),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel', style: TextStyle(color: AppTheme.mediumGray)),
+            child: Text(AppLocalizations.of(context)!.cancel, style: const TextStyle(color: AppTheme.mediumGray)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: AppTheme.darkCharcoal, foregroundColor: Colors.white),
@@ -66,7 +69,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
               Navigator.pop(ctx);
               _clearCache();
             },
-            child: const Text('Clear'),
+            child: Text(AppLocalizations.of(context)!.clear),
           ),
         ],
       ),
@@ -82,9 +85,9 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
           ),
-          title: const Text(
-            'Delete Account?',
-            style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w700),
+          title: Text(
+            AppLocalizations.of(context)!.deleteAccount,
+            style: const TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w700),
             textAlign: TextAlign.center,
           ),
           content: const Text(
@@ -107,9 +110,9 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text(
-                      'Cancel',
-                      style: TextStyle(
+                    child: Text(
+                      AppLocalizations.of(context)!.cancel,
+                      style: const TextStyle(
                         color: AppTheme.darkCharcoal,
                         fontWeight: FontWeight.w600,
                       ),
@@ -136,9 +139,9 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text(
-                      'Delete',
-                      style: TextStyle(
+                    child: Text(
+                      AppLocalizations.of(context)!.delete,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w600,
                       ),
@@ -153,12 +156,50 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
     );
   }
 
+  void _showLanguageDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: const Text('English'),
+                trailing: Localizations.localeOf(context).languageCode == 'en' 
+                    ? const Icon(Icons.check, color: AppTheme.darkCharcoal) 
+                    : null,
+                onTap: () {
+                  context.read<LocaleCubit>().changeLanguage('en');
+                  Navigator.pop(ctx);
+                },
+              ),
+              const Divider(height: 1),
+              ListTile(
+                title: const Text('Українська'),
+                trailing: Localizations.localeOf(context).languageCode == 'uk' 
+                    ? const Icon(Icons.check, color: AppTheme.darkCharcoal) 
+                    : null,
+                onTap: () {
+                  context.read<LocaleCubit>().changeLanguage('uk');
+                  Navigator.pop(ctx);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.offWhite,
       appBar: AppBar(
-        title: const Text('Account Settings'),
+        title: Text(AppLocalizations.of(context)!.accountSettings),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, size: 20),
@@ -178,11 +219,11 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                   horizontal: 20,
                   vertical: 8,
                 ),
-                title: const Text('Change Password', style: _titleStyle),
-                subtitle: const Padding(
-                  padding: EdgeInsets.only(top: 4.0),
+                title: Text(AppLocalizations.of(context)!.changePassword, style: _titleStyle),
+                subtitle: Padding(
+                  padding: const EdgeInsets.only(top: 4.0),
                   child: Text(
-                    'Update your password for enhanced security.',
+                    AppLocalizations.of(context)!.changePasswordSubtitle,
                     style: _subtitleStyle,
                   ),
                 ),
@@ -202,6 +243,24 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
             ),
             const SizedBox(height: 16),
 
+            // --- LANGUAGE ---
+            Container(
+              decoration: _cardDecoration,
+              child: ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                title: Text(AppLocalizations.of(context)!.language, style: _titleStyle),
+                subtitle: Text(
+                  Localizations.localeOf(context).languageCode == 'uk' ? 'Українська' : 'English',
+                  style: _subtitleStyle,
+                ),
+                trailing: const Icon(Icons.language, color: AppTheme.mediumGray),
+                onTap: () {
+                  _showLanguageDialog(context);
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+
             // --- 2. STORAGE & CACHE ---
             Container(
               padding: const EdgeInsets.all(20),
@@ -209,13 +268,13 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                   const Text('Storage & Cache', style: _sectionHeaderStyle),
+                   Text(AppLocalizations.of(context)!.storageCache, style: _sectionHeaderStyle),
                    const SizedBox(height: 24),
                    
                    // Switch 1: Enable Cache
                    _buildSwitchRow(
-                     'Enable Image Caching',
-                     'Save images locally for faster loading',
+                     AppLocalizations.of(context)!.enableCaching,
+                     AppLocalizations.of(context)!.saveImagesLocally,
                      _isCacheEnabled,
                      (val) {
                        setState(() => _isCacheEnabled = val);
@@ -226,8 +285,8 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                    
                    // Switch 2: Auto-clear
                    _buildSwitchRow(
-                     'Auto-clear on Startup',
-                     'Clear cache every time app starts',
+                     AppLocalizations.of(context)!.autoClear,
+                     AppLocalizations.of(context)!.clearCacheStart,
                      _isAutoClearEnabled,
                      (val) {
                        setState(() => _isAutoClearEnabled = val);
@@ -241,8 +300,8 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                    // Clear Button
                    ListTile(
                      contentPadding: EdgeInsets.zero,
-                     title: const Text('Clear Image Cache Now', 
-                         style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w600, color: AppTheme.darkCharcoal)),
+                     title: Text(AppLocalizations.of(context)!.clearCacheNow, 
+                         style: const TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w600, color: AppTheme.darkCharcoal)),
                      trailing: const Icon(Icons.delete_outline, color: Colors.redAccent),
                      onTap: _showClearCacheDialog,
                    ),
@@ -256,8 +315,8 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
             Center(
               child: TextButton(
                 onPressed: _showDeleteConfirmation,
-                child: const Text(
-                  'Delete Account',
+                child: Text(
+                  AppLocalizations.of(context)!.deleteAccount,
                   style: TextStyle(
                     color: Colors.redAccent,
                     fontFamily: 'Inter',

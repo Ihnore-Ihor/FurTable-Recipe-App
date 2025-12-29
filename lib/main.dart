@@ -13,6 +13,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/features/favorites/bloc/favorites_bloc.dart';
 import 'package:furtable/features/favorites/bloc/favorites_event.dart';
 import 'package:furtable/core/env/env.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:furtable/l10n/app_localizations.dart';
+import 'package:furtable/core/bloc/locale/locale_cubit.dart';
 
 /// The entry point of the application.
 ///
@@ -37,18 +40,18 @@ Future<void> main() async {
       // 2. Check auto-clear setting
       if (storage.isAutoClearEnabled) {
         await DefaultCacheManager().emptyCache();
-        print("Cache auto-cleared on startup");
+
       }
 
       await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
-      print('Firebase initialized: ${Firebase.apps.length}');
-      print('Analytics collection enabled.');
+
       runApp(
         MultiBlocProvider(
           providers: [
             BlocProvider<FavoritesBloc>(
               create: (context) => FavoritesBloc()..add(LoadFavorites()),
             ),
+            BlocProvider(create: (_) => LocaleCubit()),
           ],
           child: const MyApp(),
         ),
@@ -67,31 +70,46 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'FurTable',
-      theme: AppTheme.theme,
-      debugShowCheckedModeBanner: false,
-      home: StreamBuilder<User?>(
-        // Listens to the authentication state.
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot) {
-          // 1. While Firebase is initializing (checking token).
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
-          }
+    return BlocBuilder<LocaleCubit, Locale>(
+      builder: (context, locale) {
+        return MaterialApp(
+          title: 'FurTable',
+          theme: AppTheme.theme,
+          debugShowCheckedModeBanner: false,
+          locale: locale,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('en'),
+            Locale('uk'),
+          ],
+          home: StreamBuilder<User?>(
+            // Listens to the authentication state.
+            stream: FirebaseAuth.instance.authStateChanges(),
+            builder: (context, snapshot) {
+              // 1. While Firebase is initializing (checking token).
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                );
+              }
 
-          // 2. If user is authenticated (snapshot has data) -> navigate to home.
-          if (snapshot.hasData) {
-            // Important: pass parameter to avoid showing the email verification SnackBar on every refresh.
-            return const ExploreScreen(showVerificationMessage: false);
-          }
+              // 2. If user is authenticated (snapshot has data) -> navigate to home.
+              if (snapshot.hasData) {
+                // Important: pass parameter to avoid showing the email verification SnackBar on every refresh.
+                return const ExploreScreen(showVerificationMessage: false);
+              }
 
-          // 3. If user is not authenticated -> show login screen.
-          return const AuthScreen();
-        },
-      ),
+              // 3. If user is not authenticated -> show login screen.
+              return const AuthScreen();
+            },
+          ),
+        );
+      },
     );
   }
 }

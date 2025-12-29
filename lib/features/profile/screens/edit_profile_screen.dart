@@ -6,6 +6,7 @@ import 'package:furtable/core/utils/avatar_helper.dart';
 import 'package:furtable/features/profile/bloc/profile_bloc.dart';
 import 'package:furtable/features/profile/bloc/profile_event.dart';
 import 'package:furtable/features/profile/bloc/profile_state.dart';
+import 'package:furtable/l10n/app_localizations.dart';
 
 /// Screen for editing the user's profile information.
 class EditProfileScreen extends StatelessWidget {
@@ -84,8 +85,8 @@ class _EditProfileViewState extends State<EditProfileView> {
           height: 300,
           child: Column(
             children: [
-              const Text(
-                'Choose an Avatar',
+              Text(
+                AppLocalizations.of(context)!.chooseAvatar,
                 style: TextStyle(
                   fontFamily: 'Inter',
                   fontWeight: FontWeight.bold,
@@ -162,7 +163,7 @@ class _EditProfileViewState extends State<EditProfileView> {
         if (state is ProfileSuccess) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(const SnackBar(content: Text('Profile updated!')));
+          ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.profileUpdated)));
           // Return true to notify previous screen to refresh.
           Navigator.pop(context, true);
         }
@@ -170,7 +171,7 @@ class _EditProfileViewState extends State<EditProfileView> {
       child: Scaffold(
         backgroundColor: AppTheme.offWhite,
         appBar: AppBar(
-          title: const Text('Edit Profile'),
+          title: Text(AppLocalizations.of(context)!.editProfile),
           centerTitle: true,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios_new, size: 20),
@@ -211,8 +212,8 @@ class _EditProfileViewState extends State<EditProfileView> {
                               strokeWidth: 2,
                             ),
                           )
-                        : const Text(
-                            'Save',
+                        : Text(
+                            AppLocalizations.of(context)!.save,
                             style: TextStyle(fontWeight: FontWeight.w600),
                           ),
                   );
@@ -291,8 +292,8 @@ class _EditProfileViewState extends State<EditProfileView> {
                       const SizedBox(height: 12),
                       GestureDetector(
                         onTap: _showAvatarPicker,
-                        child: const Text(
-                          'Tap to change photo',
+                        child: Text(
+                          AppLocalizations.of(context)!.tapToChangePhoto,
                           style: TextStyle(
                             fontFamily: 'Inter',
                             color: AppTheme.mediumGray,
@@ -306,8 +307,8 @@ class _EditProfileViewState extends State<EditProfileView> {
 
                 const SizedBox(height: 32),
 
-                const Text(
-                  'Nickname',
+                Text(
+                  AppLocalizations.of(context)!.nickname,
                   style: TextStyle(
                     fontFamily: 'Inter',
                     fontWeight: FontWeight.w700,
@@ -319,7 +320,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                 TextFormField(
                   controller: _nicknameController,
                   validator: (val) =>
-                      val!.trim().isEmpty ? 'Nickname cannot be empty' : null,
+                      val!.trim().isEmpty ? AppLocalizations.of(context)!.nicknameEmpty : null,
                   style: const TextStyle(color: AppTheme.darkCharcoal),
                   decoration: InputDecoration(
                     filled: true,
@@ -336,8 +337,8 @@ class _EditProfileViewState extends State<EditProfileView> {
                 ),
 
                 const SizedBox(height: 24),
-                const Text(
-                  'Email',
+                Text(
+                  AppLocalizations.of(context)!.email,
                   style: TextStyle(
                     fontFamily: 'Inter',
                     fontWeight: FontWeight.w700,

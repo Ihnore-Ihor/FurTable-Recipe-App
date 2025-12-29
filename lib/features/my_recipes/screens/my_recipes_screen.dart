@@ -14,6 +14,7 @@ import 'package:furtable/features/favorites/bloc/favorites_bloc.dart';
 import 'package:furtable/features/favorites/bloc/favorites_event.dart';
 import 'package:furtable/features/favorites/bloc/favorites_state.dart';
 import 'package:furtable/features/profile/screens/profile_screen.dart';
+import 'package:furtable/l10n/app_localizations.dart';
 
 /// Screen displaying the recipes created by the current user.
 ///
@@ -44,9 +45,9 @@ class MyRecipesView extends StatelessWidget {
       child: Scaffold(
         backgroundColor: AppTheme.offWhite,
         appBar: AppBar(
-          title: const Padding(
+          title: Padding(
             padding: EdgeInsets.only(left: 8.0),
-            child: Text('My Recipes'),
+            child: Text(AppLocalizations.of(context)!.myRecipes),
           ),
           automaticallyImplyLeading: false,
           actions: [
@@ -96,9 +97,9 @@ class MyRecipesView extends StatelessWidget {
                   fontFamily: 'Inter',
                   fontWeight: FontWeight.w600,
                 ),
-                tabs: const [
-                  Tab(text: 'Public'),
-                  Tab(text: 'Private'),
+                tabs: [
+                  Tab(text: AppLocalizations.of(context)!.public),
+                  Tab(text: AppLocalizations.of(context)!.private),
                 ],
                 dividerColor: Colors.transparent,
                 indicatorSize: TabBarIndicatorSize.tab,
@@ -144,20 +145,20 @@ class MyRecipesView extends StatelessWidget {
           unselectedItemColor: AppTheme.mediumGray,
           currentIndex: 1,
           onTap: (index) => NavigationHelper.onItemTapped(context, index, 1),
-          items: const [
+          items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.explore_outlined),
-              label: 'Explore',
+              icon: const Icon(Icons.explore_outlined),
+              label: AppLocalizations.of(context)!.explore,
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.book),
-              label: 'My Recipes',
+              icon: const Icon(Icons.book),
+              label: AppLocalizations.of(context)!.myRecipes,
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.favorite_border),
-              label: 'Favorites',
+              icon: const Icon(Icons.favorite_border),
+              label: AppLocalizations.of(context)!.favorites,
             ),
-            BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
+            BottomNavigationBarItem(icon: const Icon(Icons.search), label: AppLocalizations.of(context)!.search),
           ],
         ),
       ),
@@ -172,7 +173,7 @@ class MyRecipesView extends StatelessWidget {
     if (recipes.isEmpty) {
       return Center(
         child: Text(
-          'No recipes yet',
+          AppLocalizations.of(context)!.noRecipesYet,
           style: Theme.of(context).textTheme.bodyMedium,
         ),
       );
@@ -249,7 +250,7 @@ class MyRecipesView extends StatelessWidget {
                           ),
                         );
                         // If returned true (successful save), refresh the list.
-                        if (result == true) {
+                        if (result == true && context.mounted) {
                           context.read<MyRecipesBloc>().add(LoadMyRecipes());
                         }
                       } else if (value == 'delete') {
@@ -258,23 +259,26 @@ class MyRecipesView extends StatelessWidget {
                       }
                     },
                     itemBuilder: (context) => [
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'edit',
                         child: Row(
                           children: [
                             Icon(Icons.edit, size: 18),
                             SizedBox(width: 8),
-                            Text('Edit'),
+                            Text(AppLocalizations.of(context)!.edit),
                           ],
                         ),
                       ),
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'delete',
                         child: Row(
                           children: [
                             Icon(Icons.delete, size: 18, color: Colors.red),
                             SizedBox(width: 8),
-                            Text('Delete', style: TextStyle(color: Colors.red)),
+                            Text(
+                              AppLocalizations.of(context)!.delete,
+                              style: const TextStyle(color: Colors.red),
+                            ),
                           ],
                         ),
                       ),
@@ -315,19 +319,19 @@ class MyRecipesView extends StatelessWidget {
       builder: (ctx) => AlertDialog(
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
-          'Delete Recipe?',
-          style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.bold),
+        title: Text(
+          AppLocalizations.of(context)!.deleteRecipeTitle,
+          style: const TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.bold),
         ),
-        content: const Text(
-          'Are you sure you want to permanently delete this recipe? This action cannot be undone.',
+        content: Text(
+          AppLocalizations.of(context)!.deleteRecipeContent,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: AppTheme.mediumGray),
+            child: Text(
+              AppLocalizations.of(context)!.cancel,
+              style: const TextStyle(color: AppTheme.mediumGray),
             ),
           ),
           ElevatedButton(
@@ -341,13 +345,13 @@ class MyRecipesView extends StatelessWidget {
               Navigator.pop(ctx); // Close dialog.
 
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Recipe deleted'),
+                SnackBar(
+                  content: Text(AppLocalizations.of(context)!.recipeDeleted),
                   backgroundColor: AppTheme.darkCharcoal,
                 ),
               );
             },
-            child: const Text('Delete'),
+            child: Text(AppLocalizations.of(context)!.delete),
           ),
         ],
       ),

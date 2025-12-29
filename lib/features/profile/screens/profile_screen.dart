@@ -8,6 +8,7 @@ import 'package:furtable/features/profile/screens/account_settings_screen.dart';
 import 'package:furtable/features/profile/screens/edit_profile_screen.dart';
 import 'package:furtable/features/profile/screens/faq_screen.dart';
 import 'package:furtable/features/profile/screens/feedback_screen.dart';
+import 'package:furtable/l10n/app_localizations.dart';
 
 /// Screen displaying the user's profile and settings menu.
 class ProfileScreen extends StatefulWidget {
@@ -84,8 +85,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Verification email sent! Check your inbox.'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.verificationSent),
             backgroundColor: AppTheme.darkCharcoal,
           ),
         );
@@ -140,7 +141,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       backgroundColor: AppTheme.offWhite,
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Text(AppLocalizations.of(context)!.profile),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, size: 20),
@@ -230,7 +231,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          'Email not verified',
+                          AppLocalizations.of(context)!.emailNotVerified,
                           style: TextStyle(
                             color: Colors.red.shade700,
                             fontWeight: FontWeight.w600,
@@ -248,10 +249,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           : _resendVerification,
                       child: Text(
                         _isSendingVerification
-                            ? 'Sending...'
+                            ? '...'
                             : _cooldownSeconds > 0
-                            ? 'Wait ${_cooldownSeconds}s to resend'
-                            : 'Resend Verification Email',
+                            ? 'Wait ${AppLocalizations.of(context)!.waitToResend(_cooldownSeconds)}'
+                            : AppLocalizations.of(context)!.resendVerification,
                         style: TextStyle(
                           color:
                               (_isSendingVerification || _cooldownSeconds > 0)
@@ -291,7 +292,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _buildMenuItem(
                     context,
                     icon: Icons.person_outline,
-                    title: 'Edit Profile',
+                    title: AppLocalizations.of(context)!.editProfile,
                     onTap: () async {
                       final result = await Navigator.push(
                         context,
@@ -309,7 +310,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _buildMenuItem(
                     context,
                     icon: Icons.settings_outlined,
-                    title: 'Account Settings',
+                    title: AppLocalizations.of(context)!.accountSettings,
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -321,7 +322,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _buildMenuItem(
                     context,
                     icon: Icons.help_outline,
-                    title: 'FAQ',
+                    title: AppLocalizations.of(context)!.faq,
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(builder: (_) => const FAQScreen()),
@@ -331,7 +332,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _buildMenuItem(
                     context,
                     icon: Icons.chat_bubble_outline,
-                    title: 'Send Feedback',
+                    title: AppLocalizations.of(context)!.sendFeedback,
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(builder: (_) => const FeedbackScreen()),
@@ -346,7 +347,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: OutlinedButton.icon(
                 onPressed: () => _signOut(context),
                 icon: const Icon(Icons.logout, size: 20),
-                label: const Text('Log Out'),
+                label: Text(AppLocalizations.of(context)!.logOut),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppTheme.darkCharcoal,
                   side: const BorderSide(color: Color(0xFFE0E0E0)),

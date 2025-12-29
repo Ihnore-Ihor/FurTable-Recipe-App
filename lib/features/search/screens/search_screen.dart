@@ -12,6 +12,7 @@ import 'package:furtable/features/favorites/bloc/favorites_bloc.dart';
 import 'package:furtable/features/favorites/bloc/favorites_event.dart';
 import 'package:furtable/features/favorites/bloc/favorites_state.dart';
 import 'package:furtable/features/profile/screens/profile_screen.dart';
+import 'package:furtable/l10n/app_localizations.dart';
 
 /// Screen for searching recipes by title or author.
 class SearchScreen extends StatelessWidget {
@@ -85,9 +86,9 @@ class _SearchViewState extends State<SearchView> {
     return Scaffold(
       backgroundColor: AppTheme.offWhite,
       appBar: AppBar(
-        title: const Padding(
+        title: Padding(
           padding: EdgeInsets.only(left: 8.0),
-          child: Text('Search'),
+          child: Text(AppLocalizations.of(context)!.search),
         ),
         automaticallyImplyLeading: false,
         actions: [
@@ -123,7 +124,7 @@ class _SearchViewState extends State<SearchView> {
               textInputAction: TextInputAction.search,
 
               decoration: InputDecoration(
-                hintText: 'Recipe or Author',
+                hintText: AppLocalizations.of(context)!.searchHint,
                 hintStyle: const TextStyle(color: AppTheme.mediumGray),
                 prefixIcon: const Icon(
                   Icons.search,
@@ -165,9 +166,9 @@ class _SearchViewState extends State<SearchView> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
-                              'Recent Searches',
-                              style: TextStyle(
+                            Text(
+                              AppLocalizations.of(context)!.recentSearches,
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: AppTheme.darkCharcoal,
                               ),
@@ -176,8 +177,8 @@ class _SearchViewState extends State<SearchView> {
                               onPressed: () => context.read<SearchBloc>().add(
                                 ClearSearchHistory(),
                               ),
-                              child: const Text(
-                                'Clear',
+                              child: Text(
+                                AppLocalizations.of(context)!.clear,
                                 style: TextStyle(color: AppTheme.mediumGray),
                               ),
                             ),
@@ -229,8 +230,8 @@ class _SearchViewState extends State<SearchView> {
                           'assets/images/legom_posing.png',
                         ),
                         const SizedBox(height: 24),
-                        const Text(
-                          'Type to search...',
+                        Text(
+                          AppLocalizations.of(context)!.typeToSearch,
                           style: TextStyle(
                             color: AppTheme.mediumGray,
                             fontSize: 16,
@@ -262,8 +263,8 @@ class _SearchViewState extends State<SearchView> {
                           'assets/images/legom_posing.png',
                         ),
                         const SizedBox(height: 24),
-                        const Text(
-                          'No recipes found.',
+                        Text(
+                          AppLocalizations.of(context)!.noRecipesFound,
                           style: TextStyle(
                             color: AppTheme.darkCharcoal,
                             fontSize: 18,
@@ -272,8 +273,8 @@ class _SearchViewState extends State<SearchView> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        const Text(
-                          'Try searching for something else.',
+                        Text(
+                          AppLocalizations.of(context)!.tryDifferentSearch,
                           style: TextStyle(
                             color: AppTheme.mediumGray,
                             fontSize: 14,
@@ -344,20 +345,20 @@ class _SearchViewState extends State<SearchView> {
         unselectedItemColor: AppTheme.mediumGray,
         currentIndex: 3,
         onTap: (index) => NavigationHelper.onItemTapped(context, index, 3),
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.explore_outlined),
-            label: 'Explore',
+            icon: const Icon(Icons.explore_outlined),
+            label: AppLocalizations.of(context)!.explore,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.book_outlined),
-            label: 'My Recipes',
+            icon: const Icon(Icons.book_outlined),
+            label: AppLocalizations.of(context)!.myRecipes,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.favorite_border),
-            label: 'Favorites',
+            icon: const Icon(Icons.favorite_border),
+            label: AppLocalizations.of(context)!.favorites,
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
+          BottomNavigationBarItem(icon: const Icon(Icons.search), label: AppLocalizations.of(context)!.search),
         ],
       ),
     );

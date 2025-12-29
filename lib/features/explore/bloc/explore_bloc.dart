@@ -31,7 +31,7 @@ class ExploreBloc extends Bloc<ExploreEvent, ExploreState> {
       },
       onError: (error) {
         // Handle stream error
-        print("Firestore Error: $error");
+        // Firestore Error: $error
       },
     );
   }

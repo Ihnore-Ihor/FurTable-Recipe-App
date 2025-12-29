@@ -10,6 +10,7 @@ import 'package:furtable/features/favorites/bloc/favorites_bloc.dart';
 import 'package:furtable/features/favorites/bloc/favorites_event.dart';
 import 'package:furtable/features/favorites/bloc/favorites_state.dart';
 import 'package:furtable/features/profile/screens/profile_screen.dart';
+import 'package:furtable/l10n/app_localizations.dart';
 
 /// Screen displaying the user's favorite recipes.
 class FavoritesScreen extends StatelessWidget {
@@ -31,9 +32,9 @@ class FavoritesView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Padding(
+        title: Padding(
           padding: EdgeInsets.only(left: 8.0),
-          child: Text('Favorites'),
+          child: Text(AppLocalizations.of(context)!.favorites),
         ),
         automaticallyImplyLeading: false,
         actions: [
@@ -56,6 +57,7 @@ class FavoritesView extends StatelessWidget {
       // Connect BLoC Builder.
       body: BlocBuilder<FavoritesBloc, FavoritesState>(
         builder: (context, state) {
+          // Only show spinner on first loading.
           if (state is FavoritesLoading) {
             return const Center(
               child: CircularProgressIndicator(color: AppTheme.darkCharcoal),
@@ -84,23 +86,23 @@ class FavoritesView extends StatelessWidget {
         unselectedItemColor: AppTheme.mediumGray,
         currentIndex: 2,
         onTap: (index) => NavigationHelper.onItemTapped(context, index, 2),
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.explore_outlined),
-            activeIcon: Icon(Icons.explore),
-            label: 'Explore',
+            icon: const Icon(Icons.explore_outlined),
+            activeIcon: const Icon(Icons.explore),
+            label: AppLocalizations.of(context)!.explore,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.book_outlined),
-            activeIcon: Icon(Icons.book),
-            label: 'My Recipes',
+            icon: const Icon(Icons.book_outlined),
+            activeIcon: const Icon(Icons.book),
+            label: AppLocalizations.of(context)!.myRecipes,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.favorite_border),
-            activeIcon: Icon(Icons.favorite),
-            label: 'Favorites',
+            icon: const Icon(Icons.favorite_border),
+            activeIcon: const Icon(Icons.favorite),
+            label: AppLocalizations.of(context)!.favorites,
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
+          BottomNavigationBarItem(icon: const Icon(Icons.search), label: AppLocalizations.of(context)!.search),
         ],
       ),
     );
@@ -156,13 +158,13 @@ class FavoritesView extends StatelessWidget {
           const SizedBox(height: 24),
 
           Text(
-            'No favorites yet',
+            AppLocalizations.of(context)!.noFavorites,
             style: textTheme.titleLarge?.copyWith(color: AppTheme.mediumGray),
           ),
           const SizedBox(height: 8),
 
           Text(
-            'Tap the heart icon on recipes you love',
+            AppLocalizations.of(context)!.tapHeart,
             style: textTheme.bodyMedium?.copyWith(fontSize: 14),
             textAlign: TextAlign.center,
           ),
