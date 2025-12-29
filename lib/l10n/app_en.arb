@@ -181,5 +181,15 @@
     "private": "Private",
     "noRecipesYet": "No recipes yet",
     "noFavorites": "No favorites yet",
-    "tapHeart": "Tap the heart icon on recipes you love"
+    "tapHeart": "Tap the heart icon on recipes you love",
+
+    "@_GUEST": {},
+    "joinTitle": "Join FurTable",
+    "loginOrSignup": "Log In / Sign Up",
+    "guestMyRecipesTitle": "Start Cooking!",
+    "guestMyRecipesMessage": "Create an account to save your own recipes and share them with the world.",
+    "guestFavoritesTitle": "Save Your Favorites",
+    "guestFavoritesMessage": "Log in to create your personal collection of delicious recipes.",
+    "authRequiredLike": "Log in to add this recipe to your favorites.",
+    "authRequiredAction": "Log in to perform this action."
 }

@@ -111,7 +111,8 @@ Widget _buildItem(
                 if (FirebaseAuth.instance.currentUser == null) {
                   AuthHelper.showAuthRequiredDialog(
                     context,
-                    "Log in to add this recipe to your favorites.",
+                    AppLocalizations.of(context)!.authRequiredLike,
+                    icon: Icons.favorite_border,
                   );
                   return;
                 }

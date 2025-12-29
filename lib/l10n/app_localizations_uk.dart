@@ -409,4 +409,31 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get tapHeart => 'Тисніть на серце, щоб зберегти рецепт';
+
+  @override
+  String get joinTitle => 'Приєднуйтесь до FurTable';
+
+  @override
+  String get loginOrSignup => 'Вхід / Реєстрація';
+
+  @override
+  String get guestMyRecipesTitle => 'Почніть готувати!';
+
+  @override
+  String get guestMyRecipesMessage =>
+      'Створіть акаунт, щоб зберігати власні рецепти та ділитися ними зі світом.';
+
+  @override
+  String get guestFavoritesTitle => 'Зберігайте улюблене';
+
+  @override
+  String get guestFavoritesMessage =>
+      'Увійдіть, щоб створити власну колекцію смачних рецептів.';
+
+  @override
+  String get authRequiredLike =>
+      'Увійдіть, щоб додати цей рецепт до улюблених.';
+
+  @override
+  String get authRequiredAction => 'Увійдіть, щоб виконати цю дію.';
 }

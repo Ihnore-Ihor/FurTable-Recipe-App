@@ -118,7 +118,7 @@ class _ExploreViewState extends State<ExploreView> {
               if (FirebaseAuth.instance.currentUser == null) {
                 AuthHelper.showAuthRequiredDialog(
                   context,
-                  "Join FurTable to access your profile and personalized settings.",
+                  AppLocalizations.of(context)!.authRequiredAction,
                 );
                 return;
               }

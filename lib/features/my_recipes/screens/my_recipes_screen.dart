@@ -34,9 +34,10 @@ class MyRecipesScreen extends StatelessWidget {
           ),
           automaticallyImplyLeading: false,
         ),
-        body: const GuestView(
-          title: 'Start Cooking!',
-          message: 'Create an account to save your own recipes and share them with the world.',
+        body: GuestView(
+          title: AppLocalizations.of(context)!.guestMyRecipesTitle,
+          message: AppLocalizations.of(context)!.guestMyRecipesMessage,
+          imagePath: 'assets/images/jack_writing.png',
         ),
         bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,

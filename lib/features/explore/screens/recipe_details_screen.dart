@@ -53,7 +53,8 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                   if (FirebaseAuth.instance.currentUser == null) {
                     AuthHelper.showAuthRequiredDialog(
                       context,
-                      "Log in to save this recipe to your personal collection.",
+                      AppLocalizations.of(context)!.authRequiredLike,
+                      icon: Icons.favorite_border,
                     );
                     return;
                   }

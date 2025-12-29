@@ -414,4 +414,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tapHeart => 'Tap the heart icon on recipes you love';
+
+  @override
+  String get joinTitle => 'Join FurTable';
+
+  @override
+  String get loginOrSignup => 'Log In / Sign Up';
+
+  @override
+  String get guestMyRecipesTitle => 'Start Cooking!';
+
+  @override
+  String get guestMyRecipesMessage =>
+      'Create an account to save your own recipes and share them with the world.';
+
+  @override
+  String get guestFavoritesTitle => 'Save Your Favorites';
+
+  @override
+  String get guestFavoritesMessage =>
+      'Log in to create your personal collection of delicious recipes.';
+
+  @override
+  String get authRequiredLike => 'Log in to add this recipe to your favorites.';
+
+  @override
+  String get authRequiredAction => 'Log in to perform this action.';
 }

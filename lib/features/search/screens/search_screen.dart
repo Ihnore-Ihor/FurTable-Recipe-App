@@ -102,7 +102,7 @@ class _SearchViewState extends State<SearchView> {
               if (FirebaseAuth.instance.currentUser == null) {
                 AuthHelper.showAuthRequiredDialog(
                   context,
-                  "Log in to view your profile and search history.",
+                  AppLocalizations.of(context)!.authRequiredAction,
                 );
                 return;
               }

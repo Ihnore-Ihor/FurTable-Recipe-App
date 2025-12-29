@@ -27,9 +27,9 @@ class FavoritesScreen extends StatelessWidget {
           ),
           automaticallyImplyLeading: false,
         ),
-        body: const GuestView(
-          title: 'Save Your Favorites',
-          message: 'Log in to create your personal collection of delicious recipes.',
+        body: GuestView(
+          title: AppLocalizations.of(context)!.guestFavoritesTitle,
+          message: AppLocalizations.of(context)!.guestFavoritesMessage,
           imagePath: 'assets/images/gohin_empty.png',
         ),
         bottomNavigationBar: BottomNavigationBar(

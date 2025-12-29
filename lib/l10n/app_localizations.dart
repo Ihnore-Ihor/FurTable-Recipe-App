@@ -865,6 +865,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap the heart icon on recipes you love'**
   String get tapHeart;
+
+  /// No description provided for @joinTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join FurTable'**
+  String get joinTitle;
+
+  /// No description provided for @loginOrSignup.
+  ///
+  /// In en, this message translates to:
+  /// **'Log In / Sign Up'**
+  String get loginOrSignup;
+
+  /// No description provided for @guestMyRecipesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Cooking!'**
+  String get guestMyRecipesTitle;
+
+  /// No description provided for @guestMyRecipesMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Create an account to save your own recipes and share them with the world.'**
+  String get guestMyRecipesMessage;
+
+  /// No description provided for @guestFavoritesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Your Favorites'**
+  String get guestFavoritesTitle;
+
+  /// No description provided for @guestFavoritesMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in to create your personal collection of delicious recipes.'**
+  String get guestFavoritesMessage;
+
+  /// No description provided for @authRequiredLike.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in to add this recipe to your favorites.'**
+  String get authRequiredLike;
+
+  /// No description provided for @authRequiredAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in to perform this action.'**
+  String get authRequiredAction;
 }
 
 class _AppLocalizationsDelegate

@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/core/utils/avatar_helper.dart';
-import 'package:furtable/features/auth/screens/auth_screen.dart';
+import 'package:furtable/features/explore/screens/explore_screen.dart';
 import 'package:furtable/features/profile/screens/account_settings_screen.dart';
 import 'package:furtable/features/profile/screens/edit_profile_screen.dart';
 import 'package:furtable/features/profile/screens/faq_screen.dart';
@@ -121,15 +121,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
       await FirebaseAuth.instance.signOut();
       if (context.mounted) {
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const AuthScreen()),
+          MaterialPageRoute(builder: (context) => const ExploreScreen()),
           (route) => false,
         );
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error signing out: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error signing out: $e')),
+        );
       }
     }
   }
