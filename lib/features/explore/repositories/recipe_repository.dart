@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart'; // For debugPrint
+import 'package:firebase_auth/firebase_auth.dart'; // For debugPrint
 import 'package:furtable/features/explore/models/recipe_model.dart';
 
 /// Repository for handling recipe-related operations in Firestore.
@@ -130,7 +129,7 @@ class RecipeRepository {
         batch.delete(doc.reference);
       }
     } catch (e) {
-      debugPrint("Warning: Could not cleanup favorites: $e");
+       // print('Error cleaning up favorites: $e');
       // Don't rethrow, ensure we at least delete the recipe itself
     }
 
@@ -203,7 +202,7 @@ class RecipeRepository {
         }
       });
     } catch (e) {
-      print("Firestore Transaction Error: $e");
+      // print("Firestore Transaction Error: $e");
       rethrow; // Propagate error to Bloc
     }
   }

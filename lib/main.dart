@@ -1,5 +1,4 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:furtable/features/explore/screens/explore_screen.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'firebase_options.dart';
@@ -87,27 +86,7 @@ class MyApp extends StatelessWidget {
             Locale('en'),
             Locale('uk'),
           ],
-          home: StreamBuilder<User?>(
-            // Listens to the authentication state.
-            stream: FirebaseAuth.instance.authStateChanges(),
-            builder: (context, snapshot) {
-              // 1. While Firebase is initializing (checking token).
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Scaffold(
-                  body: Center(child: CircularProgressIndicator()),
-                );
-              }
-
-              // 2. If user is authenticated (snapshot has data) -> navigate to home.
-              if (snapshot.hasData) {
-                // Important: pass parameter to avoid showing the email verification SnackBar on every refresh.
-                return const ExploreScreen(showVerificationMessage: false);
-              }
-
-              // 3. If user is not authenticated -> show login screen.
-              return const AuthScreen();
-            },
-          ),
+          home: const ExploreScreen(),
         );
       },
     );

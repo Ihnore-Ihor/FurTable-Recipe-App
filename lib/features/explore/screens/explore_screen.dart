@@ -1,7 +1,9 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/core/app_theme.dart';
+import 'package:furtable/core/utils/auth_helper.dart'; // <--- Import
 import 'package:furtable/core/utils/navigation_helper.dart';
 import 'package:furtable/features/explore/bloc/explore_bloc.dart';
 import 'package:furtable/features/explore/bloc/explore_event.dart';
@@ -113,6 +115,13 @@ class _ExploreViewState extends State<ExploreView> {
         actions: [
           IconButton(
             onPressed: () {
+              if (FirebaseAuth.instance.currentUser == null) {
+                AuthHelper.showAuthRequiredDialog(
+                  context,
+                  "Join FurTable to access your profile and personalized settings.",
+                );
+                return;
+              }
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const ProfileScreen()),

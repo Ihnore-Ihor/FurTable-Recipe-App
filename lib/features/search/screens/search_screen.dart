@@ -1,7 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:furtable/core/widgets/app_image.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/core/app_theme.dart';
+import 'package:furtable/core/utils/auth_helper.dart'; // <--- Import
 import 'package:furtable/core/utils/navigation_helper.dart';
 import 'package:furtable/features/search/bloc/search_bloc.dart';
 import 'package:furtable/features/search/bloc/search_event.dart';
@@ -97,6 +99,13 @@ class _SearchViewState extends State<SearchView> {
         actions: [
           IconButton(
             onPressed: () {
+              if (FirebaseAuth.instance.currentUser == null) {
+                AuthHelper.showAuthRequiredDialog(
+                  context,
+                  "Log in to view your profile and search history.",
+                );
+                return;
+              }
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const ProfileScreen()),

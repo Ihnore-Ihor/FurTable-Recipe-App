@@ -1,7 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/core/utils/navigation_helper.dart';
+import 'package:furtable/core/widgets/guest_view.dart';
 import 'package:furtable/features/explore/widgets/responsive_recipe_grid.dart';
 import 'package:furtable/features/favorites/bloc/favorites_bloc.dart';
 import 'package:furtable/features/favorites/bloc/favorites_event.dart';
@@ -13,10 +15,56 @@ class FavoritesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      return Scaffold(
+        backgroundColor: AppTheme.offWhite,
+        appBar: AppBar(
+          title: Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: Text(AppLocalizations.of(context)!.favorites),
+          ),
+          automaticallyImplyLeading: false,
+        ),
+        body: const GuestView(
+          title: 'Save Your Favorites',
+          message: 'Log in to create your personal collection of delicious recipes.',
+          imagePath: 'assets/images/gohin_empty.png',
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: Colors.white,
+          selectedItemColor: AppTheme.darkCharcoal,
+          unselectedItemColor: AppTheme.mediumGray,
+          currentIndex: 2,
+          onTap: (index) => NavigationHelper.onItemTapped(context, index, 2),
+          items: [
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.explore_outlined),
+              label: AppLocalizations.of(context)!.explore,
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.book_outlined),
+              label: AppLocalizations.of(context)!.myRecipes,
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.favorite_border),
+              label: AppLocalizations.of(context)!.favorites,
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.search),
+              label: AppLocalizations.of(context)!.search,
+            ),
+          ],
+        ),
+      );
+    }
+
     return BlocProvider(
       create: (context) => FavoritesBloc()..add(LoadFavorites()),
       child: const FavoritesView(),
-    ); // <--- Ось тут могла бути проблема з дужками
+    );
   }
 }
 

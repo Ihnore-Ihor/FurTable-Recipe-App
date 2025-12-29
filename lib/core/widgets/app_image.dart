@@ -48,7 +48,7 @@ class AppImage extends StatelessWidget {
     // 4. МЕРЕЖА
     if (imagePath.startsWith('http')) {
       final useCache = LocalStorageService().isCacheEnabled;
-      final int? cacheWidth = width != null && width!.isFinite 
+      final int cacheWidth = width != null && width!.isFinite 
           ? (width! * 2).toInt() 
           : 800;
 

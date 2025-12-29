@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:furtable/features/profile/repositories/feedback_repository.dart';
 
 /// Abstract base class for feedback events.
 abstract class FeedbackEvent extends Equatable {
@@ -14,6 +15,9 @@ class SubmitFeedback extends FeedbackEvent {
 
   /// Creates a [SubmitFeedback] event.
   SubmitFeedback(this.text);
+
+  @override
+  List<Object> get props => [text];
 }
 
 /// Abstract base class for feedback states.
@@ -38,19 +42,24 @@ class FeedbackFailure extends FeedbackState {
 
   /// Creates a [FeedbackFailure] with the given error message.
   FeedbackFailure(this.error);
+
+  @override
+  List<Object> get props => [error];
 }
 
 /// Manages the state of the feedback submission process.
 class FeedbackBloc extends Bloc<FeedbackEvent, FeedbackState> {
+  final FeedbackRepository _repo = FeedbackRepository();
+
   /// Creates a [FeedbackBloc].
   FeedbackBloc() : super(FeedbackInitial()) {
     on<SubmitFeedback>((event, emit) async {
       emit(FeedbackLoading());
       try {
-        await Future.delayed(const Duration(seconds: 1)); // Simulate network delay.
+        await _repo.sendFeedback(event.text);
         emit(FeedbackSuccess());
       } catch (e) {
-        emit(FeedbackFailure("Failed to send feedback"));
+        emit(FeedbackFailure("Failed to send feedback: $e"));
       }
     });
   }

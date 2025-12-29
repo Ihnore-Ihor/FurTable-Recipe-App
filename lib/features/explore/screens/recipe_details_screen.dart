@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/core/app_theme.dart';
+import 'package:furtable/core/utils/auth_helper.dart';
 import 'package:furtable/core/utils/avatar_helper.dart';
 import 'package:furtable/core/widgets/app_image.dart';
 import 'package:furtable/features/explore/models/recipe_model.dart';
@@ -48,6 +50,13 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                   color: AppTheme.darkCharcoal,
                 ),
                 onPressed: () {
+                  if (FirebaseAuth.instance.currentUser == null) {
+                    AuthHelper.showAuthRequiredDialog(
+                      context,
+                      "Log in to save this recipe to your personal collection.",
+                    );
+                    return;
+                  }
                   context.read<FavoritesBloc>().add(ToggleFavorite(widget.initialRecipe));
                 },
               );

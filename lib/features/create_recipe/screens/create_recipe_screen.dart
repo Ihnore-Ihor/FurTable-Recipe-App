@@ -506,7 +506,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                         ),
                         Switch.adaptive(
                           value: _isPublic,
-                          activeColor: AppTheme.darkCharcoal,
+                          activeTrackColor: AppTheme.darkCharcoal,
                           onChanged: (v) => setState(() => _isPublic = v),
                         ),
                       ],
@@ -554,7 +554,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: TextStyle(
-          color: AppTheme.mediumGray.withOpacity(0.5),
+          color: AppTheme.mediumGray.withValues(alpha: 0.5),
           fontSize: 14,
         ),
         filled: true,

@@ -1,7 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:furtable/core/app_theme.dart';
+import 'package:furtable/core/utils/auth_helper.dart'; // <--- Import
 import 'package:furtable/core/utils/navigation_helper.dart';
 import 'package:furtable/features/explore/models/recipe_model.dart';
 import 'package:furtable/features/explore/screens/recipe_details_screen.dart';
@@ -106,6 +108,13 @@ Widget _buildItem(
               likes: recipe.likes,
               isFavorite: isFavorite,
               onFavoriteToggle: () {
+                if (FirebaseAuth.instance.currentUser == null) {
+                  AuthHelper.showAuthRequiredDialog(
+                    context,
+                    "Log in to add this recipe to your favorites.",
+                  );
+                  return;
+                }
                 context.read<FavoritesBloc>().add(ToggleFavorite(recipe));
               },
             ),
