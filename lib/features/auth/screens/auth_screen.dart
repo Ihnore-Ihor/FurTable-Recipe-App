@@ -440,8 +440,13 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Column(children: [_buildTopSection(), _buildBottomSection()]),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600), // Optimal width for forms
+          child: SingleChildScrollView(
+            child: Column(children: [_buildTopSection(), _buildBottomSection()]),
+          ),
+        ),
       ),
     );
   }
@@ -481,13 +486,11 @@ class _AuthScreenState extends State<AuthScreen> {
       decoration: const BoxDecoration(
         color: AppTheme.offWhite,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 10,
-            offset: Offset(0, -2),
-          ),
-        ],
+        border: Border(
+          top: BorderSide(color: AppTheme.darkCharcoal, width: 1.5),
+          left: BorderSide(color: AppTheme.darkCharcoal, width: 1.5),
+          right: BorderSide(color: AppTheme.darkCharcoal, width: 1.5),
+        ),
       ),
       padding: const EdgeInsets.all(24),
       child: Form(

@@ -1,18 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/core/utils/navigation_helper.dart';
 import 'package:furtable/features/create_recipe/screens/create_recipe_screen.dart';
 import 'package:furtable/features/explore/models/recipe_model.dart';
-import 'package:furtable/features/explore/screens/recipe_details_screen.dart';
-import 'package:furtable/features/explore/widgets/recipe_card.dart';
 import 'package:furtable/features/my_recipes/bloc/my_recipes_bloc.dart';
 import 'package:furtable/features/my_recipes/bloc/my_recipes_event.dart';
 import 'package:furtable/features/my_recipes/bloc/my_recipes_state.dart';
-import 'package:furtable/features/favorites/bloc/favorites_bloc.dart';
-import 'package:furtable/features/favorites/bloc/favorites_event.dart';
-import 'package:furtable/features/favorites/bloc/favorites_state.dart';
+import 'package:furtable/features/explore/widgets/responsive_recipe_grid.dart'; // <--- Import
 import 'package:furtable/features/profile/screens/profile_screen.dart';
 import 'package:furtable/l10n/app_localizations.dart';
 
@@ -179,135 +174,26 @@ class MyRecipesView extends StatelessWidget {
       );
     }
 
-    return AlignedGridView.count(
-      padding: const EdgeInsets.all(16),
-      crossAxisCount: 2,
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 24,
-      itemCount: recipes.length,
-      itemBuilder: (context, index) {
-        final recipe = recipes[index];
-        return GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => RecipeDetailsScreen(initialRecipe: recipe),
-              ),
-            );
-          },
-          child: Stack(
-            children: [
-              BlocBuilder<FavoritesBloc, FavoritesState>(
-                builder: (context, favState) {
-                  bool isFav = false;
-                  if (favState is FavoritesLoaded) {
-                    isFav = favState.recipes.any((r) => r.id == recipe.id);
-                  }
-                  return RecipeCard(
-                    id: recipe.id,
-                    imageUrl: recipe.imageUrl,
-                    title: recipe.title,
-                    author: recipe.authorName,
-                    likes: recipe.likes,
-                    isFavorite: isFav,
-                    onFavoriteToggle: () {
-                      context.read<FavoritesBloc>().add(ToggleFavorite(recipe));
-                    },
-                  );
-                },
-              ),
-
-              // --- Menu Button (3 dots) ---
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Container(
-                  width: 32,
-                  height: 32,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: PopupMenuButton<String>(
-                    icon: const Icon(
-                      Icons.more_vert,
-                      size: 18,
-                      color: AppTheme.darkCharcoal,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    color: Colors.white,
-                    onSelected: (value) async {
-                      if (value == 'edit') {
-                        // 1. Navigate to edit screen.
-                        final result = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                CreateRecipeScreen(recipeToEdit: recipe),
-                          ),
-                        );
-                        // If returned true (successful save), refresh the list.
-                        if (result == true && context.mounted) {
-                          context.read<MyRecipesBloc>().add(LoadMyRecipes());
-                        }
-                      } else if (value == 'delete') {
-                        // 2. Show delete dialog.
-                        _showDeleteDialog(context, recipe);
-                      }
-                    },
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                        value: 'edit',
-                        child: Row(
-                          children: [
-                            Icon(Icons.edit, size: 18),
-                            SizedBox(width: 8),
-                            Text(AppLocalizations.of(context)!.edit),
-                          ],
-                        ),
-                      ),
-                      PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            Icon(Icons.delete, size: 18, color: Colors.red),
-                            SizedBox(width: 8),
-                            Text(
-                              AppLocalizations.of(context)!.delete,
-                              style: const TextStyle(color: Colors.red),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              // Lock icon for private recipes.
-              if (isPrivate)
-                Positioned(
-                  top: 8,
-                  left: 8,
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.lock_outline,
-                      size: 16,
-                      color: AppTheme.darkCharcoal,
-                    ),
-                  ),
-                ),
-            ],
+    // INSTEAD OF manual AlignedGridView (lines 182-312)...
+    return StandardRecipeGrid(
+      recipes: recipes,
+      showLockIcon: isPrivate,
+      onEdit: (recipe) async {
+        // 1. Navigate to edit screen.
+        final result = await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CreateRecipeScreen(recipeToEdit: recipe),
           ),
         );
+        // If returned true (successful save), refresh the list.
+        if (result == true && context.mounted) {
+          context.read<MyRecipesBloc>().add(LoadMyRecipes());
+        }
+      },
+      onDelete: (recipe) {
+        // 2. Show delete dialog.
+        _showDeleteDialog(context, recipe);
       },
     );
   }

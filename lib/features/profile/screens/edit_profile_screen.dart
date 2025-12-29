@@ -222,147 +222,157 @@ class _EditProfileViewState extends State<EditProfileView> {
             ),
           ],
         ),
-        body: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Avatar
-                Center(
-                  child: Column(
-                    children: [
-                      GestureDetector(
-                        onTap: _showAvatarPicker, // Open avatar picker
-                        child: Stack(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(3),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: _selectedAvatarPath != _initialAvatar 
-                                      ? AppTheme.darkCharcoal 
-                                      : Colors.grey.shade400, 
-                                  width: 2
-                                ),
-                              ),
-                              child: Container(
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle, 
-                                  color: Colors.white
-                                ),
-                                child: CircleAvatar(
-                                  radius: 50,
-                                  backgroundColor: Colors.transparent,
-                                  backgroundImage: AvatarHelper.getAvatarProvider(_selectedAvatarPath), // Show selected
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                              bottom: 0,
-                              right: 0,
-                              child: Container(
-                                padding: const EdgeInsets.all(6),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: AppTheme.offWhite,
-                                    width: 2,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.1),
-                                      blurRadius: 4,
+        body: Align( // Use Align instead of Center
+          alignment: Alignment.topCenter, // PUSH TO TOP
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600), // Optimal width for forms
+            child: Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Avatar
+                    Center(
+                      child: Column(
+                        children: [
+                          GestureDetector(
+                            onTap: _showAvatarPicker, // Open avatar picker
+                            child: Stack(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(3),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: _selectedAvatarPath != _initialAvatar
+                                          ? AppTheme.darkCharcoal
+                                          : Colors.grey.shade400,
+                                      width: 2,
                                     ),
-                                  ],
+                                  ),
+                                  child: Container(
+                                    decoration: const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white,
+                                    ),
+                                    child: CircleAvatar(
+                                      radius: 50,
+                                      backgroundColor: Colors.transparent,
+                                      backgroundImage: AvatarHelper.getAvatarProvider(
+                                        _selectedAvatarPath,
+                                      ), // Show selected
+                                    ),
+                                  ),
                                 ),
-                                child: const Icon(
-                                  Icons.camera_alt_outlined,
-                                  size: 20,
-                                  color: AppTheme.darkCharcoal,
+                                Positioned(
+                                  bottom: 0,
+                                  right: 0,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(6),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: AppTheme.offWhite,
+                                        width: 2,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withValues(alpha: 0.1),
+                                          blurRadius: 4,
+                                        ),
+                                      ],
+                                    ),
+                                    child: const Icon(
+                                      Icons.camera_alt_outlined,
+                                      size: 20,
+                                      color: AppTheme.darkCharcoal,
+                                    ),
+                                  ),
                                 ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          GestureDetector(
+                            onTap: _showAvatarPicker,
+                            child: Text(
+                              AppLocalizations.of(context)!.tapToChangePhoto,
+                              style: TextStyle(
+                                fontFamily: 'Inter',
+                                color: AppTheme.mediumGray,
+                                fontSize: 14,
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      GestureDetector(
-                        onTap: _showAvatarPicker,
-                        child: Text(
-                          AppLocalizations.of(context)!.tapToChangePhoto,
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            color: AppTheme.mediumGray,
-                            fontSize: 14,
                           ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 32),
+
+                    Text(
+                      AppLocalizations.of(context)!.nickname,
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                        color: AppTheme.darkCharcoal,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _nicknameController,
+                      validator: (val) =>
+                          val!.trim().isEmpty
+                              ? AppLocalizations.of(context)!.nicknameEmpty
+                              : null,
+                      style: const TextStyle(color: AppTheme.darkCharcoal),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Colors.red),
                         ),
                       ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 32),
-
-                Text(
-                  AppLocalizations.of(context)!.nickname,
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16,
-                    color: AppTheme.darkCharcoal,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _nicknameController,
-                  validator: (val) =>
-                      val!.trim().isEmpty ? AppLocalizations.of(context)!.nicknameEmpty : null,
-                  style: const TextStyle(color: AppTheme.darkCharcoal),
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
                     ),
-                    errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Colors.red),
-                    ),
-                  ),
-                ),
 
-                const SizedBox(height: 24),
-                Text(
-                  AppLocalizations.of(context)!.email,
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16,
-                    color: AppTheme.darkCharcoal,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _emailController,
-                  enabled: false,
-                  style: const TextStyle(
-                    color: AppTheme.mediumGray,
-                  ), // Grey text for disabled field.
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
+                    const SizedBox(height: 24),
+                    Text(
+                      AppLocalizations.of(context)!.email,
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                        color: AppTheme.darkCharcoal,
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _emailController,
+                      enabled: false,
+                      style: const TextStyle(
+                        color: AppTheme.mediumGray,
+                      ), // Grey text for disabled field.
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),

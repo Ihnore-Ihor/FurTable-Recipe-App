@@ -70,59 +70,73 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
             recipe = widget.initialRecipe;
           }
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Image
-                Hero(
-                  tag: 'recipe_image_${recipe.id}',
-                  child: AppImage(
-                    imagePath: recipe.imageUrl,
-                    width: double.infinity,
-                    height: 250,
-                    fit: BoxFit.cover,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                // Title
-                Text(
-                  recipe.title,
-                  style: const TextStyle(
-                    fontFamily: 'Inter', fontSize: 28, fontWeight: FontWeight.w800,
-                    color: AppTheme.darkCharcoal, height: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 8),
-
-                // Author
-                Row(
+          return Center( // Center content on large screens
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 800), // Limit reading width
+              child: SingleChildScrollView(
+                // WAS: vertical: 8
+                // NOW: top: 0 (push to AppBar), bottom: 40 (scroll padding)
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 40),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: AppTheme.darkCharcoal, width: 1.5),
-                      ),
-                      child: CircleAvatar(
-                        radius: 16,
-                        backgroundColor: Colors.white,
-                        backgroundImage: AvatarHelper.getAvatarProvider(recipe.authorAvatarUrl),
+                    // 1. Adaptive Image
+                    AspectRatio(
+                      aspectRatio: 16 / 10, // A bit taller than 16/9 so Haru is seen better
+                      child: Hero(
+                        tag: 'recipe_image_${recipe.id}',
+                        child: AppImage(
+                          imagePath: recipe.imageUrl,
+                          // AppImage knows Haru needs Alignment.topCenter
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(height: 16), // Reduced from 24
+
+                    // 2. Title
                     Text(
-                      AppLocalizations.of(context)!.byAuthor(recipe.authorName),
+                      recipe.title,
                       style: const TextStyle(
-                        fontFamily: 'Inter', fontSize: 16, fontWeight: FontWeight.w600,
+                        fontFamily: 'Inter',
+                        fontSize: 28,
+                        fontWeight: FontWeight.w800,
                         color: AppTheme.darkCharcoal,
+                        height: 1.2,
                       ),
                     ),
-                  ],
-                ),
+                    const SizedBox(height: 16),
+
+                    // 3. Author (FIXED OVERFLOW)
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: AppTheme.darkCharcoal, width: 1.5),
+                          ),
+                          child: CircleAvatar(
+                            radius: 16,
+                            backgroundColor: Colors.white,
+                            backgroundImage: AvatarHelper.getAvatarProvider(recipe.authorAvatarUrl),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded( // <--- Expanded saves from overflow error
+                          child: Text(
+                            AppLocalizations.of(context)!.byAuthor(recipe.authorName),
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.darkCharcoal,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
 
                 const SizedBox(height: 24),
                 Text(AppLocalizations.of(context)!.description, style: const TextStyle(fontFamily: 'Inter', fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
@@ -232,7 +246,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                                       fontFamily: 'Inter',
                                       fontSize: 16,
                                       height: 1.5,
-                                      color: AppTheme.darkCharcoal.withOpacity(0.9),
+                                      color: AppTheme.darkCharcoal.withValues(alpha: 0.9),
                                       decoration: isDone ? TextDecoration.lineThrough : null,
                                     ),
                                   ),
@@ -249,7 +263,9 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                 const SizedBox(height: 40),
               ],
             ),
-          );
+          ),
+        ),
+      );
         },
       ),
     );

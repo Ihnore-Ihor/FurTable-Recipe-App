@@ -1,17 +1,12 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/core/utils/navigation_helper.dart';
 import 'package:furtable/features/explore/bloc/explore_bloc.dart';
 import 'package:furtable/features/explore/bloc/explore_event.dart';
 import 'package:furtable/features/explore/bloc/explore_state.dart';
-import 'package:furtable/features/explore/screens/recipe_details_screen.dart';
-import 'package:furtable/features/explore/widgets/recipe_card.dart';
-import 'package:furtable/features/favorites/bloc/favorites_bloc.dart';
-import 'package:furtable/features/favorites/bloc/favorites_event.dart';
-import 'package:furtable/features/favorites/bloc/favorites_state.dart';
+import 'package:furtable/features/explore/widgets/responsive_recipe_grid.dart';
 import 'package:furtable/features/profile/screens/profile_screen.dart';
 import 'package:furtable/l10n/app_localizations.dart';
 
@@ -104,19 +99,8 @@ class _ExploreViewState extends State<ExploreView> {
     return currentScroll >= (maxScroll * 0.9);
   }
 
-  int _getCrossAxisCount(double screenWidth) {
-    if (screenWidth > 1920) return 6;
-    if (screenWidth > 1200) return 5;
-    if (screenWidth > 1024) return 4;
-    if (screenWidth > 767) return 3;
-    if (screenWidth > 480) return 2;
-    return 1;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final crossAxisCount = _getCrossAxisCount(screenWidth);
 
     return Scaffold(
       backgroundColor: AppTheme.offWhite,
@@ -161,54 +145,8 @@ class _ExploreViewState extends State<ExploreView> {
           return CustomScrollView(
             controller: _scrollController,
             slivers: [
-              SliverPadding(
-                padding: const EdgeInsets.all(16),
-                sliver: SliverAlignedGrid.count(
-                  crossAxisCount: crossAxisCount,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 24,
-                  itemCount: state.recipes.length,
-                  itemBuilder: (context, index) {
-                    final recipe = state.recipes[index];
-
-                    // Handle recipe tap.
-                    return GestureDetector(
-                      onTap: () {
-                        // Navigate to recipe details screen.
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                RecipeDetailsScreen(initialRecipe: recipe),
-                          ),
-                        );
-                      },
-                      child: BlocBuilder<FavoritesBloc, FavoritesState>(
-                        builder: (context, favState) {
-                          bool isFav = false;
-                          if (favState is FavoritesLoaded) {
-                            // Перевіряємо, чи є цей рецепт в списку улюблених
-                            isFav = favState.recipes.any((r) => r.id == recipe.id);
-                          }
-
-                          return RecipeCard(
-                            // Pass ID for Hero animation tag.
-                            id: recipe.id,
-                            imageUrl: recipe.imageUrl,
-                            title: recipe.title,
-                            author: recipe.authorName,
-                            likes: recipe.likes,
-                            isFavorite: isFav,
-                            onFavoriteToggle: () {
-                              context.read<FavoritesBloc>().add(ToggleFavorite(recipe));
-                            },
-                          );
-                        },
-                      ),
-                    );
-                  },
-                ),
-              ),
+              // INSTEAD OF SliverPadding + SliverAlignedGrid WRITE:
+              SliverRecipeGrid(recipes: state.recipes),
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.all(24.0),
@@ -218,13 +156,13 @@ class _ExploreViewState extends State<ExploreView> {
                             children: [
                               Icon(
                                 Icons.check_circle_outline,
-                                color: AppTheme.mediumGray.withOpacity(0.5),
+                                color: AppTheme.mediumGray.withValues(alpha: 0.5),
                               ),
                               const SizedBox(height: 8),
                                 Text(
                                   AppLocalizations.of(context)!.reachedEnd,
                                   style: TextStyle(
-                                    color: AppTheme.mediumGray.withOpacity(0.5),
+                                    color: AppTheme.mediumGray.withValues(alpha: 0.5),
                                     fontFamily: 'Inter',
                                   ),
                                 ),

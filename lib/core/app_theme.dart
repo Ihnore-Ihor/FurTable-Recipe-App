@@ -15,6 +15,9 @@ class AppTheme {
   /// The medium gray color used for secondary text.
   static const Color mediumGray = Color(0xFF888888);
 
+  /// The maximum width for content on large screens to ensure readability.
+  static const double maxContentWidth = 1200.0;
+
   /// Returns the global [ThemeData] for the application.
   ///
   /// Configures the font family, scaffold background color, app bar,

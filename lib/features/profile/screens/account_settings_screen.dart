@@ -355,7 +355,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
         const SizedBox(width: 16),
         Switch.adaptive(
           value: value,
-          activeColor: AppTheme.darkCharcoal,
+          activeTrackColor: AppTheme.darkCharcoal,
           onChanged: onChanged,
         ),
       ],
@@ -393,7 +393,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
     borderRadius: BorderRadius.circular(16),
     boxShadow: [
       BoxShadow(
-        color: Colors.black.withOpacity(0.03),
+        color: Colors.black.withValues(alpha: 0.03),
         blurRadius: 8,
         offset: const Offset(0, 2),
       ),

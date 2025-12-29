@@ -66,7 +66,7 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
       // and the StreamSubscription in _onLoadFavorites will sync the server truth later.
 
     } catch (e) {
-      print("!!! FAVORITE TOGGLE ERROR: $e");
+      // print("!!! FAVORITE TOGGLE ERROR: $e");
       // 3. ROLLBACK (on error)
       // If the server rejected the request, just reload everything
       add(LoadFavorites());

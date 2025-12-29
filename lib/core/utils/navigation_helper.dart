@@ -1,17 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:furtable/features/explore/screens/explore_screen.dart';
-import 'package:furtable/features/my_recipes/screens/my_recipes_screen.dart';
 import 'package:furtable/features/favorites/screens/favorites_screen.dart';
+import 'package:furtable/features/my_recipes/screens/my_recipes_screen.dart';
 import 'package:furtable/features/search/screens/search_screen.dart';
 
-/// Helper class for handling bottom navigation bar transitions.
 class NavigationHelper {
-  /// Handles the tap event on the bottom navigation bar items.
-  ///
-  /// Navigates to the selected screen using a fade transition if the
-  /// selected index is different from the current index.
   static void onItemTapped(BuildContext context, int index, int currentIndex) {
-    // Do nothing if the same tab is selected.
     if (index == currentIndex) return;
 
     Widget page;
@@ -32,7 +26,6 @@ class NavigationHelper {
         return;
     }
 
-    // Navigate with a fade transition to support Hero animations.
     Navigator.pushReplacement(
       context,
       PageRouteBuilder(
@@ -43,5 +36,14 @@ class NavigationHelper {
         },
       ),
     );
+  }
+
+  // ADDED: Method for adaptive grid
+  static int getResponsiveCrossAxisCount(double width) {
+    if (width > 1600) return 6;
+    if (width > 1200) return 5;
+    if (width > 900) return 4;
+    if (width > 600) return 3;
+    return 2;
   }
 }

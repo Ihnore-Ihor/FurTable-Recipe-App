@@ -32,6 +32,72 @@ class RecipeRepository {
         });
   }
 
+  /// Gets public recipes (for Explore screen) - Paginated.
+  Future<QuerySnapshot> getPublicRecipesPaginated({
+    DocumentSnapshot? lastDocument,
+    int limit = 10,
+  }) {
+    var query = _recipesRef
+        .where('isPublic', isEqualTo: true)
+        .orderBy('createdAt', descending: true)
+        .limit(limit);
+
+    if (lastDocument != null) {
+      query = query.startAfterDocument(lastDocument);
+    }
+
+    return query.get();
+  }
+
+  /// Gets recipes authored by a specific user (for My Recipes) - Paginated.
+  Future<QuerySnapshot> getMyRecipesPaginated(
+    String userId, {
+    DocumentSnapshot? lastDocument,
+    int limit = 10,
+  }) {
+    var query = _recipesRef
+        .where('authorId', isEqualTo: userId)
+        .orderBy('createdAt', descending: true)
+        .limit(limit);
+
+    if (lastDocument != null) {
+      query = query.startAfterDocument(lastDocument);
+    }
+
+    return query.get();
+  }
+
+  /// Gets the list of favorite REFRENCES (IDs) paginated.
+  Future<QuerySnapshot> getFavoriteRefsPaginated(
+    String userId, {
+    DocumentSnapshot? lastDocument,
+    int limit = 10,
+  }) {
+    var query = FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('favorites')
+        .orderBy('addedAt', descending: true)
+        .limit(limit);
+
+    if (lastDocument != null) {
+      query = query.startAfterDocument(lastDocument);
+    }
+
+    return query.get();
+  }
+
+  /// Fetches actual Recipe objects from a list of IDs.
+  Future<List<Recipe>> getRecipesByIds(List<String> ids) async {
+    if (ids.isEmpty) return [];
+
+    final recipesQuery = await _recipesRef
+        .where(FieldPath.documentId, whereIn: ids)
+        .get();
+
+    return recipesQuery.docs.map((doc) => Recipe.fromFirestore(doc)).toList();
+  }
+
   /// Creates a new recipe.
   Future<void> createRecipe(Recipe recipe) async {
     await _recipesRef.add(recipe.toFirestore());

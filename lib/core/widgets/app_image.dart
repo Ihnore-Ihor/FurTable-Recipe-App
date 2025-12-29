@@ -21,19 +21,35 @@ class AppImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 1. DETERMINE IMAGE TYPE
-    // If it's our placeholder (Haru), we want custom alignment (TopCenter)
-    // If it's any other image (food) - Center
-    final isHaru = imagePath.contains('haru_eating');
-    final Alignment geometryAlignment = isHaru
-        ? Alignment.topCenter
-        : Alignment.center;
+    // 1. ВИЗНАЧАЄМО АКТУАЛЬНУ ЗАГЛУШКУ (EN vs UK)
+    final String languageCode = Localizations.localeOf(context).languageCode;
+    final String haruAsset = languageCode == 'uk'
+        ? 'assets/images/haru_eating_uk.png'
+        : 'assets/images/haru_eating_en.png';
 
-    // 2. NETWORK (HTTP)
+    // 2. ВИЗНАЧАЄМО ТИП ВИРІВНЮВАННЯ
+    final bool isHaru = imagePath.contains('haru_eating') || imagePath.contains('legom');
+    final Alignment geometryAlignment = isHaru ? Alignment.topCenter : Alignment.center;
+
+    // 3. ЗАГЛУШКА (або пустий шлях)
+    if (imagePath.trim().isEmpty || imagePath.contains('placehold.co')) {
+      return _buildWrapper(
+        child: Image.asset(
+          haruAsset, // <--- Використовуємо динамічний шлях
+          width: width,
+          height: height,
+          fit: fit,
+          alignment: Alignment.topCenter,
+        ),
+        forceBackground: true,
+      );
+    }
+
+    // 4. МЕРЕЖА
     if (imagePath.startsWith('http')) {
       final useCache = LocalStorageService().isCacheEnabled;
-      final int cacheWidth = width != null && width!.isFinite
-          ? (width! * 2).toInt()
+      final int? cacheWidth = width != null && width!.isFinite 
+          ? (width! * 2).toInt() 
           : 800;
 
       if (useCache) {
@@ -45,21 +61,16 @@ class AppImage extends StatelessWidget {
             fit: fit,
             alignment: geometryAlignment,
             memCacheWidth: cacheWidth,
-
-            // No fade-in to avoid breaking Hero transitions
             fadeInDuration: Duration.zero,
             placeholderFadeInDuration: Duration.zero,
-
-            // Loader (Legoshi) only for network
             placeholder: (context, url) => const _LoadingPlaceholder(),
-
-            // If network load fails -> show local Haru
             errorWidget: (context, url, error) => Image.asset(
-              'assets/images/haru_eating_en.png',
+              haruAsset, // <--- Динамічний шлях при помилці
               fit: fit,
               alignment: Alignment.topCenter,
             ),
           ),
+          forceBackground: false,
         );
       } else {
         return _buildWrapper(
@@ -71,37 +82,42 @@ class AppImage extends StatelessWidget {
             alignment: geometryAlignment,
             cacheWidth: cacheWidth,
             loadingBuilder: (context, child, loadingProgress) {
-              if (loadingProgress == null) return child;
-              return const _LoadingPlaceholder();
+               if (loadingProgress == null) return child;
+               return const _LoadingPlaceholder();
             },
             errorBuilder: (context, error, stackTrace) => Image.asset(
-              'assets/images/haru_eating_en.png',
+              haruAsset, // <--- Динамічний шлях при помилці
               fit: fit,
               alignment: Alignment.topCenter,
             ),
           ),
+          forceBackground: false,
         );
       }
     }
 
-    // 3. LOCAL ASSET (Haru or anything else from assets folder)
-    // This loads instantly. No spinners.
+    // 5. ЛОКАЛЬНИЙ АССЕТ
+    // Якщо шлях явно вказує на "стару" хару (haru_eating_en), 
+    // замінюємо її на актуальну для поточної мови.
+    // Це потрібно для випадків, коли ми десь захардкодили шлях у коді.
+    String actualPath = imagePath;
+    if (imagePath.contains('haru_eating')) {
+      actualPath = haruAsset;
+    }
+
     return _buildWrapper(
       child: Image.asset(
-        // If an empty string somehow arrives (old data) - fallback to Haru
-        imagePath.isEmpty ? 'assets/images/haru_eating_en.png' : imagePath,
+        actualPath,
         width: width,
         height: height,
         fit: fit,
         alignment: geometryAlignment,
-        // If file not found
         errorBuilder: (context, error, stackTrace) => Image.asset(
-          'assets/images/haru_eating_en.png',
-          fit: fit,
-          alignment: Alignment.topCenter,
+           haruAsset, // <--- Динамічний шлях
+           fit: fit,
+           alignment: Alignment.topCenter,
         ),
       ),
-      // Apply background only for Haru to look like a placeholder
       forceBackground: isHaru,
     );
   }
@@ -119,7 +135,6 @@ class AppImage extends StatelessWidget {
   }
 }
 
-// Loading (Legoshi)
 class _LoadingPlaceholder extends StatelessWidget {
   const _LoadingPlaceholder();
 
@@ -131,8 +146,8 @@ class _LoadingPlaceholder extends StatelessWidget {
         fit: BoxFit.contain,
         alignment: Alignment.center,
         child: SizedBox(
-          width: 300,
-          height: 300,
+          width: 300, 
+          height: 300, 
           child: Stack(
             alignment: Alignment.center,
             children: [
@@ -142,10 +157,7 @@ class _LoadingPlaceholder extends StatelessWidget {
                 child: const SizedBox(
                   width: 35,
                   height: 35,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 3,
-                    color: AppTheme.darkCharcoal,
-                  ),
+                  child: CircularProgressIndicator(strokeWidth: 3, color: AppTheme.darkCharcoal),
                 ),
               ),
             ],

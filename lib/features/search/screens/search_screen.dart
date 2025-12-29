@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:furtable/core/widgets/app_image.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/core/utils/navigation_helper.dart';
-import 'package:furtable/features/explore/screens/recipe_details_screen.dart';
-import 'package:furtable/features/explore/widgets/recipe_card.dart';
 import 'package:furtable/features/search/bloc/search_bloc.dart';
 import 'package:furtable/features/search/bloc/search_event.dart';
 import 'package:furtable/features/search/bloc/search_state.dart';
-import 'package:furtable/features/favorites/bloc/favorites_bloc.dart';
-import 'package:furtable/features/favorites/bloc/favorites_event.dart';
-import 'package:furtable/features/favorites/bloc/favorites_state.dart';
+import 'package:furtable/features/explore/widgets/responsive_recipe_grid.dart'; // <--- Import
 import 'package:furtable/features/profile/screens/profile_screen.dart';
 import 'package:furtable/l10n/app_localizations.dart';
 
@@ -64,20 +60,27 @@ class _SearchViewState extends State<SearchView> {
   }
 
   // Common widget for displaying placeholder images.
+  // Common widget for displaying placeholder images.
   Widget _buildPlaceholderImage(String assetPath) {
-    return Opacity(
-      opacity: 0.75, // 75% opacity.
-      child: Container(
-        width: double.infinity, // Full width.
-        height: 250, // Fixed height.
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage(assetPath),
-            fit: BoxFit.cover, // Stretch to width.
-            alignment: Alignment.topCenter, // Show only top 40%.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // On desktop height should be larger so it doesn't look like a strip
+        double height = constraints.maxWidth > 600 ? 400 : 250;
+
+        return Opacity(
+          opacity: 0.75,
+          child: AppImage(
+            imagePath: assetPath,
+            width: double.infinity,
+            height: height,
+            fit: BoxFit.cover,
+            // alignment: Alignment.topCenter is already built-in for Haru in AppImage/placeholder logic if needed,
+            // or we can rely on fit: BoxFit.cover to do a decent job.
+            // If explicit alignment is needed, wrapping AppImage in another widget or modifying AppImage might be needed,
+            // but for now we follow the request to use AppImage.
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -288,46 +291,8 @@ class _SearchViewState extends State<SearchView> {
 
                 // 4. STATE: SUCCESS
                 if (state is SearchSuccess) {
-                  return AlignedGridView.count(
-                    padding: const EdgeInsets.all(16),
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 24,
-                    itemCount: state.recipes.length,
-                    itemBuilder: (context, index) {
-                      final recipe = state.recipes[index];
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  RecipeDetailsScreen(initialRecipe: recipe),
-                            ),
-                          );
-                        },
-                        child: BlocBuilder<FavoritesBloc, FavoritesState>(
-                          builder: (context, favState) {
-                            bool isFav = false;
-                            if (favState is FavoritesLoaded) {
-                              isFav = favState.recipes.any((r) => r.id == recipe.id);
-                            }
-                            return RecipeCard(
-                              id: recipe.id,
-                              imageUrl: recipe.imageUrl,
-                              title: recipe.title,
-                              author: recipe.authorName,
-                              likes: recipe.likes,
-                              isFavorite: isFav,
-                              onFavoriteToggle: () {
-                                context.read<FavoritesBloc>().add(ToggleFavorite(recipe));
-                              },
-                            );
-                          },
-                        ),
-                      );
-                    },
-                  );
+                  // INSTEAD OF AlignedGridView.count...
+                  return StandardRecipeGrid(recipes: state.recipes);
                 }
 
                 return const SizedBox.shrink();
