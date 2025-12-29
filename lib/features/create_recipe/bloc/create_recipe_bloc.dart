@@ -43,7 +43,7 @@ class CreateRecipeBloc extends Bloc<CreateRecipeEvent, CreateRecipeState> {
           user.uid, // <--- Pass user ID
         );
       } else {
-        imageUrl = 'https://placehold.co/600x400/png?text=No+Image';
+        imageUrl = 'assets/images/haru_eating_en.png';
       }
 
       // 2. Create the recipe object

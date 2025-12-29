@@ -14,12 +14,6 @@ class AccountSettingsScreen extends StatefulWidget {
 }
 
 class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
-  // Switch states.
-  bool _emailNotifications = true;
-  bool _recipeUpdates = false;
-  bool _pushNotifications = true;
-  bool _recipeLikes = false;
-
   late bool _isCacheEnabled;
   late bool _isAutoClearEnabled;
 
@@ -208,74 +202,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
             ),
             const SizedBox(height: 16),
 
-            // --- 2. EMAIL PREFERENCES ---
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: _cardDecoration,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Email Preferences', style: _sectionHeaderStyle),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Manage the email notifications you receive.',
-                    style: _subtitleStyle,
-                  ),
-                  const SizedBox(height: 24),
-
-                  _buildSwitchRow(
-                    'Email Notifications',
-                    'Receive important updates via email',
-                    _emailNotifications,
-                    (val) => setState(() => _emailNotifications = val),
-                  ),
-                  const SizedBox(height: 24),
-                  _buildSwitchRow(
-                    'Recipe Updates',
-                    'Get notified when recipes you liked are updated',
-                    _recipeUpdates,
-                    (val) => setState(() => _recipeUpdates = val),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // --- 3. PUSH NOTIFICATIONS ---
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: _cardDecoration,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Push Notifications', style: _sectionHeaderStyle),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Control which push notifications you receive.',
-                    style: _subtitleStyle,
-                  ),
-                  const SizedBox(height: 24),
-
-                  _buildSwitchRow(
-                    'Push Notifications',
-                    'Allow FurTable to send push notifications',
-                    _pushNotifications,
-                    (val) => setState(() => _pushNotifications = val),
-                  ),
-                  const SizedBox(height: 24),
-                  _buildSwitchRow(
-                    'Recipe Likes',
-                    'When someone likes your recipes',
-                    _recipeLikes,
-                    (val) => setState(() => _recipeLikes = val),
-                  ),
-                ],
-              ),
-            ),
-
-            // --- 4. STORAGE & CACHE ---
-            const SizedBox(height: 16), // Added spacing
-            
+            // --- 2. STORAGE & CACHE ---
             Container(
               padding: const EdgeInsets.all(20),
               decoration: _cardDecoration,
@@ -326,7 +253,6 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
             const SizedBox(height: 32),
 
             // Account deletion button.
-            const SizedBox(height: 32),
             Center(
               child: TextButton(
                 onPressed: _showDeleteConfirmation,

@@ -3,27 +3,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/core/utils/avatar_helper.dart';
+import 'package:furtable/core/widgets/app_image.dart';
 import 'package:furtable/features/explore/models/recipe_model.dart';
 import 'package:furtable/features/favorites/bloc/favorites_bloc.dart';
 import 'package:furtable/features/favorites/bloc/favorites_event.dart';
 import 'package:furtable/features/favorites/bloc/favorites_state.dart';
-import 'package:furtable/core/widgets/app_image.dart';
 
-/// Screen displaying the detailed view of a recipe.
-class RecipeDetailsScreen extends StatelessWidget {
-  /// The initial recipe data.
-  final Recipe initialRecipe; // Renamed for clarity
+/// Screen displaying the detailed view of a recipe with interactive checklists.
+class RecipeDetailsScreen extends StatefulWidget {
+  final Recipe initialRecipe;
 
-  /// Creates a [RecipeDetailsScreen] with initial data.
-  ///
-  /// Initial data is shown while fetching updates.
   const RecipeDetailsScreen({super.key, required this.initialRecipe});
+
+  @override
+  State<RecipeDetailsScreen> createState() => _RecipeDetailsScreenState();
+}
+
+class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
+  // Store indices/values of completed items locally
+  final Set<String> _completedIngredients = {}; 
+  final Set<int> _completedSteps = {};
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.offWhite,
-      // AppBar remains here so the Back button always works
       appBar: AppBar(
         backgroundColor: AppTheme.offWhite,
         leading: IconButton(
@@ -31,12 +35,11 @@ class RecipeDetailsScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
-          // Like button handled via BLoC
           BlocBuilder<FavoritesBloc, FavoritesState>(
             builder: (context, state) {
               bool isFavorite = false;
               if (state is FavoritesLoaded) {
-                isFavorite = state.recipes.any((r) => r.id == initialRecipe.id);
+                isFavorite = state.recipes.any((r) => r.id == widget.initialRecipe.id);
               }
               return IconButton(
                 icon: Icon(
@@ -44,9 +47,7 @@ class RecipeDetailsScreen extends StatelessWidget {
                   color: AppTheme.darkCharcoal,
                 ),
                 onPressed: () {
-                  context.read<FavoritesBloc>().add(
-                    ToggleFavorite(initialRecipe),
-                  );
+                  context.read<FavoritesBloc>().add(ToggleFavorite(widget.initialRecipe));
                 },
               );
             },
@@ -54,26 +55,20 @@ class RecipeDetailsScreen extends StatelessWidget {
           const SizedBox(width: 8),
         ],
       ),
-
-      // --- MAIN CHANGE: StreamBuilder ---
+      
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance
             .collection('recipes')
-            .doc(initialRecipe.id)
+            .doc(widget.initialRecipe.id)
             .snapshots(),
         builder: (context, snapshot) {
-          // 1. Determine which data to show
           Recipe recipe;
-
           if (snapshot.hasData && snapshot.data!.exists) {
-            // If fresh data from DB, use it
             recipe = Recipe.fromFirestore(snapshot.data!);
           } else {
-            // While loading (or error), show initial data
-            recipe = initialRecipe;
+            recipe = widget.initialRecipe;
           }
 
-          // 2. Draw UI (same code as before, but using the recipe variable)
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
             child: Column(
@@ -96,131 +91,192 @@ class RecipeDetailsScreen extends StatelessWidget {
                 Text(
                   recipe.title,
                   style: const TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 28,
-                    fontWeight: FontWeight.w800,
-                    color: AppTheme.darkCharcoal,
-                    height: 1.2,
+                    fontFamily: 'Inter', fontSize: 28, fontWeight: FontWeight.w800,
+                    color: AppTheme.darkCharcoal, height: 1.2,
                   ),
                 ),
                 const SizedBox(height: 8),
 
-                // Author + Avatar
+                // Author
                 Row(
                   children: [
-                    // --- RESTORED AVATAR ---
                     Container(
                       padding: const EdgeInsets.all(2),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(
-                          color: AppTheme.darkCharcoal,
-                          width: 1.5, // Slightly thicker border for style
-                        ),
+                        border: Border.all(color: AppTheme.darkCharcoal, width: 1.5),
                       ),
                       child: CircleAvatar(
-                        radius: 16, // Avatar size
+                        radius: 16,
                         backgroundColor: Colors.white,
-                        // Use path from model or default
-                        backgroundImage: AvatarHelper.getAvatarProvider(
-                          recipe.authorAvatarUrl,
-                        ),
+                        backgroundImage: AvatarHelper.getAvatarProvider(recipe.authorAvatarUrl),
                       ),
                     ),
                     const SizedBox(width: 12),
-
-                    // ---------------------------
                     Text(
                       'by ${recipe.authorName}',
                       style: const TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 16,
-                        fontWeight:
-                            FontWeight.w600, // Slightly bolder for accent
-                        color: AppTheme.darkCharcoal, // Dark color
+                        fontFamily: 'Inter', fontSize: 16, fontWeight: FontWeight.w600,
+                        color: AppTheme.darkCharcoal,
                       ),
                     ),
                   ],
                 ),
 
                 const SizedBox(height: 24),
-                // ... Rest of fields (Description, Ingredients, Steps) unchanged ...
-                const Text(
-                  'Description',
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.darkCharcoal,
-                  ),
-                ),
+                const Text('Description', style: TextStyle(fontFamily: 'Inter', fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
                 const SizedBox(height: 8),
-                Text(
-                  recipe.description.isNotEmpty
-                      ? recipe.description
-                      : 'No description.',
-                  style: const TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 15,
-                    height: 1.5,
-                    color: AppTheme.mediumGray,
-                  ),
-                ),
-
+                Text(recipe.description.isNotEmpty ? recipe.description : 'No description provided.', style: const TextStyle(fontFamily: 'Inter', fontSize: 15, height: 1.5, color: AppTheme.mediumGray)),
+                
                 const SizedBox(height: 24),
-                const Text(
-                  'Ingredients',
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.darkCharcoal,
-                  ),
-                ),
+                
+                // --- INGREDIENTS WITH CHECKBOXES ---
+                const Text('Ingredients', style: TextStyle(fontFamily: 'Inter', fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
                 const SizedBox(height: 12),
-                ...recipe.ingredients.map(
-                  (i) => Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Text(
-                      "• $i",
-                      style: const TextStyle(
-                        fontSize: 15,
-                        color: AppTheme.darkCharcoal,
+                if (recipe.ingredients.isEmpty)
+                  const Text('No ingredients listed.', style: TextStyle(color: AppTheme.mediumGray)),
+                
+                ...recipe.ingredients.map((ingredient) {
+                  final isDone = _completedIngredients.contains(ingredient);
+                  
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        if (isDone) {
+                          _completedIngredients.remove(ingredient);
+                        } else {
+                          _completedIngredients.add(ingredient);
+                        }
+                      });
+                    },
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 200),
+                      opacity: isDone ? 0.5 : 1.0,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 12.0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _ThinCheckbox(isDone: isDone),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                ingredient,
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: 16,
+                                  height: 1.4,
+                                  color: AppTheme.darkCharcoal,
+                                  decoration: isDone ? TextDecoration.lineThrough : null,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ),
-
+                  );
+                }),
+                
                 const SizedBox(height: 24),
-                const Text(
-                  'Instructions',
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.darkCharcoal,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                ...recipe.steps.map(
-                  (s) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Text(
-                      s,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        color: AppTheme.darkCharcoal,
+
+                // --- INSTRUCTIONS WITH CHECKBOXES ---
+                const Text('Instructions', style: TextStyle(fontFamily: 'Inter', fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
+                const SizedBox(height: 16),
+                if (recipe.steps.isEmpty)
+                  const Text('No instructions listed.', style: TextStyle(color: AppTheme.mediumGray)),
+
+                ...recipe.steps.asMap().entries.map((entry) {
+                  int idx = entry.key;
+                  String step = entry.value;
+                  final isDone = _completedSteps.contains(idx);
+
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        if (isDone) {
+                          _completedSteps.remove(idx);
+                        } else {
+                          _completedSteps.add(idx);
+                        }
+                      });
+                    },
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 200),
+                      opacity: isDone ? 0.5 : 1.0,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 20.0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _ThinCheckbox(isDone: isDone),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Step ${idx + 1}',
+                                    style: const TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppTheme.mediumGray,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    step,
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 16,
+                                      height: 1.5,
+                                      color: AppTheme.darkCharcoal.withOpacity(0.9),
+                                      decoration: isDone ? TextDecoration.lineThrough : null,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ),
-
+                  );
+                }),
+                
                 const SizedBox(height: 40),
               ],
             ),
           );
         },
       ),
+    );
+  }
+}
+
+class _ThinCheckbox extends StatelessWidget {
+  final bool isDone;
+
+  const _ThinCheckbox({required this.isDone});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      width: 20,
+      height: 20,
+      decoration: BoxDecoration(
+        color: isDone ? AppTheme.darkCharcoal : Colors.transparent,
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(
+          color: AppTheme.darkCharcoal,
+          width: 1.0,
+        ),
+      ),
+      child: isDone
+          ? const Icon(Icons.check, size: 14, color: Colors.white)
+          : null,
     );
   }
 }

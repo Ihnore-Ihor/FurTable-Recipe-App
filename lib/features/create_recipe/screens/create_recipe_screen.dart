@@ -1,8 +1,8 @@
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/cupertino.dart'; // For CupertinoTimerPicker
+import 'package:flutter/services.dart'; // For TextInputFormatter
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/core/widgets/app_image.dart'; // <--- Import
 import 'package:furtable/core/utils/image_helper.dart'; // <--- Add import
@@ -83,22 +83,22 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
         // 1. Quick extension check
         final extension = image.name.split('.').last.toLowerCase();
         if (['pdf', 'doc', 'docx', 'exe', 'zip'].contains(extension)) {
-           _showError('Invalid file format. Please select an image (JPG, PNG).');
-           return;
+          _showError('Invalid file format. Please select an image (JPG, PNG).');
+          return;
         }
 
         final bytes = await image.readAsBytes();
 
         // 2. Deep byte check (using our helper)
         if (!ImageHelper.isImage(bytes)) {
-           _showError('The selected file is not a valid image.');
-           return;
+          _showError('The selected file is not a valid image.');
+          return;
         }
 
         // 3. Compression (to ~100 KB)
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Compressing image...'), 
+            content: Text('Compressing image...'),
             duration: Duration(milliseconds: 500),
             backgroundColor: AppTheme.darkCharcoal,
           ),
@@ -107,8 +107,12 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
         final compressedBytes = await ImageHelper.compressImage(bytes);
 
         // For debugging
-        print("Original size: ${(bytes.lengthInBytes / 1024).toStringAsFixed(2)} KB");
-        print("Compressed size: ${(compressedBytes.lengthInBytes / 1024).toStringAsFixed(2)} KB");
+        print(
+          "Original size: ${(bytes.lengthInBytes / 1024).toStringAsFixed(2)} KB",
+        );
+        print(
+          "Compressed size: ${(compressedBytes.lengthInBytes / 1024).toStringAsFixed(2)} KB",
+        );
 
         setState(() {
           _selectedImageBytes = compressedBytes;
@@ -130,7 +134,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
     final d = duration.inDays;
     final h = duration.inHours % 24;
     final m = duration.inMinutes % 60;
-    
+
     String result = '';
     if (d > 0) result += '${d}d ';
     if (h > 0) result += '${h}h ';
@@ -283,7 +287,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                             ),
                           )
                         : (isEditing &&
-                                widget.recipeToEdit!.imageUrl.isNotEmpty)
+                              widget.recipeToEdit!.imageUrl.isNotEmpty)
                         ? AppImage(
                             imagePath: widget.recipeToEdit!.imageUrl,
                             width: double.infinity,
@@ -336,8 +340,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                     int currentMinutes =
                         int.tryParse(_timeController.text) ?? 30;
                     // 2. Temporary variable for scrolling
-                    Duration tempDuration =
-                        Duration(minutes: currentMinutes);
+                    Duration tempDuration = Duration(minutes: currentMinutes);
 
                     showModalBottomSheet(
                       context: context,
@@ -351,7 +354,9 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                               Container(
                                 color: Colors.grey[100],
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 8),
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
@@ -359,17 +364,19 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                                       onPressed: () {
                                         // 3. On 'Done', save the tempDuration
                                         setState(() {
-                                          _timeController.text =
-                                              tempDuration.inMinutes
-                                                  .toString();
+                                          _timeController.text = tempDuration
+                                              .inMinutes
+                                              .toString();
                                         });
                                         Navigator.pop(context);
                                       },
-                                      child: const Text('Done',
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color:
-                                                  AppTheme.darkCharcoal)),
+                                      child: const Text(
+                                        'Done',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: AppTheme.darkCharcoal,
+                                        ),
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -388,8 +395,10 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                                             setState(() {
                                               tempDuration = Duration(
                                                 days: val,
-                                                hours: tempDuration.inHours % 24,
-                                                minutes: tempDuration.inMinutes % 60,
+                                                hours:
+                                                    tempDuration.inHours % 24,
+                                                minutes:
+                                                    tempDuration.inMinutes % 60,
                                               );
                                             });
                                           },
@@ -398,13 +407,15 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                                         _buildPickerColumn(
                                           title: 'Hours',
                                           count: 24,
-                                          initialItem: tempDuration.inHours % 24,
+                                          initialItem:
+                                              tempDuration.inHours % 24,
                                           onChanged: (val) {
                                             setState(() {
                                               tempDuration = Duration(
                                                 days: tempDuration.inDays,
                                                 hours: val,
-                                                minutes: tempDuration.inMinutes % 60,
+                                                minutes:
+                                                    tempDuration.inMinutes % 60,
                                               );
                                             });
                                           },
@@ -413,12 +424,14 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                                         _buildPickerColumn(
                                           title: 'Mins',
                                           count: 60,
-                                          initialItem: tempDuration.inMinutes % 60,
+                                          initialItem:
+                                              tempDuration.inMinutes % 60,
                                           onChanged: (val) {
                                             setState(() {
                                               tempDuration = Duration(
                                                 days: tempDuration.inDays,
-                                                hours: tempDuration.inHours % 24,
+                                                hours:
+                                                    tempDuration.inHours % 24,
                                                 minutes: val,
                                               );
                                             });
@@ -426,7 +439,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                                         ),
                                       ],
                                     );
-                                  }
+                                  },
                                 ),
                               ),
                             ],
@@ -464,7 +477,8 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                 _buildLabel('Ingredients *'),
                 _buildTextFormField(
                   controller: _ingredientsController,
-                  hintText: 'One per line...',
+                  hintText:
+                      'Example:\n2 Eggs\n200g Flour\n1 cup Milk\n(Each on a new line)',
                   maxLines: 6,
                   validator: (v) => v!.isEmpty ? 'Required' : null,
                 ),
@@ -473,7 +487,8 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                 _buildLabel('Instructions *'),
                 _buildTextFormField(
                   controller: _instructionsController,
-                  hintText: 'One per line...',
+                  hintText:
+                      'Example:\nMix eggs and flour.\nAdd milk gradually.\nBake at 180C.\n(Each step on a new line)',
                   maxLines: 8,
                   validator: (v) => v!.isEmpty ? 'Required' : null,
                 ),
@@ -524,19 +539,48 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
     required String hintText,
     int maxLines = 1,
     String? Function(String?)? validator,
+    List<TextInputFormatter>? inputFormatters,
+    TextInputType? keyboardType,
   }) {
     return TextFormField(
       controller: controller,
       maxLines: maxLines,
       minLines: maxLines > 1 ? 3 : 1,
       validator: validator,
+      inputFormatters: inputFormatters,
+      keyboardType: keyboardType,
+      style: const TextStyle(color: AppTheme.darkCharcoal),
       decoration: InputDecoration(
         hintText: hintText,
+        hintStyle: TextStyle(
+          color: AppTheme.mediumGray.withOpacity(0.5),
+          fontSize: 14,
+        ),
         filled: true,
         fillColor: Colors.white,
+        contentPadding: const EdgeInsets.all(16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(
+            color: AppTheme.darkCharcoal,
+            width: 1.5,
+          ),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFDC2626), width: 1.5),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFDC2626), width: 1.5),
         ),
       ),
     );
@@ -553,11 +597,16 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
           Expanded(
             child: CupertinoPicker(
-              scrollController: FixedExtentScrollController(initialItem: initialItem),
+              scrollController: FixedExtentScrollController(
+                initialItem: initialItem,
+              ),
               itemExtent: 32,
               onSelectedItemChanged: onChanged,
               children: List<Widget>.generate(count, (int index) {
