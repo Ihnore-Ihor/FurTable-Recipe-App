@@ -26,7 +26,6 @@ class AppTheme {
     final baseTheme = ThemeData(fontFamily: GoogleFonts.inter().fontFamily);
 
     return baseTheme.copyWith(
-      colorScheme: ColorScheme.fromSeed(seedColor: offWhite),
       scaffoldBackgroundColor: offWhite,
       splashColor: Colors.transparent,
       highlightColor: Colors.transparent,

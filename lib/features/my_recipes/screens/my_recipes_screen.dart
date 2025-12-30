@@ -9,7 +9,7 @@ import 'package:furtable/features/explore/models/recipe_model.dart';
 import 'package:furtable/features/my_recipes/bloc/my_recipes_bloc.dart';
 import 'package:furtable/features/my_recipes/bloc/my_recipes_event.dart';
 import 'package:furtable/features/my_recipes/bloc/my_recipes_state.dart';
-import 'package:furtable/features/explore/widgets/responsive_recipe_grid.dart'; // <--- Import
+import 'package:furtable/features/explore/widgets/responsive_recipe_grid.dart';
 import 'package:furtable/features/profile/screens/profile_screen.dart';
 import 'package:furtable/l10n/app_localizations.dart';
 
@@ -147,7 +147,7 @@ class MyRecipesView extends StatelessWidget {
           ),
         ),
 
-        // Listen to the state here.
+        // Monitor the MyRecipesBloc state to display loading, errors, or the recipe grid.
         body: BlocBuilder<MyRecipesBloc, MyRecipesState>(
           builder: (context, state) {
             if (state is MyRecipesLoading) {
@@ -218,25 +218,24 @@ class MyRecipesView extends StatelessWidget {
       );
     }
 
-    // INSTEAD OF manual AlignedGridView (lines 182-312)...
+    // Use the StandardRecipeGrid for a consistent layout across screens.
     return StandardRecipeGrid(
       recipes: recipes,
       showLockIcon: isPrivate,
       onEdit: (recipe) async {
-        // 1. Navigate to edit screen.
+        // Navigate to the edit screen and refresh the list if a change was made.
         final result = await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => CreateRecipeScreen(recipeToEdit: recipe),
           ),
         );
-        // If returned true (successful save), refresh the list.
         if (result == true && context.mounted) {
           context.read<MyRecipesBloc>().add(LoadMyRecipes());
         }
       },
       onDelete: (recipe) {
-        // 2. Show delete dialog.
+        // Confirm deletion with the user.
         _showDeleteDialog(context, recipe);
       },
     );
@@ -270,9 +269,9 @@ class MyRecipesView extends StatelessWidget {
               foregroundColor: Colors.white,
             ),
             onPressed: () {
-              // Delete via BLoC.
+              // Execute the deletion via the BLoC and close the dialog.
               context.read<MyRecipesBloc>().add(DeleteRecipeEvent(recipe.id));
-              Navigator.pop(ctx); // Close dialog.
+              Navigator.pop(ctx);
 
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(

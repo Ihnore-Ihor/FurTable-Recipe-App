@@ -7,12 +7,12 @@ import 'package:furtable/features/explore/repositories/recipe_repository.dart';
 /// Manages the state of the Explore screen, including loading recipes.
 class ExploreBloc extends Bloc<ExploreEvent, ExploreState> {
   final RecipeRepository _recipeRepo = RecipeRepository();
-  StreamSubscription? _recipesSubscription; // To listen to the DB stream
+  StreamSubscription? _recipesSubscription; // Subscription to the Firestore recipes stream.
 
   /// Creates an [ExploreBloc] and registers event handlers.
   ExploreBloc() : super(const ExploreState()) {
     on<LoadRecipesEvent>(_onLoadRecipes);
-    on<RecipesUpdated>(_onRecipesUpdated); // New internal event
+    on<RecipesUpdated>(_onRecipesUpdated);
   }
 
   Future<void> _onLoadRecipes(
@@ -36,13 +36,13 @@ class ExploreBloc extends Bloc<ExploreEvent, ExploreState> {
     );
   }
 
-  // When new data arrives from DB -> update UI
+  // Handles updates when new data arrives from Firestore.
   void _onRecipesUpdated(RecipesUpdated event, Emitter<ExploreState> emit) {
     emit(
       state.copyWith(
         status: ExploreStatus.success,
         recipes: event.recipes,
-        hasReachedMax: true, // Simplified (no pagination yet)
+        hasReachedMax: true,
       ),
     );
   }

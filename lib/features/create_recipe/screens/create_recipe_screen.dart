@@ -4,7 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter/cupertino.dart'; // For CupertinoTimerPicker
 import 'package:flutter/services.dart'; // For TextInputFormatter
 import 'package:furtable/core/app_theme.dart';
-import 'package:furtable/core/widgets/app_image.dart'; // <--- Import
+import 'package:furtable/core/widgets/app_image.dart';
 import 'package:furtable/core/utils/image_helper.dart';
 import 'package:furtable/l10n/app_localizations.dart';
 import 'package:furtable/features/create_recipe/bloc/create_recipe_bloc.dart';
@@ -81,7 +81,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
       final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
       if (image != null) {
-        // 1. Quick extension check
+        // Validate file extension.
         final extension = image.name.split('.').last.toLowerCase();
         if (['pdf', 'doc', 'docx', 'exe', 'zip'].contains(extension)) {
           _showError('Invalid file format. Please select an image (JPG, PNG).');
@@ -90,7 +90,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
 
         final bytes = await image.readAsBytes();
 
-        // 2. Deep byte check (using our helper)
+        // Verify image integrity using byte analysis.
         if (!ImageHelper.isImage(bytes)) {
           _showError('The selected file is not a valid image.');
           return;
@@ -107,10 +107,6 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
         );
 
         final compressedBytes = await ImageHelper.compressImage(bytes);
-
-        // For debugging
-        // print("Original size...");
-        // print("Compressed size...");
 
         setState(() {
           _selectedImageBytes = compressedBytes;
@@ -337,10 +333,10 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                     _buildLabel('${AppLocalizations.of(context)!.cookTime} *'),
                     GestureDetector(
                       onTap: () {
-                        // 1. Initial value (or 30 if empty)
+                        // Initialize value (default to 30 if empty)
                         int currentMinutes =
                             int.tryParse(_timeController.text) ?? 30;
-                        // 2. Temporary variable for scrolling
+                        // Temporary variable for scrolling selection
                         Duration tempDuration = Duration(minutes: currentMinutes);
 
                         showModalBottomSheet(
@@ -363,7 +359,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                                       children: [
                                         TextButton(
                                           onPressed: () {
-                                            // 3. On 'Done', save the tempDuration
+                                            // On 'Done', save the selected duration.
                                             setState(() {
                                               _timeController.text = tempDuration
                                                   .inMinutes

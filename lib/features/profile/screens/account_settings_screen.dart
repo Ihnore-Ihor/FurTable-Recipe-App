@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:furtable/core/app_theme.dart';
@@ -196,6 +197,13 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 1. Get the current user
+    final user = FirebaseAuth.instance.currentUser;
+    
+    // 2. Check if the user has a password provider
+    final bool hasPassword = user?.providerData
+            .any((userInfo) => userInfo.providerId == 'password') ?? false;
+
     return Scaffold(
       backgroundColor: AppTheme.offWhite,
       appBar: AppBar(
@@ -211,37 +219,39 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- 1. CHANGE PASSWORD CARD ---
-            Container(
-              decoration: _cardDecoration,
-              child: ListTile(
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 8,
-                ),
-                title: Text(AppLocalizations.of(context)!.changePassword, style: _titleStyle),
-                subtitle: Padding(
-                  padding: const EdgeInsets.only(top: 4.0),
-                  child: Text(
-                    AppLocalizations.of(context)!.changePasswordSubtitle,
-                    style: _subtitleStyle,
+            // --- 1. CHANGE PASSWORD CARD (Visible only if user has a password) ---
+            if (hasPassword) ...[
+              Container(
+                decoration: _cardDecoration,
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 8,
                   ),
-                ),
-                trailing: const Icon(
-                  Icons.chevron_right,
-                  color: AppTheme.mediumGray,
-                ),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ChangePasswordScreen(),
+                  title: Text(AppLocalizations.of(context)!.changePassword, style: _titleStyle),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 4.0),
+                    child: Text(
+                      AppLocalizations.of(context)!.changePasswordSubtitle,
+                      style: _subtitleStyle,
                     ),
-                  );
-                },
+                  ),
+                  trailing: const Icon(
+                    Icons.chevron_right,
+                    color: AppTheme.mediumGray,
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ChangePasswordScreen(),
+                      ),
+                    );
+                  },
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
+            ],
 
             // --- LANGUAGE ---
             Container(

@@ -81,7 +81,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
           }
 
           return SingleChildScrollView(
-            // ЗБІЛЬШИЛИ ВІДСТУП ЗНИЗУ ДО 80, щоб було зручно скролити до кінця
+            // Increased bottom padding to 80 for comfortable scrolling to the end
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
             child: Center(
               child: ConstrainedBox(
@@ -89,7 +89,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Картинка
+                    // Recipe Image
                     AspectRatio(
                       aspectRatio: 16 / 10,
                       child: Hero(
@@ -102,7 +102,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                     ),
                     const SizedBox(height: 24),
 
-                    // Заголовок
+                    // Recipe Title
                     Text(
                       recipe.title,
                       style: const TextStyle(
@@ -115,7 +115,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    // --- АВТОР (ЗБІЛЬШЕНА АВАТАРКА) ---
+                    // --- AUTHOR (ENLARGED AVATAR) ---
                     Row(
                       children: [
                         Container(
@@ -124,7 +124,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                             shape: BoxShape.circle,
                             border: Border.all(color: AppTheme.darkCharcoal, width: 1.5),
                           ),
-                          // ЗМІНЕНО: Radius 16 -> 24 (Діаметр 48px)
+                          // CHANGED: Radius 16 -> 24 (48px diameter)
                           child: CircleAvatar(
                             radius: 24, 
                             backgroundColor: Colors.white,
@@ -149,7 +149,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
 
                     const SizedBox(height: 32),
 
-                    // Опис
+                    // Description
                     Text(AppLocalizations.of(context)!.description, style: const TextStyle(fontFamily: 'Inter', fontSize: 20, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
                     const SizedBox(height: 12),
                     Text(
@@ -159,7 +159,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
 
                     const SizedBox(height: 32),
 
-                    // --- ІНГРЕДІЄНТИ (ЗБІЛЬШЕНІ ВІДСТУПИ) ---
+                    // --- INGREDIENTS (INCREASED SPACING) ---
                     Text(AppLocalizations.of(context)!.ingredients, style: const TextStyle(fontFamily: 'Inter', fontSize: 20, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
                     const SizedBox(height: 16),
                     if (recipe.ingredients.isEmpty)
@@ -208,7 +208,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
 
                     const SizedBox(height: 32),
 
-                    // --- ІНСТРУКЦІЇ (ЗБІЛЬШЕНІ ВІДСТУПИ) ---
+                    // --- INSTRUCTIONS ---
                     Text(AppLocalizations.of(context)!.instructions, style: const TextStyle(fontFamily: 'Inter', fontSize: 20, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
                     const SizedBox(height: 16),
                     if (recipe.steps.isEmpty)
@@ -283,6 +283,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
   }
 }
 
+/// A custom thin checkbox for recipe checklists.
 class _ThinCheckbox extends StatelessWidget {
   final bool isDone;
 

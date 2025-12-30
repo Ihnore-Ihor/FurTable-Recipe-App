@@ -6,7 +6,7 @@ class Recipe extends Equatable {
   final String id;
   final String authorId;
   final String authorName;
-  final String authorAvatarUrl; // New field
+  final String authorAvatarUrl;
   final String title;
   final String description;
   final String imageUrl;
@@ -22,7 +22,7 @@ class Recipe extends Equatable {
     required this.id,
     required this.authorId,
     required this.authorName,
-    this.authorAvatarUrl = 'assets/images/legoshi_eating_auth.png', // Default
+    this.authorAvatarUrl = 'assets/images/legoshi_eating_auth.png',
     required this.title,
     required this.description,
     required this.imageUrl,
@@ -42,7 +42,7 @@ class Recipe extends Equatable {
       authorId: data['authorId'] ?? '',
       authorName: data['authorName'] ?? 'Unknown',
       authorAvatarUrl: data['authorAvatarUrl'] ??
-          'assets/images/legoshi_eating_auth.png', // Read from DB
+          'assets/images/legoshi_eating_auth.png',
       title: data['title'] ?? '',
       description: data['description'] ?? '',
       imageUrl: data['imageUrl'] ?? '',
@@ -60,7 +60,7 @@ class Recipe extends Equatable {
     return {
       'authorId': authorId,
       'authorName': authorName,
-      'authorAvatarUrl': authorAvatarUrl, // Write to DB
+      'authorAvatarUrl': authorAvatarUrl,
       'title': title,
       'description': description,
       'imageUrl': imageUrl,
@@ -108,8 +108,7 @@ class Recipe extends Equatable {
     return keywords.toList();
   }
 
-  // --- GETTERS COMPATIBILITY ---
-  // Fixes "undefined getter" errors
+  // --- Compatibility Getters ---
   String get author => authorName;
 
   String get likes {
