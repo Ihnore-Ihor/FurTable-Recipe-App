@@ -169,14 +169,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mins => 'Mins';
 
   @override
-  String get discardChangesTitle => 'Discard changes?';
+  String get discardChanges => 'Discard changes?';
 
   @override
-  String get discardChangesMessage =>
+  String get unsavedChangesMsg =>
       'You have unsaved changes. Are you sure you want to leave?';
 
   @override
   String get discard => 'Discard';
+
+  @override
+  String get imageTooLarge => 'Image too large (>1MB)';
+
+  @override
+  String get processingImage => 'Processing image...';
+
+  @override
+  String get selectCookingTime => 'Please select cooking time';
 
   @override
   String get profile => 'Profile';

@@ -404,23 +404,41 @@ abstract class AppLocalizations {
   /// **'Mins'**
   String get mins;
 
-  /// No description provided for @discardChangesTitle.
+  /// No description provided for @discardChanges.
   ///
   /// In en, this message translates to:
   /// **'Discard changes?'**
-  String get discardChangesTitle;
+  String get discardChanges;
 
-  /// No description provided for @discardChangesMessage.
+  /// No description provided for @unsavedChangesMsg.
   ///
   /// In en, this message translates to:
   /// **'You have unsaved changes. Are you sure you want to leave?'**
-  String get discardChangesMessage;
+  String get unsavedChangesMsg;
 
   /// No description provided for @discard.
   ///
   /// In en, this message translates to:
   /// **'Discard'**
   String get discard;
+
+  /// No description provided for @imageTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Image too large (>1MB)'**
+  String get imageTooLarge;
+
+  /// No description provided for @processingImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing image...'**
+  String get processingImage;
+
+  /// No description provided for @selectCookingTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select cooking time'**
+  String get selectCookingTime;
 
   /// No description provided for @profile.
   ///

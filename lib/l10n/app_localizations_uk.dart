@@ -169,14 +169,23 @@ class AppLocalizationsUk extends AppLocalizations {
   String get mins => 'Хв';
 
   @override
-  String get discardChangesTitle => 'Скасувати зміни?';
+  String get discardChanges => 'Відхилити зміни?';
 
   @override
-  String get discardChangesMessage =>
+  String get unsavedChangesMsg =>
       'У вас є незбережені зміни. Ви впевнені, що хочете вийти?';
 
   @override
-  String get discard => 'Відкинути';
+  String get discard => 'Відхилити';
+
+  @override
+  String get imageTooLarge => 'Зображення завелике (>1MB)';
+
+  @override
+  String get processingImage => 'Обробка зображення...';
+
+  @override
+  String get selectCookingTime => 'Будь ласка, оберіть час готування';
 
   @override
   String get profile => 'Профіль';

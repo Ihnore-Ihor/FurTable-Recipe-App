@@ -87,8 +87,13 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
       builder: (context) => AlertDialog(
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Discard changes?', style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.bold)),
-        content: const Text('You have unsaved changes. Are you sure you want to leave?'),
+        // ЛОКАЛІЗАЦІЯ ЗАГОЛОВКА
+        title: Text(
+          AppLocalizations.of(context)!.discardChanges, 
+          style: const TextStyle(fontWeight: FontWeight.bold)
+        ),
+        // ЛОКАЛІЗАЦІЯ ТЕКСТУ
+        content: Text(AppLocalizations.of(context)!.unsavedChangesMsg),
         actions: [
           // Кнопка Скасувати (Сіра, як у Delete)
           TextButton(
@@ -107,7 +112,8 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             ),
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Discard'),
+            // ЛОКАЛІЗАЦІЯ КНОПКИ
+            child: Text(AppLocalizations.of(context)!.discard),
           ),
         ],
       ),
@@ -137,7 +143,10 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
       // Якщо час не вибрано - покажемо повідомлення
       if (timeEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select cooking time'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.selectCookingTime),
+            backgroundColor: Colors.red
+          ),
         );
       }
       return;
@@ -196,7 +205,10 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
 
         if (bytes.lengthInBytes > 1024 * 1024) {
            ScaffoldMessenger.of(context).showSnackBar(
-             const SnackBar(content: Text('Image too large (>1MB)'), backgroundColor: Colors.red),
+             SnackBar(
+               content: Text(AppLocalizations.of(context)!.imageTooLarge),
+               backgroundColor: Colors.red
+             ),
            );
            return;
         }
@@ -204,7 +216,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(AppLocalizations.of(context)!.compressingImage), 
+              content: Text(AppLocalizations.of(context)!.processingImage), 
               duration: const Duration(milliseconds: 500),
               backgroundColor: AppTheme.darkCharcoal,
             ),
