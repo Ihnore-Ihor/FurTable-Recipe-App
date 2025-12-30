@@ -1,8 +1,9 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 
+/// Helper class for managing and providing user avatars.
 class AvatarHelper {
-  // Генеруємо список із 40 шляху автоматично
+  // Automatically generate a list of 40 avatar paths.
   static List<String> get avatars {
     return List.generate(
       40,
@@ -10,28 +11,27 @@ class AvatarHelper {
     );
   }
 
-  // Дефолтна аватарка (перша зі списку)
+  // Default avatar (the first one in the list).
   static String get defaultAvatar => avatars[0];
 
-  // Випадкова аватарка (для нових юзерів)
+  // Random avatar (for new users).
   static String getRandomAvatar() {
     return avatars[Random().nextInt(avatars.length)];
   }
 
   static ImageProvider getAvatarProvider(String? path) {
-    // 1. Якщо шляху немає — даємо дефолт
+    // 1. If the path is null or empty, return the default avatar.
     if (path == null || path.isEmpty) {
       return AssetImage(defaultAvatar);
     }
 
-    // 2. Якщо це Google-фото (http)
+    // 2. If it's a Google photo (starts with http).
     if (path.startsWith('http')) {
       return NetworkImage(path);
     }
 
-    // 3. Якщо це локальний ассет
-    // (Тут буде працювати і для старих 'legoshi.png', якщо ви їх не видалили з папки images,
-    // і для нових 'avatar_X.jpg')
+    // 3. If it's a local asset.
+    // Works for both legacy assets and the new avatar series.
     return AssetImage(path);
   }
 }

@@ -75,13 +75,13 @@ class _EditProfileViewState extends State<EditProfileView> {
   void _showAvatarPicker() {
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true, // <--- Дозволяє розтягнути на весь екран
-      useSafeArea: true, // <--- Враховує "чубчик" телефону
+      isScrollControlled: true, // <--- Allows stretching to full screen
+      useSafeArea: true, // <--- Accounts for phone notch (safe area)
       backgroundColor: AppTheme.offWhite,
       builder: (context) {
         return Scaffold(
           backgroundColor: AppTheme.offWhite,
-          // Додаємо AppBar для зручного закриття
+          // Adding AppBar for easy closing
           appBar: AppBar(
             backgroundColor: AppTheme.offWhite,
             elevation: 0,
@@ -105,7 +105,7 @@ class _EditProfileViewState extends State<EditProfileView> {
               crossAxisCount: 4,
               crossAxisSpacing: 16,
               mainAxisSpacing: 16,
-              childAspectRatio: 1, // Квадратні
+              childAspectRatio: 1, // Square items
             ),
             itemCount: AvatarHelper.avatars.length,
             itemBuilder: (context, index) {
@@ -118,12 +118,12 @@ class _EditProfileViewState extends State<EditProfileView> {
                     _selectedAvatarPath = path;
                     _checkForChanges();
                   });
-                  Navigator.pop(context); // Закриваємо при виборі
+                  Navigator.pop(context); // Close on selection
                 },
                 child: Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    // Підсвічуємо вибрану жирною рамкою
+                    // Highlight selected with a thick border
                     border: isSelected
                         ? Border.all(color: AppTheme.darkCharcoal, width: 4)
                         : Border.all(color: Colors.grey.shade300, width: 1),
@@ -131,7 +131,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                   child: Padding(
                     padding: const EdgeInsets.all(
                       2.0,
-                    ), // Відступ між рамкою і фото
+                    ), // Padding between border and image
                     child: CircleAvatar(
                       backgroundColor: Colors.white,
                       backgroundImage: AssetImage(path),

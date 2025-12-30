@@ -197,10 +197,10 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Отримуємо користувача
+    // 1. Get the current user
     final user = FirebaseAuth.instance.currentUser;
     
-    // 2. Перевіряємо, чи є у нього пароль
+    // 2. Check if the user has a password provider
     final bool hasPassword = user?.providerData
             .any((userInfo) => userInfo.providerId == 'password') ?? false;
 

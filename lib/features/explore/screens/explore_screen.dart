@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/core/app_theme.dart';
-import 'package:furtable/core/utils/auth_helper.dart'; // <--- Import
+import 'package:furtable/core/utils/auth_helper.dart';
 import 'package:furtable/core/utils/navigation_helper.dart';
 import 'package:furtable/features/explore/bloc/explore_bloc.dart';
 import 'package:furtable/features/explore/bloc/explore_event.dart';
@@ -154,7 +154,6 @@ class _ExploreViewState extends State<ExploreView> {
           return CustomScrollView(
             controller: _scrollController,
             slivers: [
-              // INSTEAD OF SliverPadding + SliverAlignedGrid WRITE:
               SliverRecipeGrid(recipes: state.recipes),
               SliverToBoxAdapter(
                 child: Padding(

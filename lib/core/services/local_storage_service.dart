@@ -1,14 +1,20 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// Service for managing persistence using [SharedPreferences].
+///
+/// Handles search history, caching preferences, and other local settings.
 class LocalStorageService {
-  // Singleton pattern
+  // Singleton instance
   static final LocalStorageService _instance = LocalStorageService._internal();
+
+  /// Factory constructor to return the singleton instance.
   factory LocalStorageService() => _instance;
+
   LocalStorageService._internal();
 
   SharedPreferences? _prefs;
 
-  // Initialize at startup
+  /// Initializes the service by getting the [SharedPreferences] instance.
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
   }
@@ -58,9 +64,15 @@ class LocalStorageService {
   static const String _keyEnableCache = 'enable_cache';
   static const String _keyAutoClear = 'auto_clear_cache';
 
+  /// Whether image caching is enabled.
   bool get isCacheEnabled => _prefs?.getBool(_keyEnableCache) ?? true;
+
+  /// Whether the cache should be cleared automatically on startup.
   bool get isAutoClearEnabled => _prefs?.getBool(_keyAutoClear) ?? false;
 
+  /// Updates the image caching preference.
   Future<void> setCacheEnabled(bool value) async => await _prefs?.setBool(_keyEnableCache, value);
+
+  /// Updates the auto-clear cache preference.
   Future<void> setAutoClearEnabled(bool value) async => await _prefs?.setBool(_keyAutoClear, value);
 }

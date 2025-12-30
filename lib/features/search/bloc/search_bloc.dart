@@ -18,7 +18,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     on<SearchQuerySubmitted>(_onQuerySubmitted);
   }
 
-  // Helper to get current User UID
+  /// Returns the current user's unique identifier.
   String get _currentUserId => FirebaseAuth.instance.currentUser?.uid ?? '';
 
   Future<void> _onLoadHistory(
@@ -53,7 +53,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   }
 
   Future<void> _onQuerySubmitted(SearchQuerySubmitted event, Emitter<SearchState> emit) async {
-    final query = event.query.trim(); // No toLowerCase here, the repository handles it.
+    final query = event.query.trim();
     if (query.isEmpty) return;
 
     await _storage.saveSearchQuery(query, _currentUserId);
@@ -63,9 +63,8 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       // Call server search.
       final results = await _recipeRepo.searchRecipes(query);
 
-      // (Optional) For higher precision, we could filter results on the client
-      // to ensure ALL words from the query are in the title.
-      // But for this basic implementation, the database result is sufficient.
+      // Filtering results on the client for higher precision could be implemented here
+      // if necessary. The current database search is sufficient for general needs.
 
       if (results.isEmpty) {
         emit(SearchEmpty());
