@@ -148,6 +148,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get compressingImage => 'Compressing image...';
 
   @override
+  String get draftRestored => 'Draft restored from last session';
+
+  @override
   String get recipeCreated => 'Recipe created successfully!';
 
   @override
@@ -167,6 +170,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mins => 'Mins';
+
+  @override
+  String get discardChanges => 'Discard changes?';
+
+  @override
+  String get unsavedChangesMsg =>
+      'You have unsaved changes. Are you sure you want to leave?';
+
+  @override
+  String get discard => 'Discard';
+
+  @override
+  String get imageTooLarge => 'Image too large (>1MB)';
+
+  @override
+  String get processingImage => 'Processing image...';
+
+  @override
+  String get selectCookingTime => 'Please select cooking time';
 
   @override
   String get profile => 'Profile';
@@ -352,6 +374,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Are you sure you want to permanently delete this account? This action cannot be undone.';
 
   @override
+  String get deleteAccountContent =>
+      'Are you sure you want to permanently delete this account? This action cannot be undone.';
+
+  @override
   String get language => 'Language';
 
   @override
@@ -414,6 +440,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tapHeart => 'Tap the heart icon on recipes you love';
+
+  @override
+  String get shareMasterpieces => 'Share your culinary masterpieces!';
+
+  @override
+  String get createPrivateHint => 'Create a private recipe to see it here.';
 
   @override
   String get faqTitle => 'Frequently Asked Questions';

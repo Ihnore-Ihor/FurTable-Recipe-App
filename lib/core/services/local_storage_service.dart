@@ -75,4 +75,25 @@ class LocalStorageService {
 
   /// Updates the auto-clear cache preference.
   Future<void> setAutoClearEnabled(bool value) async => await _prefs?.setBool(_keyAutoClear, value);
+
+  // --- DRAFTS ---
+  static const _draftKey = 'recipe_draft';
+
+  /// Saves the current recipe draft as a list of strings:
+  /// [title, description, ingredients, instructions, timeMinutes, isPublic]
+  Future<void> saveDraft(List<String> data) async {
+    final prefs = _prefs ?? await SharedPreferences.getInstance();
+    await prefs.setStringList(_draftKey, data);
+  }
+
+  /// Retrieves the saved recipe draft if it exists.
+  List<String>? getDraft() {
+    return _prefs?.getStringList(_draftKey);
+  }
+
+  /// Clears the saved recipe draft.
+  Future<void> clearDraft() async {
+    final prefs = _prefs ?? await SharedPreferences.getInstance();
+    await prefs.remove(_draftKey);
+  }
 }

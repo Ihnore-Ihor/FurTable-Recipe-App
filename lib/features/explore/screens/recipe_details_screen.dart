@@ -147,6 +147,29 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                       ],
                     ),
 
+                    const SizedBox(height: 16),
+                    
+                    // --- COOKING TIME ---
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.access_time_filled, 
+                          color: AppTheme.darkCharcoal, 
+                          size: 20
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          recipe.durationString,
+                          style: const TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.darkCharcoal,
+                          ),
+                        ),
+                      ],
+                    ),
+
                     const SizedBox(height: 32),
 
                     // Description
@@ -293,18 +316,20 @@ class _ThinCheckbox extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
-      width: 24,
-      height: 24,
+      // БУЛО: 24.0 -> СТАЛО: 20.0 (більш компактно)
+      width: 20, 
+      height: 20,
       decoration: BoxDecoration(
         color: isDone ? AppTheme.darkCharcoal : Colors.transparent,
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(5), // Трохи менший радіус (було 6)
         border: Border.all(
           color: AppTheme.darkCharcoal,
-          width: 1.2,
+          width: 1.0, // Тонка лінія
         ),
       ),
       child: isDone
-          ? const Icon(Icons.check, size: 16, color: Colors.white)
+          // БУЛО: 16 -> СТАЛО: 14 (щоб влізло в менший квадрат)
+          ? const Icon(Icons.check, size: 14, color: Colors.white)
           : null,
     );
   }

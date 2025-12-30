@@ -362,6 +362,12 @@ abstract class AppLocalizations {
   /// **'Compressing image...'**
   String get compressingImage;
 
+  /// No description provided for @draftRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft restored from last session'**
+  String get draftRestored;
+
   /// No description provided for @recipeCreated.
   ///
   /// In en, this message translates to:
@@ -403,6 +409,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mins'**
   String get mins;
+
+  /// No description provided for @discardChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard changes?'**
+  String get discardChanges;
+
+  /// No description provided for @unsavedChangesMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'You have unsaved changes. Are you sure you want to leave?'**
+  String get unsavedChangesMsg;
+
+  /// No description provided for @discard.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get discard;
+
+  /// No description provided for @imageTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Image too large (>1MB)'**
+  String get imageTooLarge;
+
+  /// No description provided for @processingImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing image...'**
+  String get processingImage;
+
+  /// No description provided for @selectCookingTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select cooking time'**
+  String get selectCookingTime;
 
   /// No description provided for @profile.
   ///
@@ -740,6 +782,12 @@ abstract class AppLocalizations {
   /// **'Are you sure you want to permanently delete this account? This action cannot be undone.'**
   String get deleteAccountDesc;
 
+  /// No description provided for @deleteAccountContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to permanently delete this account? This action cannot be undone.'**
+  String get deleteAccountContent;
+
   /// No description provided for @language.
   ///
   /// In en, this message translates to:
@@ -865,6 +913,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap the heart icon on recipes you love'**
   String get tapHeart;
+
+  /// No description provided for @shareMasterpieces.
+  ///
+  /// In en, this message translates to:
+  /// **'Share your culinary masterpieces!'**
+  String get shareMasterpieces;
+
+  /// No description provided for @createPrivateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a private recipe to see it here.'**
+  String get createPrivateHint;
 
   /// No description provided for @faqTitle.
   ///

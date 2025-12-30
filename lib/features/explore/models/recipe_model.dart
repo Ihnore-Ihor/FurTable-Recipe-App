@@ -111,6 +111,21 @@ class Recipe extends Equatable {
   // --- Compatibility Getters ---
   String get author => authorName;
 
+  /// Formats the cooking time into a readable string (e.g., "1h 30m", "45m").
+  String get durationString {
+    final d = Duration(minutes: timeMinutes);
+    final days = d.inDays;
+    final hours = d.inHours % 24;
+    final minutes = d.inMinutes % 60;
+
+    String result = '';
+    if (days > 0) result += '${days}d ';
+    if (hours > 0) result += '${hours}h ';
+    if (minutes > 0 || result.isEmpty) result += '${minutes}m';
+    
+    return result.trim();
+  }
+
   String get likes {
     if (likesCount >= 1000) {
       return '${(likesCount / 1000).toStringAsFixed(1)}k';

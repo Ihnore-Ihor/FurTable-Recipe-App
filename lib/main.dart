@@ -10,7 +10,6 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/features/favorites/bloc/favorites_bloc.dart';
-import 'package:furtable/features/favorites/bloc/favorites_event.dart';
 import 'package:furtable/core/env/env.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:furtable/l10n/app_localizations.dart';
@@ -47,7 +46,7 @@ Future<void> main() async {
         MultiBlocProvider(
           providers: [
             BlocProvider<FavoritesBloc>(
-              create: (context) => FavoritesBloc()..add(LoadFavorites()),
+              create: (context) => FavoritesBloc(),
             ),
             BlocProvider(create: (_) => LocaleCubit()),
           ],

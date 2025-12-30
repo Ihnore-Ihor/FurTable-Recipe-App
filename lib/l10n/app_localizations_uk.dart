@@ -148,6 +148,9 @@ class AppLocalizationsUk extends AppLocalizations {
   String get compressingImage => 'Стиснення зображення...';
 
   @override
+  String get draftRestored => 'Чернетку відновлено з попереднього сеансу';
+
+  @override
   String get recipeCreated => 'Рецепт успішно створено!';
 
   @override
@@ -167,6 +170,25 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get mins => 'Хв';
+
+  @override
+  String get discardChanges => 'Відхилити зміни?';
+
+  @override
+  String get unsavedChangesMsg =>
+      'У вас є незбережені зміни. Ви впевнені, що хочете вийти?';
+
+  @override
+  String get discard => 'Відхилити';
+
+  @override
+  String get imageTooLarge => 'Зображення завелике (>1MB)';
+
+  @override
+  String get processingImage => 'Обробка зображення...';
+
+  @override
+  String get selectCookingTime => 'Будь ласка, оберіть час готування';
 
   @override
   String get profile => 'Профіль';
@@ -347,6 +369,10 @@ class AppLocalizationsUk extends AppLocalizations {
   String get deleteAccountDesc => 'Ви впевнені? Цю дію неможливо скасувати.';
 
   @override
+  String get deleteAccountContent =>
+      'Ви впевнені, що хочете назавжди видалити цей акаунт? Цю дію неможливо скасувати.';
+
+  @override
   String get language => 'Мова';
 
   @override
@@ -409,6 +435,13 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get tapHeart => 'Тисніть на серце, щоб зберегти рецепт';
+
+  @override
+  String get shareMasterpieces => 'Діліться своїми кулінарними шедеврами!';
+
+  @override
+  String get createPrivateHint =>
+      'Створіть приватний рецепт, щоб побачити його тут.';
 
   @override
   String get faqTitle => 'Часті запитання';

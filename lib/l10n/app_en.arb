@@ -65,6 +65,7 @@
     "anyoneCanSee": "Anyone can see this recipe",
     "selectTime": "Select time",
     "compressingImage": "Compressing image...",
+    "draftRestored": "Draft restored from last session",
     "recipeCreated": "Recipe created successfully!",
     "recipeUpdated": "Recipe updated!",
     "save": "Save",
@@ -72,6 +73,12 @@
     "days": "Days",
     "hours": "Hours",
     "mins": "Mins",
+    "discardChanges": "Discard changes?",
+    "unsavedChangesMsg": "You have unsaved changes. Are you sure you want to leave?",
+    "discard": "Discard",
+    "imageTooLarge": "Image too large (>1MB)",
+    "processingImage": "Processing image...",
+    "selectCookingTime": "Please select cooking time",
 
     "@_PROFILE": {},
     "profile": "Profile",
@@ -157,6 +164,7 @@
     "deleteAccount": "Delete Account",
     "deleteAccountConfirm": "Delete Account?",
     "deleteAccountDesc": "Are you sure you want to permanently delete this account? This action cannot be undone.",
+    "deleteAccountContent": "Are you sure you want to permanently delete this account? This action cannot be undone.",
     "language": "Language",
 
     "@_SEARCH": {},
@@ -182,6 +190,8 @@
     "noRecipesYet": "No recipes yet",
     "noFavorites": "No favorites yet",
     "tapHeart": "Tap the heart icon on recipes you love",
+    "shareMasterpieces": "Share your culinary masterpieces!",
+    "createPrivateHint": "Create a private recipe to see it here.",
 
     "faqTitle": "Frequently Asked Questions",
     "faqQ_create": "How do I create a new recipe?",

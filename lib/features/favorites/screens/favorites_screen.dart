@@ -6,7 +6,6 @@ import 'package:furtable/core/utils/navigation_helper.dart';
 import 'package:furtable/core/widgets/guest_view.dart';
 import 'package:furtable/features/explore/widgets/responsive_recipe_grid.dart';
 import 'package:furtable/features/favorites/bloc/favorites_bloc.dart';
-import 'package:furtable/features/favorites/bloc/favorites_event.dart';
 import 'package:furtable/features/favorites/bloc/favorites_state.dart';
 import 'package:furtable/l10n/app_localizations.dart'; 
 
@@ -43,18 +42,22 @@ class FavoritesScreen extends StatelessWidget {
           items: [
             BottomNavigationBarItem(
               icon: const Icon(Icons.explore_outlined),
+              activeIcon: const Icon(Icons.explore),
               label: AppLocalizations.of(context)!.explore,
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.book_outlined),
+              activeIcon: const Icon(Icons.book),
               label: AppLocalizations.of(context)!.myRecipes,
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.favorite_border),
+              activeIcon: const Icon(Icons.favorite),
               label: AppLocalizations.of(context)!.favorites,
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.search),
+              activeIcon: const Icon(Icons.search),
               label: AppLocalizations.of(context)!.search,
             ),
           ],
@@ -62,10 +65,7 @@ class FavoritesScreen extends StatelessWidget {
       );
     }
 
-    return BlocProvider(
-      create: (context) => FavoritesBloc()..add(LoadFavorites()),
-      child: const FavoritesView(),
-    );
+    return const FavoritesView();
   }
 }
 
@@ -134,18 +134,22 @@ class _FavoritesViewState extends State<FavoritesView> {
         items: [
           BottomNavigationBarItem(
             icon: const Icon(Icons.explore_outlined),
+            activeIcon: const Icon(Icons.explore),
             label: AppLocalizations.of(context)!.explore,
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.book_outlined),
+            activeIcon: const Icon(Icons.book),
             label: AppLocalizations.of(context)!.myRecipes,
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.favorite_border),
+            activeIcon: const Icon(Icons.favorite),
             label: AppLocalizations.of(context)!.favorites,
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.search),
+            activeIcon: const Icon(Icons.search),
             label: AppLocalizations.of(context)!.search,
           ),
         ],

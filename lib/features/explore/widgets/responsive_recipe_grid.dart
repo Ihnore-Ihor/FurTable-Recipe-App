@@ -106,6 +106,7 @@ Widget _buildItem(
               title: recipe.title,
               author: recipe.authorName,
               likes: recipe.likes,
+              cookingTime: recipe.durationString, // NEW
               isFavorite: isFavorite,
               onFavoriteToggle: () {
                 if (FirebaseAuth.instance.currentUser == null) {

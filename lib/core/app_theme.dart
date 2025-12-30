@@ -27,8 +27,15 @@ class AppTheme {
 
     return baseTheme.copyWith(
       scaffoldBackgroundColor: offWhite,
+      canvasColor: offWhite,
       splashColor: Colors.transparent,
       highlightColor: Colors.transparent,
+
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: darkCharcoal,
+        selectionColor: darkCharcoal.withValues(alpha: 0.3),
+        selectionHandleColor: darkCharcoal,
+      ),
 
       appBarTheme: AppBarTheme(
         backgroundColor: offWhite,
