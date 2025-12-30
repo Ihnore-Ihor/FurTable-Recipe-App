@@ -54,6 +54,9 @@
     "days": "Дн",
     "hours": "Год",
     "mins": "Хв",
+    "discardChangesTitle": "Скасувати зміни?",
+    "discardChangesMessage": "У вас є незбережені зміни. Ви впевнені, що хочете вийти?",
+    "discard": "Відкинути",
 
     "profile": "Профіль",
     "editProfile": "Редагувати профіль",

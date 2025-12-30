@@ -72,6 +72,9 @@
     "days": "Days",
     "hours": "Hours",
     "mins": "Mins",
+    "discardChangesTitle": "Discard changes?",
+    "discardChangesMessage": "You have unsaved changes. Are you sure you want to leave?",
+    "discard": "Discard",
 
     "@_PROFILE": {},
     "profile": "Profile",

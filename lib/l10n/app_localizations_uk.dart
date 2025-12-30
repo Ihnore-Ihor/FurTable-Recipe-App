@@ -169,6 +169,16 @@ class AppLocalizationsUk extends AppLocalizations {
   String get mins => 'Хв';
 
   @override
+  String get discardChangesTitle => 'Скасувати зміни?';
+
+  @override
+  String get discardChangesMessage =>
+      'У вас є незбережені зміни. Ви впевнені, що хочете вийти?';
+
+  @override
+  String get discard => 'Відкинути';
+
+  @override
   String get profile => 'Профіль';
 
   @override

@@ -169,6 +169,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mins => 'Mins';
 
   @override
+  String get discardChangesTitle => 'Discard changes?';
+
+  @override
+  String get discardChangesMessage =>
+      'You have unsaved changes. Are you sure you want to leave?';
+
+  @override
+  String get discard => 'Discard';
+
+  @override
   String get profile => 'Profile';
 
   @override

@@ -404,6 +404,24 @@ abstract class AppLocalizations {
   /// **'Mins'**
   String get mins;
 
+  /// No description provided for @discardChangesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard changes?'**
+  String get discardChangesTitle;
+
+  /// No description provided for @discardChangesMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You have unsaved changes. Are you sure you want to leave?'**
+  String get discardChangesMessage;
+
+  /// No description provided for @discard.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get discard;
+
   /// No description provided for @profile.
   ///
   /// In en, this message translates to:

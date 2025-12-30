@@ -57,8 +57,8 @@ class CreateRecipeBloc extends Bloc<CreateRecipeEvent, CreateRecipeState> {
         imageUrl: imageUrl,
         likesCount: 0,
         timeMinutes: event.timeMinutes,
-        ingredients: event.ingredients.split('\n'),
-        steps: event.instructions.split('\n'),
+        ingredients: event.ingredients.split('\n').where((s) => s.trim().isNotEmpty).toList(),
+        steps: event.instructions.split('\n').where((s) => s.trim().isNotEmpty).toList(),
         isPublic: event.isPublic,
         createdAt: DateTime.now(),
       );
@@ -114,8 +114,8 @@ class CreateRecipeBloc extends Bloc<CreateRecipeEvent, CreateRecipeState> {
         imageUrl: imageUrl, // New or existing URL
         likesCount: 0, // Resetting likes on edit (per requirements)
         timeMinutes: event.timeMinutes,
-        ingredients: event.ingredients.split('\n'),
-        steps: event.instructions.split('\n'),
+        ingredients: event.ingredients.split('\n').where((s) => s.trim().isNotEmpty).toList(),
+        steps: event.instructions.split('\n').where((s) => s.trim().isNotEmpty).toList(),
         isPublic: event.isPublic,
         createdAt: DateTime.now(),
       );
