@@ -170,6 +170,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
               instructions: instructions,
               timeMinutes: time,
               isPublic: _isPublic,
+              likesCount: widget.recipeToEdit!.likesCount,
               currentImageUrl: widget.recipeToEdit!.imageUrl,
               newImageBytes: _selectedImageBytes,
             ),

@@ -435,6 +435,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tapHeart => 'Tap the heart icon on recipes you love';
 
   @override
+  String get shareMasterpieces => 'Share your culinary masterpieces!';
+
+  @override
+  String get createPrivateHint => 'Create a private recipe to see it here.';
+
+  @override
   String get faqTitle => 'Frequently Asked Questions';
 
   @override

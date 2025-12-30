@@ -54,6 +54,8 @@ class UpdateRecipe extends CreateRecipeEvent {
   final String? currentImageUrl;
   final Uint8List? newImageBytes;
 
+  final int likesCount;
+
   /// Creates an [UpdateRecipe] event.
   const UpdateRecipe({
     required this.id,
@@ -63,6 +65,7 @@ class UpdateRecipe extends CreateRecipeEvent {
     required this.instructions,
     required this.timeMinutes, // Added field
     required this.isPublic,
+    required this.likesCount,
     this.currentImageUrl,
     this.newImageBytes,
   });
@@ -76,6 +79,7 @@ class UpdateRecipe extends CreateRecipeEvent {
     instructions,
     timeMinutes,
     isPublic,
+    likesCount,
     currentImageUrl,
     newImageBytes,
   ];

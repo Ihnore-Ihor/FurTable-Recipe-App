@@ -430,6 +430,13 @@ class AppLocalizationsUk extends AppLocalizations {
   String get tapHeart => 'Тисніть на серце, щоб зберегти рецепт';
 
   @override
+  String get shareMasterpieces => 'Діліться своїми кулінарними шедеврами!';
+
+  @override
+  String get createPrivateHint =>
+      'Створіть приватний рецепт, щоб побачити його тут.';
+
+  @override
   String get faqTitle => 'Часті запитання';
 
   @override

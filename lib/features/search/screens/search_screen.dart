@@ -315,17 +315,24 @@ class _SearchViewState extends State<SearchView> {
         items: [
           BottomNavigationBarItem(
             icon: const Icon(Icons.explore_outlined),
+            activeIcon: const Icon(Icons.explore),
             label: AppLocalizations.of(context)!.explore,
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.book_outlined),
+            activeIcon: const Icon(Icons.book),
             label: AppLocalizations.of(context)!.myRecipes,
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.favorite_border),
+            activeIcon: const Icon(Icons.favorite),
             label: AppLocalizations.of(context)!.favorites,
           ),
-          BottomNavigationBarItem(icon: const Icon(Icons.search), label: AppLocalizations.of(context)!.search),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.search),
+            activeIcon: const Icon(Icons.search),
+            label: AppLocalizations.of(context)!.search,
+          ),
         ],
       ),
     );

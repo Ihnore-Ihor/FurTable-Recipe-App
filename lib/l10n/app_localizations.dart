@@ -902,6 +902,18 @@ abstract class AppLocalizations {
   /// **'Tap the heart icon on recipes you love'**
   String get tapHeart;
 
+  /// No description provided for @shareMasterpieces.
+  ///
+  /// In en, this message translates to:
+  /// **'Share your culinary masterpieces!'**
+  String get shareMasterpieces;
+
+  /// No description provided for @createPrivateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a private recipe to see it here.'**
+  String get createPrivateHint;
+
   /// No description provided for @faqTitle.
   ///
   /// In en, this message translates to:

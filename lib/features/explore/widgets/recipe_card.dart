@@ -3,7 +3,9 @@ import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/core/widgets/app_image.dart';
 
 /// A card widget displaying a brief summary of a recipe.
-class RecipeCard extends StatefulWidget {
+///
+/// Refactored to StatelessWidget to ensure immediate UI updates during state changes (like favoriting).
+class RecipeCard extends StatelessWidget {
   final String id;
   final String imageUrl;
   final String title;
@@ -25,44 +27,38 @@ class RecipeCard extends StatefulWidget {
   });
 
   @override
-  State<RecipeCard> createState() => _RecipeCardState();
-}
-
-class _RecipeCardState extends State<RecipeCard> {
-  @override
   Widget build(BuildContext context) {
+    // Width calculation for responsiveness if needed, though AspectRatio handles it mostly.
+    final cardWidth = (MediaQuery.of(context).size.width - 48) / 2;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Use AspectRatio 1/1 for guaranteed square
+        // Square aspect ratio for the image container
         AspectRatio(
           aspectRatio: 1,
           child: Stack(
             children: [
-              Positioned.fill( // Fills the entire 1:1 square
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Hero(
-                    tag: 'recipe_image_${widget.id}',
-                    child: AppImage(
-                      imagePath: widget.imageUrl,
-                      // AspectRatio will define the height, we remove it from here
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+              Positioned.fill(
+                child: Hero(
+                  tag: 'recipe_image_$id',
+                  child: AppImage(
+                    imagePath: imageUrl,
+                    width: double.infinity,
+                    height: cardWidth,
+                    fit: BoxFit.cover,
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
               ),
-              // Like button
+              // Like button positioned at the bottom right
               Positioned(
                 bottom: 8,
                 right: 8,
                 child: GestureDetector(
-                  onTap: widget.onFavoriteToggle,
+                  onTap: onFavoriteToggle,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(50),
@@ -78,16 +74,17 @@ class _RecipeCardState extends State<RecipeCard> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          widget.isFavorite
-                              ? Icons.favorite
-                              : Icons.favorite_border,
-                          color: AppTheme.darkCharcoal, // Dark color for both
-                          size: 14,
+                          isFavorite ? Icons.favorite : Icons.favorite_border,
+                          // Use charcoal for both states as requested
+                          color: AppTheme.darkCharcoal,
+                          size: 16, 
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          widget.likes,
-                          style: Theme.of(context).textTheme.labelSmall,
+                          likes, 
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            fontWeight: FontWeight.w600
+                          )
                         ),
                       ],
                     ),
@@ -99,14 +96,16 @@ class _RecipeCardState extends State<RecipeCard> {
         ),
         const SizedBox(height: 12),
         Text(
-          widget.title,
+          title,
           style: Theme.of(context).textTheme.titleLarge,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 4),
-        // Just author text, no avatar
-        Text(widget.author, style: Theme.of(context).textTheme.bodyMedium),
+        Text(
+          author, 
+          style: Theme.of(context).textTheme.bodyMedium
+        ),
       ],
     );
   }

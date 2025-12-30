@@ -13,6 +13,9 @@ abstract class FavoritesEvent extends Equatable {
 /// Event triggered to load the list of favorite recipes.
 class LoadFavorites extends FavoritesEvent {}
 
+/// Event triggered to clear the favorites (e.g., on logout).
+class ClearFavorites extends FavoritesEvent {}
+
 /// Event triggered to toggle the favorite status of a recipe.
 class ToggleFavorite extends FavoritesEvent {
   /// The recipe to toggle.
