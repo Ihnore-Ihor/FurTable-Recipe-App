@@ -10,27 +10,40 @@ import 'package:furtable/features/favorites/bloc/favorites_state.dart';
 class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
   final RecipeRepository _recipeRepo = RecipeRepository();
   StreamSubscription? _favoritesSubscription;
+  StreamSubscription? _authSubscription;
 
   /// Creates a [FavoritesBloc].
   FavoritesBloc() : super(FavoritesLoading()) {
     on<LoadFavorites>(_onLoadFavorites);
     on<ToggleFavorite>(_onToggleFavorite);
     on<FavoritesUpdated>(_onFavoritesUpdated);
+    on<ClearFavorites>(_onClearFavorites);
+
+    // Initial auth listener to handle reactive loading/clearing
+    _authSubscription = FirebaseAuth.instance.authStateChanges().listen((user) {
+      if (user != null) {
+        add(LoadFavorites());
+      } else {
+        add(ClearFavorites());
+      }
+    });
   }
 
   Future<void> _onLoadFavorites(LoadFavorites event, Emitter<FavoritesState> emit) async {
     await _favoritesSubscription?.cancel();
-    emit(FavoritesLoading());
-
+    
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      emit(const FavoritesError("User not logged in"));
+      emit(const FavoritesLoaded([]));
       return;
     }
 
+    // We keep the current state (if any) to avoid unnecessary loading flickers.
+    // If it's the very first load, FavoritesLoading (from constructor) is already set.
+
     _favoritesSubscription = _recipeRepo.getFavorites(user.uid).listen(
       (recipes) => add(FavoritesUpdated(recipes)),
-      onError: (e) {}, // Favorites Error
+      onError: (e) {},
     );
   }
 
@@ -38,37 +51,34 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
     emit(FavoritesLoaded(event.recipes));
   }
 
+  void _onClearFavorites(ClearFavorites event, Emitter<FavoritesState> emit) {
+    _favoritesSubscription?.cancel();
+    emit(const FavoritesLoaded([]));
+  }
+
   Future<void> _onToggleFavorite(ToggleFavorite event, Emitter<FavoritesState> emit) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
     // 1. OPTIMISTIC UPDATE
-    // We take the current list and IMMEDIATELY change it in the UI
     if (state is FavoritesLoaded) {
       final currentRecipes = List<Recipe>.from((state as FavoritesLoaded).recipes);
-      final isExist = currentRecipes.any((r) => r.id == event.recipe.id);
+      final index = currentRecipes.indexWhere((r) => r.id == event.recipe.id);
 
-      if (isExist) {
-        currentRecipes.removeWhere((r) => r.id == event.recipe.id);
+      if (index >= 0) {
+        currentRecipes.removeAt(index);
       } else {
         currentRecipes.add(event.recipe);
       }
 
-      // Emit updated state immediately (before server request)
       emit(FavoritesLoaded(currentRecipes));
     }
 
     try {
-      // 2. SERVER REQUEST (in background)
+      // 2. SERVER REQUEST
       await _recipeRepo.toggleFavorite(user.uid, event.recipe);
-      
-      // We no longer call add(LoadFavorites()) because we already updated locally,
-      // and the StreamSubscription in _onLoadFavorites will sync the server truth later.
-
     } catch (e) {
-      // print("!!! FAVORITE TOGGLE ERROR: $e");
-      // 3. ROLLBACK (on error)
-      // If the server rejected the request, just reload everything
+      // 3. ROLLBACK (re-load from server)
       add(LoadFavorites());
     }
   }
@@ -76,6 +86,7 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
   @override
   Future<void> close() {
     _favoritesSubscription?.cancel();
+    _authSubscription?.cancel();
     return super.close();
   }
 }

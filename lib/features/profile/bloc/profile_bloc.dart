@@ -75,5 +75,32 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         emit(const ProfileFailure("An error occurred"));
       }
     });
+
+    // Permanently deletes the user's account and data.
+    on<DeleteAccount>((event, emit) async {
+      emit(ProfileLoading());
+      try {
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          // 1. Delete data from database while we still have permissions.
+          await _userRepo.deleteUserData(user.uid);
+
+          // 2. Delete the user from Auth.
+          await user.delete();
+
+          emit(const ProfileSuccess("Account deleted successfully"));
+        } else {
+          emit(const ProfileFailure("User not logged in"));
+        }
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'requires-recent-login') {
+          emit(const ProfileFailure("Please log out and log in again to delete your account."));
+        } else {
+          emit(ProfileFailure(e.message ?? "Failed to delete account"));
+        }
+      } catch (e) {
+        emit(const ProfileFailure("An error occurred during account deletion"));
+      }
+    });
   }
 }

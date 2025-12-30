@@ -6,11 +6,13 @@ import 'package:furtable/features/create_recipe/bloc/create_recipe_state.dart';
 import 'package:furtable/core/utils/avatar_helper.dart';
 import 'package:furtable/features/explore/models/recipe_model.dart';
 import 'package:furtable/features/explore/repositories/recipe_repository.dart';
+import 'package:furtable/features/profile/repositories/user_repository.dart';
 
 /// Manages the state of recipe creation and updates.
 class CreateRecipeBloc extends Bloc<CreateRecipeEvent, CreateRecipeState> {
   final RecipeRepository _recipeRepo = RecipeRepository();
   final StorageRepository _storageRepo = StorageRepository();
+  final UserRepository _userRepo = UserRepository();
 
   /// Creates a [CreateRecipeBloc].
   CreateRecipeBloc() : super(CreateRecipeInitial()) {
@@ -25,40 +27,47 @@ class CreateRecipeBloc extends Bloc<CreateRecipeEvent, CreateRecipeState> {
   ) async {
     emit(CreateRecipeLoading());
     try {
-      var user = FirebaseAuth.instance.currentUser;
+      final user = FirebaseAuth.instance.currentUser;
       if (user == null) throw Exception("User not logged in");
 
-      // FORCE refresh to get latest profile updates (name/avatar)
-      await user.reload();
-      user = FirebaseAuth.instance.currentUser; // Get refreshed user
-      if (user == null) throw Exception("User session invalid");
+      // 1. Fetch the LATEST avatar from Firestore (Source of Truth)
+      // This bypasses any local Auth profile caching.
+      String currentAvatar = AvatarHelper.defaultAvatar;
+      try {
+        final fetchedAvatar = await _userRepo.getUserAvatar(user.uid);
+        if (fetchedAvatar != null && fetchedAvatar.isNotEmpty) {
+          currentAvatar = fetchedAvatar;
+        }
+      } catch (_) {
+        // Fallback to default if fetch fails
+      }
 
       String imageUrl = '';
 
-      // 1. Upload image to Storage (simulated Supabase/Firebase)
+      // 2. Upload image to Storage
       if (event.imageBytes != null) {
         imageUrl = await _storageRepo.uploadImageBytes(
           event.imageBytes!,
           'recipe_images',
-          user.uid, // <--- Pass user ID
+          user.uid,
         );
       } else {
         imageUrl = 'assets/images/haru_eating_en.png';
       }
 
-      // 2. Create the recipe object
+      // 3. Create the recipe object
       final recipe = Recipe(
         id: '', // ID will be assigned by Firestore
         authorId: user.uid,
         authorName: user.displayName ?? 'Chef',
-        authorAvatarUrl: user.photoURL ?? AvatarHelper.defaultAvatar,
+        authorAvatarUrl: currentAvatar, // <--- Using the fresh one from DB
         title: event.title,
         description: event.description,
         imageUrl: imageUrl,
         likesCount: 0,
         timeMinutes: event.timeMinutes,
-        ingredients: event.ingredients.split('\n'),
-        steps: event.instructions.split('\n'),
+        ingredients: event.ingredients.split('\n').where((s) => s.trim().isNotEmpty).toList(),
+        steps: event.instructions.split('\n').where((s) => s.trim().isNotEmpty).toList(),
         isPublic: event.isPublic,
         createdAt: DateTime.now(),
       );
@@ -112,10 +121,10 @@ class CreateRecipeBloc extends Bloc<CreateRecipeEvent, CreateRecipeState> {
         title: event.title,
         description: event.description,
         imageUrl: imageUrl, // New or existing URL
-        likesCount: 0, // Resetting likes on edit (per requirements)
+        likesCount: event.likesCount,
         timeMinutes: event.timeMinutes,
-        ingredients: event.ingredients.split('\n'),
-        steps: event.instructions.split('\n'),
+        ingredients: event.ingredients.split('\n').where((s) => s.trim().isNotEmpty).toList(),
+        steps: event.instructions.split('\n').where((s) => s.trim().isNotEmpty).toList(),
         isPublic: event.isPublic,
         createdAt: DateTime.now(),
       );

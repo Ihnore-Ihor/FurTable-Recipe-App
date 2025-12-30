@@ -49,17 +49,24 @@ class MyRecipesScreen extends StatelessWidget {
           items: [
             BottomNavigationBarItem(
               icon: const Icon(Icons.explore_outlined),
+              activeIcon: const Icon(Icons.explore),
               label: AppLocalizations.of(context)!.explore,
             ),
             BottomNavigationBarItem(
-              icon: const Icon(Icons.book),
+              icon: const Icon(Icons.book_outlined),
+              activeIcon: const Icon(Icons.book),
               label: AppLocalizations.of(context)!.myRecipes,
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.favorite_border),
+              activeIcon: const Icon(Icons.favorite),
               label: AppLocalizations.of(context)!.favorites,
             ),
-            BottomNavigationBarItem(icon: const Icon(Icons.search), label: AppLocalizations.of(context)!.search),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.search),
+              activeIcon: const Icon(Icons.search),
+              label: AppLocalizations.of(context)!.search,
+            ),
           ],
         ),
       );
@@ -187,17 +194,24 @@ class MyRecipesView extends StatelessWidget {
           items: [
             BottomNavigationBarItem(
               icon: const Icon(Icons.explore_outlined),
+              activeIcon: const Icon(Icons.explore),
               label: AppLocalizations.of(context)!.explore,
             ),
             BottomNavigationBarItem(
-              icon: const Icon(Icons.book),
+              icon: const Icon(Icons.book_outlined),
+              activeIcon: const Icon(Icons.book),
               label: AppLocalizations.of(context)!.myRecipes,
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.favorite_border),
+              activeIcon: const Icon(Icons.favorite),
               label: AppLocalizations.of(context)!.favorites,
             ),
-            BottomNavigationBarItem(icon: const Icon(Icons.search), label: AppLocalizations.of(context)!.search),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.search),
+              activeIcon: const Icon(Icons.search),
+              label: AppLocalizations.of(context)!.search,
+            ),
           ],
         ),
       ),
@@ -211,9 +225,38 @@ class MyRecipesView extends StatelessWidget {
   }) {
     if (recipes.isEmpty) {
       return Center(
-        child: Text(
-          AppLocalizations.of(context)!.noRecipesYet,
-          style: Theme.of(context).textTheme.bodyMedium,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Opacity(
+                opacity: 0.8,
+                child: Image.asset('assets/images/jack_writing.png', height: 200),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                AppLocalizations.of(context)!.noRecipesYet,
+                style: const TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.mediumGray,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                isPrivate
+                    ? AppLocalizations.of(context)!.createPrivateHint
+                    : AppLocalizations.of(context)!.shareMasterpieces,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 14,
+                  color: AppTheme.mediumGray,
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }

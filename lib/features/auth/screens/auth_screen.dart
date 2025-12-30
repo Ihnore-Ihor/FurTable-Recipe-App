@@ -7,6 +7,7 @@ import 'package:furtable/core/utils/avatar_helper.dart';
 import 'package:furtable/l10n/app_localizations.dart';
 import 'package:furtable/features/explore/screens/explore_screen.dart';
 import 'package:furtable/features/profile/repositories/user_repository.dart';
+import 'package:flutter/services.dart';
 
 /// The authentication screen handling both login and registration.
 ///
@@ -60,6 +61,9 @@ class _AuthScreenState extends State<AuthScreen> {
     setState(() {
       _isLoading = true;
     });
+
+    // Notify the browser/system that autofill is finished to trigger password saving prompts.
+    TextInput.finishAutofillContext();
 
     try {
       final email = _emailController.text.trim();
@@ -607,6 +611,7 @@ class _AuthScreenState extends State<AuthScreen> {
         _buildTextField(
           controller: _emailController,
           hintText: AppLocalizations.of(context)!.email,
+          autofillHints: [AutofillHints.email],
           validator: (val) =>
               (val?.isEmpty ?? true) ? AppLocalizations.of(context)!.requiredField : null,
         ),
@@ -615,6 +620,7 @@ class _AuthScreenState extends State<AuthScreen> {
           controller: _passwordController,
           hintText: AppLocalizations.of(context)!.password,
           isPassword: true,
+          autofillHints: [AutofillHints.password],
           validator: (val) =>
               (val?.isEmpty ?? true) ? AppLocalizations.of(context)!.requiredField : null,
           onSubmitted: _handleAuthentication,
@@ -636,6 +642,7 @@ class _AuthScreenState extends State<AuthScreen> {
         _buildTextField(
           controller: _emailController,
           hintText: AppLocalizations.of(context)!.email,
+          autofillHints: [AutofillHints.email],
           validator: (value) {
             if (value == null || !RegExp(r'\S+@\S+\.\S+').hasMatch(value)) {
               return AppLocalizations.of(context)!.invalidEmail;
@@ -647,6 +654,7 @@ class _AuthScreenState extends State<AuthScreen> {
         _buildTextField(
           controller: _nicknameController,
           hintText: AppLocalizations.of(context)!.nickname,
+          autofillHints: [AutofillHints.name],
           validator: (value) {
             if (value == null || value.length < 3) {
               return AppLocalizations.of(context)!.requiredField;
@@ -659,6 +667,7 @@ class _AuthScreenState extends State<AuthScreen> {
           controller: _passwordController,
           hintText: AppLocalizations.of(context)!.password,
           isPassword: true,
+          autofillHints: [AutofillHints.newPassword],
           validator: (value) {
             if (value == null || value.length < 8) {
               return AppLocalizations.of(context)!.minPassword;
@@ -682,12 +691,14 @@ class _AuthScreenState extends State<AuthScreen> {
     required TextEditingController controller,
     required String hintText,
     bool isPassword = false,
+    Iterable<String>? autofillHints,
     String? Function(String?)? validator,
     VoidCallback? onSubmitted,
   }) {
     return TextFormField(
       controller: controller,
       obscureText: isPassword && !_isPasswordVisible,
+      autofillHints: autofillHints,
       validator: validator,
       textInputAction: onSubmitted != null ? TextInputAction.done : TextInputAction.next,
       onFieldSubmitted: (_) {

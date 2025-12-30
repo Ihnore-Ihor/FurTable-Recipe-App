@@ -40,3 +40,6 @@ class ChangePassword extends ProfileEvent {
     required this.newPassword,
   });
 }
+
+/// Event triggered to permanently delete the user's account.
+class DeleteAccount extends ProfileEvent {}
