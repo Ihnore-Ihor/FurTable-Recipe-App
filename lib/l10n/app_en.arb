@@ -1,0 +1,213 @@
+{
+    "appTitle": "FurTable",
+    
+    "@_AUTH": {},
+    "login": "Log In",
+    "signUp": "Create Account",
+    "welcomeBack": "Welcome Back",
+    "fillInfo": "Fill out the information below...",
+    "letsGetStarted": "Let's get started...",
+    "email": "Email",
+    "password": "Password",
+    "nickname": "Nickname",
+    "signIn": "Sign In",
+    "getStarted": "Get Started",
+    "or": "OR",
+    "continueWithGoogle": "Continue with Google",
+    "accountCreatedCheckEmail": "Account created! Please check your email to verify.",
+    "invalidEmail": "Please enter a valid email address",
+    "minPassword": "Minimum 8 characters required",
+    "mustContainNumber": "Must contain at least one number",
+    "requiredField": "Please fill in this field",
+    
+    "@_NAVIGATION": {},
+    "explore": "Explore",
+    "myRecipes": "My Recipes",
+    "favorites": "Favorites",
+    "search": "Search",
+    
+    "@_RECIPE": {},
+    "cookTime": "Cooking Time",
+    "ingredients": "Ingredients",
+    "instructions": "Instructions",
+    "description": "Description",
+    "byAuthor": "by {name}",
+    "@byAuthor": {
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "noDescription": "No description provided.",
+    "noIngredients": "No ingredients listed.",
+    "noInstructions": "No instructions listed.",
+    "step": "Step {number}",
+    "@step": {
+        "placeholders": {
+            "number": {
+                "type": "int"
+            }
+        }
+    },
+    
+    "@_CREATE_EDIT": {},
+    "createRecipe": "Create Recipe",
+    "editRecipe": "Edit Recipe",
+    "recipeImage": "Recipe Image",
+    "tapToAddPhoto": "Tap to add photo",
+    "recipeTitle": "Recipe Title",
+    "enterTitle": "Enter recipe title...",
+    "describeRecipe": "Describe your recipe...",
+    "enterIngredientHint": "Example:\n2 Eggs\n200g Flour\n(Each on a new line)",
+    "enterInstructionHint": "Example:\nMix eggs.\nBake at 180C.\n(Each step on a new line)",
+    "makePublic": "Make this recipe public",
+    "anyoneCanSee": "Anyone can see this recipe",
+    "selectTime": "Select time",
+    "compressingImage": "Compressing image...",
+    "recipeCreated": "Recipe created successfully!",
+    "recipeUpdated": "Recipe updated!",
+    "save": "Save",
+    "done": "Done",
+    "days": "Days",
+    "hours": "Hours",
+    "mins": "Mins",
+
+    "@_PROFILE": {},
+    "profile": "Profile",
+    "editProfile": "Edit Profile",
+    "tapToChangePhoto": "Tap to change photo",
+    "chooseAvatar": "Choose an Avatar",
+    "accountSettings": "Account Settings",
+    "faq": "FAQ",
+    "helpSupport": "Help & Support",
+    "sendFeedback": "Send Feedback",
+    "logOut": "Log Out",
+    "emailNotVerified": "Email not verified",
+    "resendVerification": "Resend Verification Email",
+    "waitToResend": "Wait {seconds}s to resend",
+    "@waitToResend": {
+        "placeholders": {
+            "seconds": {
+                "type": "int"
+            }
+        }
+    },
+    "verificationSent": "Verification email sent! Check your inbox.",
+    "profileUpdated": "Profile updated!",
+    "nicknameEmpty": "Nickname cannot be empty",
+    "faqQ1": "How do I create a recipe?",
+    "faqA1": "Go to the 'My Recipes' tab (book icon) and tap the '+' icon in the top right corner.",
+    "faqQ2": "Can I make my recipes private?",
+    "faqA2": "Yes! When creating or editing a recipe, toggle the 'Make this recipe public' switch off.",
+    "faqQ3": "How do I change my password?",
+    "faqA3": "Navigate to Profile > Account Settings > Change Password.",
+    "faqQ4": "Is FurTable free?",
+    "faqA4": "Yes, FurTable is completely free to use for everyone.",
+    "faqQ5": "How do I delete my account?",
+    "faqA5": "Go to Profile > Account Settings and select 'Delete Account' at the bottom.",
+    "feedbackThanks": "Thank you for your feedback!",
+    "feedbackError": "Error sending feedback: {error}",
+    "@feedbackError": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "tellUsExperience": "Tell us about your experience...",
+    "feedbackHint": "Share your thoughts, suggestions, or report any issues...",
+    "emailIncluded": "Your email address ({email}) will be included with this feedback.",
+    "@emailIncluded": {
+        "placeholders": {
+            "email": {
+                "type": "String"
+            }
+        }
+    },
+    "inProgress": "In progress...",
+    
+    "reachedEnd": "You've reached the end",
+    "changePasswordSubtitle": "Update your password for enhanced security.",
+    
+    "enterCurrentPassword": "Enter your current password",
+    "enterNewPassword": "Enter your new password",
+    "confirmYourPassword": "Confirm your new password",
+    "passwordRequirement": "Minimum 8 characters, including one number",
+    
+    "clearCacheDialogTitle": "Clear Cache?",
+    "clearCacheDialogDesc": "This will remove all downloaded images. They will be re-downloaded when needed.",
+    "clearCacheSuccess": "Image cache cleared successfully",
+    "errorClearingCache": "Error clearing cache",
+
+    "@_SETTINGS": {},
+    "changePassword": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmNewPassword": "Confirm New Password",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "passwordUpdated": "Password updated!",
+    "storageCache": "Storage & Cache",
+    "enableCaching": "Enable Image Caching",
+    "saveImagesLocally": "Save images locally for faster loading",
+    "autoClear": "Auto-clear on Startup",
+    "clearCacheStart": "Clear cache every time app starts",
+    "clearCacheNow": "Clear Image Cache Now",
+
+    "deleteAccount": "Delete Account",
+    "deleteAccountConfirm": "Delete Account?",
+    "deleteAccountDesc": "Are you sure you want to permanently delete this account? This action cannot be undone.",
+    "language": "Language",
+
+    "@_SEARCH": {},
+    "typeToSearch": "Type to search...",
+    "noRecipesFound": "No recipes found.",
+    "tryDifferentSearch": "Try searching for something else.",
+    "recentSearches": "Recent Searches",
+    "clear": "Clear",
+
+    "@_COMMON": {},
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "update": "Update",
+    "deleteRecipeTitle": "Delete Recipe?",
+    "deleteRecipeContent": "Are you sure you want to permanently delete this recipe? This action cannot be undone.",
+    "recipeDeleted": "Recipe deleted",
+    "searchHint": "Recipe or Author",
+    "public": "Public",
+    "private": "Private",
+    "noRecipesYet": "No recipes yet",
+    "noFavorites": "No favorites yet",
+    "tapHeart": "Tap the heart icon on recipes you love",
+
+    "faqTitle": "Frequently Asked Questions",
+    "faqQ_create": "How do I create a new recipe?",
+    "faqA_create": "Go to the 'My Recipes' tab (book icon) and tap the '+' button in the top right corner. Fill in the details, add a photo, and hit Save.",
+    "faqQ_private": "Can I keep my recipes secret?",
+    "faqA_private": "Yes! When creating or editing a recipe, simply toggle the 'Make this recipe public' switch off. Only you will see it.",
+    "faqQ_editDelete": "How do I edit or delete a recipe?",
+    "faqA_editDelete": "In the 'My Recipes' tab, tap the three dots icon on any of your recipe cards. You will see options to Edit or Delete.",
+    "faqQ_favorites": "How do Favorites work?",
+    "faqA_favorites": "Tap the heart icon on any recipe to save it to your collection. You can find all your saved dishes in the 'Favorites' tab.",
+    "faqQ_search": "How does search work?",
+    "faqA_search": "You can search by recipe title or author name. Just type in the search bar and press Enter (or the search button on keyboard).",
+    "faqQ_profile": "Can I change my avatar?",
+    "faqA_profile": "Yes, go to Profile > Edit Profile and tap on your current avatar to choose a new character.",
+    "faqQ_legoshi": "Why is a wolf staring at me when loading?",
+    "faqA_legoshi": "That's Legoshi. He ensures your data is loaded correctly... and he's also looking for egg sandwiches.",
+    "faqQ_egg": "Is this app safe for herbivores?",
+    "faqA_egg": "Absolutely. FurTable supports all diets, from salads for Haru to burgers for the rest. No animals were harmed in the coding of this app.",
+
+    "@_GUEST": {},
+    "joinTitle": "Join FurTable",
+    "loginOrSignup": "Log In / Sign Up",
+    "guestMyRecipesTitle": "Start Cooking!",
+    "guestMyRecipesMessage": "Create an account to save your own recipes and share them with the world.",
+    "guestFavoritesTitle": "Save Your Favorites",
+    "guestFavoritesMessage": "Log in to create your personal collection of delicious recipes.",
+    "authRequiredLike": "Log in to add this recipe to your favorites.",
+    "authRequiredAction": "Log in to perform this action."
+}

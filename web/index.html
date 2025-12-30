@@ -27,12 +27,51 @@
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="icon" type="image/png" href="logo.png"/>
 
   <title>cookbook</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- The core Firebase JS SDK is always required and must be listed first -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+
+  <!-- Add SDKs for Firebase products that you want to use -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-analytics.js"></script>
 </head>
 <body>
+  <!-- 1. Include heic2any library -->
+  <script src="heic2any.min.js" type="application/javascript"></script>
+
+  <!-- 2. Helper function for Flutter (from heckofaheic docs) -->
+  <script>
+    function executeHeic2any(blob, multiple, toType, quality, gifInterval) {
+      return heic2any({
+        blob,
+        multiple: multiple,
+        toType: toType,
+        quality: quality,
+        gifInterval: gifInterval
+      });
+    }
+  </script>
+
   <script src="flutter_bootstrap.js" async></script>
+
+  <script>
+    // Your web app's Firebase configuration
+    var firebaseConfig = {
+      apiKey: "AIzaSyCInx-HkXQYzfpzY1A9e37zHtSdAdQUuoQ",
+      authDomain: "furtable.firebaseapp.com",
+      projectId: "furtable",
+      storageBucket: "furtable.firebasestorage.app",
+      messagingSenderId: "119425224593",
+      appId: "1:119425224593:web:edf5ca4ea2f5eb9fb35430",
+      measurementId: "G-ZPD8D1J3F8"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    firebase.analytics();
+  </script>
 </body>
 </html>
