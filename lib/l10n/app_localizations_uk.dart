@@ -411,6 +411,65 @@ class AppLocalizationsUk extends AppLocalizations {
   String get tapHeart => 'Тисніть на серце, щоб зберегти рецепт';
 
   @override
+  String get faqTitle => 'Часті запитання';
+
+  @override
+  String get faqQ_create => 'Як створити новий рецепт?';
+
+  @override
+  String get faqA_create =>
+      'Перейдіть у вкладку \'Мої рецепти\' (книжка) та натисніть \'+\' у верхньому куті. Заповніть деталі, додайте фото та натисніть Зберегти.';
+
+  @override
+  String get faqQ_private => 'Чи можу я приховати свої рецепти?';
+
+  @override
+  String get faqA_private =>
+      'Так! При створенні або редагуванні просто вимкніть перемикач \'Зробити публічним\'. Тільки ви зможете бачити цей рецепт.';
+
+  @override
+  String get faqQ_editDelete => 'Як редагувати або видалити рецепт?';
+
+  @override
+  String get faqA_editDelete =>
+      'У вкладці \'Мої рецепти\' натисніть на три крапки на картці рецепту. Ви побачити опції редагування та видалення.';
+
+  @override
+  String get faqQ_favorites => 'Як працює \'Улюблене\'?';
+
+  @override
+  String get faqA_favorites =>
+      'Натисніть на іконку серця на будь-якому рецепті, щоб зберегти його. Усі збережені страви будуть у вкладці \'Улюблене\'.';
+
+  @override
+  String get faqQ_search => 'Як працює пошук?';
+
+  @override
+  String get faqA_search =>
+      'Ви можете шукати за назвою страви або іменем автора. Введіть текст і натисніть Enter (або кнопку пошуку на клавіатурі).';
+
+  @override
+  String get faqQ_profile => 'Чи можу я змінити аватар?';
+
+  @override
+  String get faqA_profile =>
+      'Так, перейдіть у Профіль > Редагувати профіль та натисніть на поточний аватар, щоб обрати нового персонажа.';
+
+  @override
+  String get faqQ_legoshi => 'Чому вовк дивиться на мене при завантаженні?';
+
+  @override
+  String get faqA_legoshi =>
+      'Це Легоші. Він стежить, щоб ваші дані завантажились правильно... а ще він шукає сендвічі з яйцями.';
+
+  @override
+  String get faqQ_egg => 'Чи безпечний цей додаток для травоїдних?';
+
+  @override
+  String get faqA_egg =>
+      'Абсолютно. FurTable підтримує всі дієти: від салатів для Хару до бургерів для хижаків. При написанні коду жодна тварина не постраждала.';
+
+  @override
   String get joinTitle => 'Приєднуйтесь до FurTable';
 
   @override

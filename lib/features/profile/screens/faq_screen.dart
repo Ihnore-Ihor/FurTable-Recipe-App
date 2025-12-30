@@ -2,73 +2,71 @@ import 'package:flutter/material.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/l10n/app_localizations.dart';
 
-/// Screen displaying Frequently Asked Questions.
 class FAQScreen extends StatelessWidget {
-  /// Creates an [FAQScreen].
   const FAQScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Формуємо список питань динамічно, щоб мати доступ до контексту локалізації
+    final l10n = AppLocalizations.of(context)!;
+    
+    final List<Map<String, String>> faqItems = [
+      {'q': l10n.faqQ_create, 'a': l10n.faqA_create},
+      {'q': l10n.faqQ_editDelete, 'a': l10n.faqA_editDelete},
+      {'q': l10n.faqQ_private, 'a': l10n.faqA_private},
+      {'q': l10n.faqQ_favorites, 'a': l10n.faqA_favorites},
+      {'q': l10n.faqQ_search, 'a': l10n.faqA_search},
+      {'q': l10n.faqQ_profile, 'a': l10n.faqA_profile},
+      // Жартівливі
+      {'q': l10n.faqQ_legoshi, 'a': l10n.faqA_legoshi},
+      {'q': l10n.faqQ_egg, 'a': l10n.faqA_egg},
+    ];
+
     return Scaffold(
       backgroundColor: AppTheme.offWhite,
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.faq), // Title matches menu item.
+        title: Text(l10n.faq),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: ListView(
+      body: ListView.builder(
         padding: const EdgeInsets.all(20),
-        children: [
-          Text(
-            AppLocalizations.of(context)!.faq,
-            style: TextStyle(
-              fontFamily: 'Inter',
-              fontWeight: FontWeight.w800,
-              fontSize: 20,
-              color: AppTheme.darkCharcoal,
-            ),
-          ),
-          SizedBox(height: 16),
+        itemCount: faqItems.length + 1, // +1 для заголовка
+        itemBuilder: (context, index) {
+          if (index == 0) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 24.0),
+              child: Text(
+                l10n.faqTitle,
+                style: const TextStyle(
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.w800,
+                  fontSize: 24,
+                  color: AppTheme.darkCharcoal,
+                ),
+              ),
+            );
+          }
 
-          FAQItem(
-            question: AppLocalizations.of(context)!.faqQ1,
-            answer: AppLocalizations.of(context)!.faqA1,
-          ),
-          FAQItem(
-            question: AppLocalizations.of(context)!.faqQ2,
-            answer: AppLocalizations.of(context)!.faqA2,
-          ),
-          FAQItem(
-            question: AppLocalizations.of(context)!.faqQ3,
-            answer: AppLocalizations.of(context)!.faqA3,
-          ),
-          FAQItem(
-            question: AppLocalizations.of(context)!.faqQ4,
-            answer: AppLocalizations.of(context)!.faqA4,
-          ),
-          FAQItem(
-            question: AppLocalizations.of(context)!.faqQ5,
-            answer: AppLocalizations.of(context)!.faqA5,
-          ),
-        ],
+          final item = faqItems[index - 1];
+          return _FAQItem(
+            question: item['q']!,
+            answer: item['a']!,
+          );
+        },
       ),
     );
   }
 }
 
-/// A widget representing a single FAQ item with an expandable answer.
-class FAQItem extends StatelessWidget {
-  /// The question text.
+class _FAQItem extends StatelessWidget {
   final String question;
-
-  /// The answer text.
   final String answer;
 
-  /// Creates an [FAQItem].
-  const FAQItem({super.key, required this.question, required this.answer});
+  const _FAQItem({required this.question, required this.answer});
 
   @override
   Widget build(BuildContext context) {
@@ -77,6 +75,7 @@ class FAQItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
+        // Легка тінь для об'єму
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),
@@ -86,18 +85,18 @@ class FAQItem extends StatelessWidget {
         ],
       ),
       child: Theme(
-        data: Theme.of(context).copyWith(
-          dividerColor: Colors.transparent,
-        ), // Remove divider line when expanded.
+        // Прибираємо стандартні лінії ExpansionTile
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
           tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
           childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
           iconColor: AppTheme.darkCharcoal,
           collapsedIconColor: AppTheme.mediumGray,
+          expandedAlignment: Alignment.centerLeft, // Вирівнювання відповіді
           title: Text(
             question,
             style: const TextStyle(
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
               fontSize: 16,
               color: AppTheme.darkCharcoal,
               fontFamily: 'Inter',

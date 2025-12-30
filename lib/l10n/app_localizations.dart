@@ -866,6 +866,108 @@ abstract class AppLocalizations {
   /// **'Tap the heart icon on recipes you love'**
   String get tapHeart;
 
+  /// No description provided for @faqTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Frequently Asked Questions'**
+  String get faqTitle;
+
+  /// No description provided for @faqQ_create.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I create a new recipe?'**
+  String get faqQ_create;
+
+  /// No description provided for @faqA_create.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to the \'My Recipes\' tab (book icon) and tap the \'+\' button in the top right corner. Fill in the details, add a photo, and hit Save.'**
+  String get faqA_create;
+
+  /// No description provided for @faqQ_private.
+  ///
+  /// In en, this message translates to:
+  /// **'Can I keep my recipes secret?'**
+  String get faqQ_private;
+
+  /// No description provided for @faqA_private.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes! When creating or editing a recipe, simply toggle the \'Make this recipe public\' switch off. Only you will see it.'**
+  String get faqA_private;
+
+  /// No description provided for @faqQ_editDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I edit or delete a recipe?'**
+  String get faqQ_editDelete;
+
+  /// No description provided for @faqA_editDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'In the \'My Recipes\' tab, tap the three dots icon on any of your recipe cards. You will see options to Edit or Delete.'**
+  String get faqA_editDelete;
+
+  /// No description provided for @faqQ_favorites.
+  ///
+  /// In en, this message translates to:
+  /// **'How do Favorites work?'**
+  String get faqQ_favorites;
+
+  /// No description provided for @faqA_favorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the heart icon on any recipe to save it to your collection. You can find all your saved dishes in the \'Favorites\' tab.'**
+  String get faqA_favorites;
+
+  /// No description provided for @faqQ_search.
+  ///
+  /// In en, this message translates to:
+  /// **'How does search work?'**
+  String get faqQ_search;
+
+  /// No description provided for @faqA_search.
+  ///
+  /// In en, this message translates to:
+  /// **'You can search by recipe title or author name. Just type in the search bar and press Enter (or the search button on keyboard).'**
+  String get faqA_search;
+
+  /// No description provided for @faqQ_profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Can I change my avatar?'**
+  String get faqQ_profile;
+
+  /// No description provided for @faqA_profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, go to Profile > Edit Profile and tap on your current avatar to choose a new character.'**
+  String get faqA_profile;
+
+  /// No description provided for @faqQ_legoshi.
+  ///
+  /// In en, this message translates to:
+  /// **'Why is a wolf staring at me when loading?'**
+  String get faqQ_legoshi;
+
+  /// No description provided for @faqA_legoshi.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s Legoshi. He ensures your data is loaded correctly... and he\'s also looking for egg sandwiches.'**
+  String get faqA_legoshi;
+
+  /// No description provided for @faqQ_egg.
+  ///
+  /// In en, this message translates to:
+  /// **'Is this app safe for herbivores?'**
+  String get faqQ_egg;
+
+  /// No description provided for @faqA_egg.
+  ///
+  /// In en, this message translates to:
+  /// **'Absolutely. FurTable supports all diets, from salads for Haru to burgers for the rest. No animals were harmed in the coding of this app.'**
+  String get faqA_egg;
+
   /// No description provided for @joinTitle.
   ///
   /// In en, this message translates to:
