@@ -8,8 +8,9 @@ import 'package:furtable/features/explore/widgets/responsive_recipe_grid.dart';
 import 'package:furtable/features/favorites/bloc/favorites_bloc.dart';
 import 'package:furtable/features/favorites/bloc/favorites_event.dart';
 import 'package:furtable/features/favorites/bloc/favorites_state.dart';
-import 'package:furtable/l10n/app_localizations.dart'; // Імпорт локалізації
+import 'package:furtable/l10n/app_localizations.dart'; 
 
+/// Screen for displaying the user's favorite recipes.
 class FavoritesScreen extends StatelessWidget {
   const FavoritesScreen({super.key});
 
@@ -68,6 +69,7 @@ class FavoritesScreen extends StatelessWidget {
   }
 }
 
+/// The view implementation for [FavoritesScreen].
 class FavoritesView extends StatefulWidget {
   const FavoritesView({super.key});
 
@@ -94,7 +96,7 @@ class _FavoritesViewState extends State<FavoritesView> {
           child: Text(AppLocalizations.of(context)!.favorites),
         ),
         automaticallyImplyLeading: false,
-        // Профіль ми викликаємо через NavigationHelper або AppBar Actions
+        // Profile is handled via NavigationHelper or AppBar Actions
       ),
       body: BlocBuilder<FavoritesBloc, FavoritesState>(
         builder: (context, state) {
@@ -106,7 +108,7 @@ class _FavoritesViewState extends State<FavoritesView> {
             if (state.recipes.isEmpty) {
               return _buildEmptyState(context);
             }
-            // Використовуємо наш адаптивний грід
+            // Using our responsive grid
             return CustomScrollView(
               controller: _scrollController,
               slivers: [

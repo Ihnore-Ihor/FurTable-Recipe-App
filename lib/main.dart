@@ -5,8 +5,8 @@ import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/features/auth/screens/auth_screen.dart';
-import 'package:furtable/core/services/local_storage_service.dart'; // <--- Import
-import 'package:flutter_cache_manager/flutter_cache_manager.dart'; // <--- Import
+import 'package:furtable/core/services/local_storage_service.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/features/favorites/bloc/favorites_bloc.dart';
@@ -36,10 +36,9 @@ Future<void> main() async {
       final storage = LocalStorageService();
       await storage.init();
 
-      // 2. Check auto-clear setting
+      // 2. Clear cache if auto-clear is enabled.
       if (storage.isAutoClearEnabled) {
         await DefaultCacheManager().emptyCache();
-
       }
 
       await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);

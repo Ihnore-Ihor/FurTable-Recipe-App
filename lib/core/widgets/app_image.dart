@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/core/services/local_storage_service.dart';
 
+/// A customizable image widget that handles network caching, locale-specific placeholders,
+/// and error states for the application.
 class AppImage extends StatelessWidget {
   final String imagePath;
   final double? width;
@@ -21,21 +23,21 @@ class AppImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 1. ВИЗНАЧАЄМО АКТУАЛЬНУ ЗАГЛУШКУ (EN vs UK)
+    // 1. Determine the relevant placeholder (EN vs UK)
     final String languageCode = Localizations.localeOf(context).languageCode;
     final String haruAsset = languageCode == 'uk'
         ? 'assets/images/haru_eating_uk.png'
         : 'assets/images/haru_eating_en.png';
 
-    // 2. ВИЗНАЧАЄМО ТИП ВИРІВНЮВАННЯ
+    // 2. Determine the alignment type
     final bool isHaru = imagePath.contains('haru_eating') || imagePath.contains('legom');
     final Alignment geometryAlignment = isHaru ? Alignment.topCenter : Alignment.center;
 
-    // 3. ЗАГЛУШКА (або пустий шлях)
+    // 3. Placeholder (for empty or invalid path)
     if (imagePath.trim().isEmpty || imagePath.contains('placehold.co')) {
       return _buildWrapper(
         child: Image.asset(
-          haruAsset, // <--- Використовуємо динамічний шлях
+          haruAsset, // <--- Using dynamic path
           width: width,
           height: height,
           fit: fit,
@@ -45,7 +47,7 @@ class AppImage extends StatelessWidget {
       );
     }
 
-    // 4. МЕРЕЖА
+    // 4. Network Image
     if (imagePath.startsWith('http')) {
       final useCache = LocalStorageService().isCacheEnabled;
       final int cacheWidth = width != null && width!.isFinite 
@@ -65,7 +67,7 @@ class AppImage extends StatelessWidget {
             placeholderFadeInDuration: Duration.zero,
             placeholder: (context, url) => const _LoadingPlaceholder(),
             errorWidget: (context, url, error) => Image.asset(
-              haruAsset, // <--- Динамічний шлях при помилці
+              haruAsset, // <--- Dynamic path on error
               fit: fit,
               alignment: Alignment.topCenter,
             ),
@@ -86,7 +88,7 @@ class AppImage extends StatelessWidget {
                return const _LoadingPlaceholder();
             },
             errorBuilder: (context, error, stackTrace) => Image.asset(
-              haruAsset, // <--- Динамічний шлях при помилці
+              haruAsset, // <--- Dynamic path on error
               fit: fit,
               alignment: Alignment.topCenter,
             ),
@@ -96,10 +98,10 @@ class AppImage extends StatelessWidget {
       }
     }
 
-    // 5. ЛОКАЛЬНИЙ АССЕТ
-    // Якщо шлях явно вказує на "стару" хару (haru_eating_en), 
-    // замінюємо її на актуальну для поточної мови.
-    // Це потрібно для випадків, коли ми десь захардкодили шлях у коді.
+    // 5. Local Asset
+    // If the path explicitly points to the "old" Haru (haru_eating_en),
+    // we replace it with the relevant one for the current language.
+    // This handles cases where the path might be hardcoded elsewhere in the code.
     String actualPath = imagePath;
     if (imagePath.contains('haru_eating')) {
       actualPath = haruAsset;
@@ -113,7 +115,7 @@ class AppImage extends StatelessWidget {
         fit: fit,
         alignment: geometryAlignment,
         errorBuilder: (context, error, stackTrace) => Image.asset(
-           haruAsset, // <--- Динамічний шлях
+           haruAsset, // <--- Dynamic path
            fit: fit,
            alignment: Alignment.topCenter,
         ),
@@ -135,6 +137,7 @@ class AppImage extends StatelessWidget {
   }
 }
 
+/// Internal fallback widget shown while a network image is loading.
 class _LoadingPlaceholder extends StatelessWidget {
   const _LoadingPlaceholder();
 

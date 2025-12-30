@@ -30,12 +30,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    // 1. INSTANT INITIALIZATION
-    // We use data already in memory so the image appears immediately.
+    // Initialize the user from memory for immediate display.
     _user = FirebaseAuth.instance.currentUser;
     
-    // 2. Background refresh
-    // Required to check emailVerified or if data changed on another device.
+    // Refresh user data in the background to catch any remote changes.
     _refreshUser();
   }
 
@@ -178,7 +176,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 height: 110,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white, // IMPORTANT: White background under image
+                  color: Colors.white,
                   border: Border.all(color: AppTheme.darkCharcoal, width: 2),
                   image: DecorationImage(
                     image: AvatarHelper.getAvatarProvider(_user?.photoURL),
@@ -208,7 +206,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
 
-            // --- VERIFICATION STATUS LOGIC ---
+            // Verification status section for unverified users.
             if (!isVerified && _user != null) ...[
               const SizedBox(height: 12),
               Container(
@@ -217,7 +215,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFEF2F2), // Light red background.
+                  color: const Color(0xFFFEF2F2),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: Colors.red.shade200),
                 ),
@@ -304,7 +302,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       );
 
                       if (result == true) {
-                        _refreshUser(); // Call refresh
+                        _refreshUser();
                       }
                     },
                   ),

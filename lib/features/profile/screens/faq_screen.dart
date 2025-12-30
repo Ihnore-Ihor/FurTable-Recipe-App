@@ -7,7 +7,7 @@ class FAQScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Формуємо список питань динамічно, щоб мати доступ до контексту локалізації
+    // Build the question list dynamically to access the localization context
     final l10n = AppLocalizations.of(context)!;
     
     final List<Map<String, String>> faqItems = [
@@ -17,7 +17,7 @@ class FAQScreen extends StatelessWidget {
       {'q': l10n.faqQ_favorites, 'a': l10n.faqA_favorites},
       {'q': l10n.faqQ_search, 'a': l10n.faqA_search},
       {'q': l10n.faqQ_profile, 'a': l10n.faqA_profile},
-      // Жартівливі
+      // Jokes / Easter eggs
       {'q': l10n.faqQ_legoshi, 'a': l10n.faqA_legoshi},
       {'q': l10n.faqQ_egg, 'a': l10n.faqA_egg},
     ];
@@ -34,7 +34,7 @@ class FAQScreen extends StatelessWidget {
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(20),
-        itemCount: faqItems.length + 1, // +1 для заголовка
+        itemCount: faqItems.length + 1, // +1 for the header
         itemBuilder: (context, index) {
           if (index == 0) {
             return Padding(
@@ -75,7 +75,7 @@ class _FAQItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        // Легка тінь для об'єму
+        // Subtle shadow for depth
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),
@@ -85,14 +85,14 @@ class _FAQItem extends StatelessWidget {
         ],
       ),
       child: Theme(
-        // Прибираємо стандартні лінії ExpansionTile
+        // Remove default ExpansionTile dividers
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
           tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
           childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
           iconColor: AppTheme.darkCharcoal,
           collapsedIconColor: AppTheme.mediumGray,
-          expandedAlignment: Alignment.centerLeft, // Вирівнювання відповіді
+          expandedAlignment: Alignment.centerLeft, // Alignment of the answer
           title: Text(
             question,
             style: const TextStyle(

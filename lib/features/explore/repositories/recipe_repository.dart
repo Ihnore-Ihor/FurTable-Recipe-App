@@ -4,10 +4,8 @@ import 'package:furtable/features/explore/models/recipe_model.dart';
 
 /// Repository for handling recipe-related operations in Firestore.
 class RecipeRepository {
-  // Reference to the 'recipes' collection in Firestore
-  final CollectionReference _recipesRef = FirebaseFirestore.instance.collection(
-    'recipes',
-  );
+  // Reference to the 'recipes' collection in Firestore.
+  final CollectionReference _recipesRef = FirebaseFirestore.instance.collection('recipes');
 
   /// Gets public recipes (for Explore screen).
   Stream<List<Recipe>> getPublicRecipes() {
@@ -66,7 +64,7 @@ class RecipeRepository {
     return query.get();
   }
 
-  /// Gets the list of favorite REFRENCES (IDs) paginated.
+  /// Gets the list of favorite references (IDs) paginated.
   Future<QuerySnapshot> getFavoriteRefsPaginated(
     String userId, {
     DocumentSnapshot? lastDocument,
@@ -118,11 +116,11 @@ class RecipeRepository {
       // 1. Delete favorites (Collection Group)
       final favoritesGroup = FirebaseFirestore.instance.collectionGroup('favorites');
       
-      // IMPORTANT: We add filter by authorId.
-      // This satisfies security rules effectively asking only for docs where WE are the author.
+      // Filtering by authorId ensures consistency with security rules,
+      // confirming that the current user is authorized to delete the favorite references.
       final snapshots = await favoritesGroup
           .where('recipeId', isEqualTo: recipeId)
-          .where('authorId', isEqualTo: user.uid) // <--- ADDED THIS
+          .where('authorId', isEqualTo: user.uid)
           .get();
 
       for (var doc in snapshots.docs) {
@@ -151,7 +149,7 @@ class RecipeRepository {
 
     final snapshot = await _recipesRef
         .where('isPublic', isEqualTo: true)
-        // Magic here: check if the 'searchKeywords' array contains our word
+        // Check if the 'searchKeywords' array contains the query prefix.
         .where('searchKeywords', arrayContains: cleanQuery)
         .get();
 

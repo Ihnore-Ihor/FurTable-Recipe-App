@@ -3,7 +3,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
 import 'package:furtable/core/app_theme.dart';
-import 'package:furtable/core/utils/avatar_helper.dart'; // Import Helper
+import 'package:furtable/core/utils/avatar_helper.dart';
 import 'package:furtable/l10n/app_localizations.dart';
 import 'package:furtable/features/explore/screens/explore_screen.dart';
 import 'package:furtable/features/profile/repositories/user_repository.dart';
@@ -80,11 +80,11 @@ class _AuthScreenState extends State<AuthScreen> {
             _nicknameController.text.trim(),
           );
           
-          // 2. Set RANDOM avatar
+          // Assign a random avatar to the new user.
           final randomAvatar = AvatarHelper.getRandomAvatar();
           await userCredential.user!.updatePhotoURL(randomAvatar);
 
-          // 3. Create record in Firestore
+          // Create a corresponding user profile in Firestore.
           await UserRepository().saveUserProfile(
             userCredential.user!.uid,
             _nicknameController.text.trim(),
@@ -244,10 +244,10 @@ class _AuthScreenState extends State<AuthScreen> {
 
       await _analytics.logLogin(loginMethod: 'google');
 
-      // Check if user has a photo (Google) and replace it if needed
+      // If the user does not have a photo or has a Google-provided photo,
+      // replace it with one of our random avatars for a consistent look.
       final user = userCredential.user;
       if (user != null && (user.photoURL == null || user.photoURL!.startsWith('http'))) {
-         // If user handles Google photo or none - swap to our random
          final randomAvatar = AvatarHelper.getRandomAvatar();
          await user.updatePhotoURL(randomAvatar);
          await UserRepository().saveUserProfile(user.uid, user.displayName ?? "User", randomAvatar);
@@ -649,7 +649,7 @@ class _AuthScreenState extends State<AuthScreen> {
           hintText: AppLocalizations.of(context)!.nickname,
           validator: (value) {
             if (value == null || value.length < 3) {
-              return AppLocalizations.of(context)!.requiredField; // Simplified
+              return AppLocalizations.of(context)!.requiredField;
             }
             return null;
           },

@@ -20,7 +20,7 @@ class StorageRepository {
       final Reference ref = _storage.ref().child('$folder/$fileName');
 
       final metadata = SettableMetadata(
-        contentType: 'image/webp', // <--- Tell browser it's WebP
+        contentType: 'image/webp',
         customMetadata: {
           'owner': userId,
         },
@@ -42,8 +42,8 @@ class StorageRepository {
       final ref = _storage.refFromURL(imageUrl);
       await ref.delete();
     } catch (e) {
-      // Ignore errors (e.g., file already deleted or broken URL) 
-      // to avoid blocking the main recipe deletion process.
+      // Ignore errors (e.g., file already deleted or broken URL)
+      // to avoid blocking the parent operation.
     }
   }
 }

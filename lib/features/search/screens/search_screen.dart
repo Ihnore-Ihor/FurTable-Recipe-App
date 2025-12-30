@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:furtable/core/widgets/app_image.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/core/app_theme.dart';
-import 'package:furtable/core/utils/auth_helper.dart'; // <--- Import
+import 'package:furtable/core/utils/auth_helper.dart';
 import 'package:furtable/core/utils/navigation_helper.dart';
 import 'package:furtable/features/search/bloc/search_bloc.dart';
 import 'package:furtable/features/search/bloc/search_event.dart';
 import 'package:furtable/features/search/bloc/search_state.dart';
-import 'package:furtable/features/explore/widgets/responsive_recipe_grid.dart'; // <--- Import
+import 'package:furtable/features/explore/widgets/responsive_recipe_grid.dart';
 import 'package:furtable/features/profile/screens/profile_screen.dart';
 import 'package:furtable/l10n/app_localizations.dart';
 
@@ -62,7 +62,6 @@ class _SearchViewState extends State<SearchView> {
   }
 
   // Common widget for displaying placeholder images.
-  // Common widget for displaying placeholder images.
   Widget _buildPlaceholderImage(String assetPath) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -76,10 +75,8 @@ class _SearchViewState extends State<SearchView> {
             width: double.infinity,
             height: height,
             fit: BoxFit.cover,
-            // alignment: Alignment.topCenter is already built-in for Haru in AppImage/placeholder logic if needed,
-            // or we can rely on fit: BoxFit.cover to do a decent job.
-            // If explicit alignment is needed, wrapping AppImage in another widget or modifying AppImage might be needed,
-            // but for now we follow the request to use AppImage.
+            // The fit: BoxFit.cover property ensures a centered and consistent look
+            // for the placeholder artwork across different screen sizes.
           ),
         );
       },
@@ -128,11 +125,10 @@ class _SearchViewState extends State<SearchView> {
               onChanged: (value) {
                 context.read<SearchBloc>().add(SearchQueryChanged(value));
               },
-              // History Save (saves only when Enter/Search is pressed).
+              // Save the search query to history when the user submits it.
               onSubmitted: (value) {
                 context.read<SearchBloc>().add(SearchQuerySubmitted(value));
               },
-              // Keyboard action setting.
               textInputAction: TextInputAction.search,
 
               decoration: InputDecoration(
@@ -214,13 +210,11 @@ class _SearchViewState extends State<SearchView> {
                                 ),
                               ),
                               onTap: () {
-                                // 1. Set text.
+                                // Set the search field text, trigger the search, and hide the keyboard.
                                 _searchController.text = item;
-                                // 2. IMPORTANT: Trigger Submitted to start search.
                                 context.read<SearchBloc>().add(
                                   SearchQuerySubmitted(item),
                                 );
-                                // 3. Unfocus to hide keyboard.
                                 FocusScope.of(context).unfocus();
                               },
                             );
@@ -231,7 +225,7 @@ class _SearchViewState extends State<SearchView> {
                   );
                 }
 
-                // 1. STATE: INITIAL
+                // Initial state when the screen is first opened.
                 if (state is SearchInitial) {
                   return Center(
                     child: Column(
@@ -255,7 +249,7 @@ class _SearchViewState extends State<SearchView> {
                   );
                 }
 
-                // 2. STATE: LOADING
+                // Display a loading indicator while fetching results.
                 if (state is SearchLoading) {
                   return const Center(
                     child: CircularProgressIndicator(
@@ -264,7 +258,7 @@ class _SearchViewState extends State<SearchView> {
                   );
                 }
 
-                // 3. STATE: EMPTY
+                // State when no recipes match the search criteria.
                 if (state is SearchEmpty) {
                   return Center(
                     child: Column(
@@ -298,9 +292,8 @@ class _SearchViewState extends State<SearchView> {
                   );
                 }
 
-                // 4. STATE: SUCCESS
+                // Successfully retrieved search results.
                 if (state is SearchSuccess) {
-                  // INSTEAD OF AlignedGridView.count...
                   return StandardRecipeGrid(recipes: state.recipes);
                 }
 
