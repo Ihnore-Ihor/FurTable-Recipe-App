@@ -10,6 +10,7 @@ import 'package:furtable/features/create_recipe/bloc/create_recipe_bloc.dart';
 import 'package:furtable/features/create_recipe/bloc/create_recipe_event.dart';
 import 'package:furtable/features/create_recipe/bloc/create_recipe_state.dart';
 import 'package:furtable/features/explore/models/recipe_model.dart';
+import 'package:furtable/core/services/local_storage_service.dart';
 import 'package:furtable/l10n/app_localizations.dart';
 
 class CreateRecipeScreen extends StatelessWidget {
@@ -46,6 +47,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
   
   bool _isPublic = true;
   Uint8List? _selectedImageBytes;
+  final _storage = LocalStorageService();
 
   @override
   void initState() {
@@ -58,6 +60,61 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
       _instructionsController.text = r.steps.join('\n');
       _timeController.text = r.timeMinutes.toString();
       _isPublic = r.isPublic;
+    } else {
+      // NEW: Load draft if not editing an existing recipe
+      _loadDraft();
+    }
+
+    // NEW: Listen for changes to auto-save draft
+    _titleController.addListener(_saveDraft);
+    _descriptionController.addListener(_saveDraft);
+    _ingredientsController.addListener(_saveDraft);
+    _instructionsController.addListener(_saveDraft);
+    // Note: time is picked via dialog, so it's manually saved when set
+  }
+
+  void _loadDraft() {
+    final draft = _storage.getDraft();
+    if (draft != null && draft.length >= 5) {
+      setState(() {
+        _titleController.text = draft[0];
+        _descriptionController.text = draft[1];
+        _ingredientsController.text = draft[2];
+        _instructionsController.text = draft[3];
+        _timeController.text = draft[4];
+        if (draft.length > 5) {
+          _isPublic = draft[5] == 'true';
+        }
+
+        // Show a brief hint only if title was restored
+        if (_titleController.text.isNotEmpty) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(AppLocalizations.of(context)!.draftRestored), 
+                  duration: const Duration(seconds: 2),
+                  backgroundColor: AppTheme.darkCharcoal,
+                ),
+              );
+            }
+          });
+        }
+      });
+    }
+  }
+
+  void _saveDraft() {
+    // Only save if we are creating a NEW recipe (not editing)
+    if (widget.recipeToEdit == null) {
+      _storage.saveDraft([
+        _titleController.text,
+        _descriptionController.text,
+        _ingredientsController.text,
+        _instructionsController.text,
+        _timeController.text,
+        _isPublic.toString(),
+      ]);
     }
   }
 
@@ -71,58 +128,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
     super.dispose();
   }
 
-  // --- ДІАЛОГ ВИХОДУ (ОНОВЛЕНИЙ СТИЛЬ) ---
-  Future<void> _handleExit() async {
-    final hasContent = _titleController.text.isNotEmpty || 
-                       _descriptionController.text.isNotEmpty ||
-                       _ingredientsController.text.isNotEmpty;
 
-    if (!hasContent && widget.recipeToEdit == null) {
-      Navigator.of(context).pop();
-      return;
-    }
-
-    final shouldDiscard = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        // ЛОКАЛІЗАЦІЯ ЗАГОЛОВКА
-        title: Text(
-          AppLocalizations.of(context)!.discardChanges, 
-          style: const TextStyle(fontWeight: FontWeight.bold)
-        ),
-        // ЛОКАЛІЗАЦІЯ ТЕКСТУ
-        content: Text(AppLocalizations.of(context)!.unsavedChangesMsg),
-        actions: [
-          // Кнопка Скасувати (Сіра, як у Delete)
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(
-              AppLocalizations.of(context)!.cancel, 
-              style: const TextStyle(color: AppTheme.mediumGray)
-            ),
-          ),
-          // Кнопка Відкинути (Темна заливка, як у Delete)
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.darkCharcoal,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            ),
-            onPressed: () => Navigator.of(context).pop(true),
-            // ЛОКАЛІЗАЦІЯ КНОПКИ
-            child: Text(AppLocalizations.of(context)!.discard),
-          ),
-        ],
-      ),
-    );
-
-    if (shouldDiscard == true && mounted) {
-      Navigator.of(context).pop();
-    }
-  }
 
   // --- ЛОГІКА ЗБЕРЕЖЕННЯ ---
   void _submitForm() {
@@ -277,13 +283,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
     final isEditing = widget.recipeToEdit != null;
     final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
 
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) return;
-        _handleExit();
-      },
-      child: BlocListener<CreateRecipeBloc, CreateRecipeState>(
+    return BlocListener<CreateRecipeBloc, CreateRecipeState>(
         listener: (context, state) {
           if (state is CreateRecipeSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -292,6 +292,12 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                 backgroundColor: AppTheme.darkCharcoal,
               ),
             );
+            
+            // NEW: Clear draft after successful creation
+            if (!isEditing) {
+              _storage.clearDraft();
+            }
+
             Navigator.pop(context, true);
           } else if (state is CreateRecipeFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -307,7 +313,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
             title: Text(isEditing ? AppLocalizations.of(context)!.editRecipe : AppLocalizations.of(context)!.createRecipe),
             leading: IconButton(
               icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-              onPressed: _handleExit,
+              onPressed: () => Navigator.pop(context),
             ),
             actions: [
               Padding(
@@ -415,7 +421,22 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                                       Container(
                                         color: Colors.grey[100],
                                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                        child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [TextButton(onPressed: () { setState(() => _timeController.text = tempDuration.inMinutes.toString()); Navigator.pop(context); }, child: Text(AppLocalizations.of(context)!.done, style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.darkCharcoal)))]),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.end, 
+                                          children: [
+                                            TextButton(
+                                              onPressed: () { 
+                                                setState(() => _timeController.text = tempDuration.inMinutes.toString()); 
+                                                _saveDraft(); // Save draft when time is changed
+                                                Navigator.pop(context); 
+                                              }, 
+                                              child: Text(
+                                                AppLocalizations.of(context)!.done, 
+                                                style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.darkCharcoal)
+                                              )
+                                            )
+                                          ]
+                                        ),
                                       ),
                                       Expanded(
                                         child: Row(
@@ -496,7 +517,14 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                                 Text(AppLocalizations.of(context)!.anyoneCanSee, style: const TextStyle(fontFamily: 'Inter', fontSize: 14, color: AppTheme.mediumGray)),
                               ],
                             ),
-                            Switch.adaptive(value: _isPublic, activeTrackColor: AppTheme.darkCharcoal, onChanged: (v) => setState(() => _isPublic = v)),
+                            Switch.adaptive(
+                              value: _isPublic, 
+                              activeTrackColor: AppTheme.darkCharcoal, 
+                              onChanged: (v) {
+                                setState(() => _isPublic = v);
+                                _saveDraft(); // Save draft when visibility changes
+                              },
+                            ),
                           ],
                         ),
                         const SizedBox(height: 40),
@@ -508,8 +536,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildLabel(String text) => Padding(padding: const EdgeInsets.only(bottom: 12), child: Text(text, style: const TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.darkCharcoal)));

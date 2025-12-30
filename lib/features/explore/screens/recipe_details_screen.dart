@@ -147,6 +147,29 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                       ],
                     ),
 
+                    const SizedBox(height: 16),
+                    
+                    // --- COOKING TIME ---
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.access_time_filled, 
+                          color: AppTheme.darkCharcoal, 
+                          size: 20
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          recipe.durationString,
+                          style: const TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.darkCharcoal,
+                          ),
+                        ),
+                      ],
+                    ),
+
                     const SizedBox(height: 32),
 
                     // Description

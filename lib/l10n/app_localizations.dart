@@ -362,6 +362,12 @@ abstract class AppLocalizations {
   /// **'Compressing image...'**
   String get compressingImage;
 
+  /// No description provided for @draftRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft restored from last session'**
+  String get draftRestored;
+
   /// No description provided for @recipeCreated.
   ///
   /// In en, this message translates to:
@@ -775,6 +781,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Are you sure you want to permanently delete this account? This action cannot be undone.'**
   String get deleteAccountDesc;
+
+  /// No description provided for @deleteAccountContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to permanently delete this account? This action cannot be undone.'**
+  String get deleteAccountContent;
 
   /// No description provided for @language.
   ///

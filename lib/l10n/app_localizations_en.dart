@@ -148,6 +148,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get compressingImage => 'Compressing image...';
 
   @override
+  String get draftRestored => 'Draft restored from last session';
+
+  @override
   String get recipeCreated => 'Recipe created successfully!';
 
   @override
@@ -368,6 +371,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteAccountDesc =>
+      'Are you sure you want to permanently delete this account? This action cannot be undone.';
+
+  @override
+  String get deleteAccountContent =>
       'Are you sure you want to permanently delete this account? This action cannot be undone.';
 
   @override

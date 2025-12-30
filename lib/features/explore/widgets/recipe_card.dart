@@ -11,6 +11,7 @@ class RecipeCard extends StatelessWidget {
   final String title;
   final String author;
   final String likes;
+  final String cookingTime;
   final bool isFavorite;
   final VoidCallback? onFavoriteToggle;
 
@@ -22,6 +23,7 @@ class RecipeCard extends StatelessWidget {
     required this.title,
     required this.author,
     required this.likes,
+    required this.cookingTime,
     this.isFavorite = false,
     this.onFavoriteToggle,
   });
@@ -102,9 +104,34 @@ class RecipeCard extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 4),
-        Text(
-          author, 
-          style: Theme.of(context).textTheme.bodyMedium
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text(
+                author, 
+                style: Theme.of(context).textTheme.bodyMedium,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.access_time, 
+                  size: 14, 
+                  color: AppTheme.mediumGray
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  cookingTime,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppTheme.mediumGray,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ],
     );

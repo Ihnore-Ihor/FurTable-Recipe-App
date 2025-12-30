@@ -10,7 +10,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/features/profile/bloc/profile_bloc.dart';
 import 'package:furtable/features/profile/bloc/profile_event.dart';
 import 'package:furtable/features/profile/bloc/profile_state.dart';
-import 'package:furtable/features/auth/screens/auth_screen.dart';
+import 'package:furtable/features/explore/screens/explore_screen.dart';
 
 /// Screen for managing account settings, including notifications and deletion.
 class AccountSettingsScreen extends StatelessWidget {
@@ -32,9 +32,9 @@ class AccountSettingsScreen extends StatelessWidget {
               ),
             );
           } else if (state is ProfileSuccess) {
-            // Success -> Navigation
+            // Success -> Navigation to ExploreScreen (as guest)
             Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (_) => const AuthScreen()),
+              MaterialPageRoute(builder: (_) => const ExploreScreen()),
               (route) => false,
             );
             ScaffoldMessenger.of(context).showSnackBar(
@@ -142,10 +142,10 @@ class _AccountSettingsViewState extends State<AccountSettingsView> {
             style: const TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w700),
             textAlign: TextAlign.center,
           ),
-          content: const Text(
-            'Are you sure you want to permanently delete this account? This action cannot be undone.',
+          content: Text(
+            AppLocalizations.of(context)!.deleteAccountContent,
             textAlign: TextAlign.center,
-            style: TextStyle(fontFamily: 'Inter', color: AppTheme.mediumGray),
+            style: const TextStyle(fontFamily: 'Inter', color: AppTheme.mediumGray),
           ),
           actionsAlignment: MainAxisAlignment.center,
           actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),

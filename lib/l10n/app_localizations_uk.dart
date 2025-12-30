@@ -148,6 +148,9 @@ class AppLocalizationsUk extends AppLocalizations {
   String get compressingImage => 'Стиснення зображення...';
 
   @override
+  String get draftRestored => 'Чернетку відновлено з попереднього сеансу';
+
+  @override
   String get recipeCreated => 'Рецепт успішно створено!';
 
   @override
@@ -364,6 +367,10 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get deleteAccountDesc => 'Ви впевнені? Цю дію неможливо скасувати.';
+
+  @override
+  String get deleteAccountContent =>
+      'Ви впевнені, що хочете назавжди видалити цей акаунт? Цю дію неможливо скасувати.';
 
   @override
   String get language => 'Мова';
