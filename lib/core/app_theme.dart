@@ -26,6 +26,7 @@ class AppTheme {
     final baseTheme = ThemeData(fontFamily: GoogleFonts.inter().fontFamily);
 
     return baseTheme.copyWith(
+      colorScheme: ColorScheme.fromSeed(seedColor: offWhite),
       scaffoldBackgroundColor: offWhite,
       splashColor: Colors.transparent,
       highlightColor: Colors.transparent,
@@ -33,6 +34,8 @@ class AppTheme {
       appBarTheme: AppBarTheme(
         backgroundColor: offWhite,
         elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        scrolledUnderElevation: 0,
         iconTheme: const IconThemeData(color: darkCharcoal),
         titleTextStyle: GoogleFonts.inter(
           color: darkCharcoal,
