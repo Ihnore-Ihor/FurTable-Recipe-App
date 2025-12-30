@@ -7,17 +7,69 @@ import 'package:furtable/features/profile/screens/change_password_screen.dart';
 import 'package:furtable/l10n/app_localizations.dart';
 import 'package:furtable/core/bloc/locale/locale_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:furtable/features/profile/bloc/profile_bloc.dart';
+import 'package:furtable/features/profile/bloc/profile_event.dart';
+import 'package:furtable/features/profile/bloc/profile_state.dart';
+import 'package:furtable/features/auth/screens/auth_screen.dart';
 
 /// Screen for managing account settings, including notifications and deletion.
-class AccountSettingsScreen extends StatefulWidget {
+class AccountSettingsScreen extends StatelessWidget {
   /// Creates an [AccountSettingsScreen].
   const AccountSettingsScreen({super.key});
 
   @override
-  State<AccountSettingsScreen> createState() => _AccountSettingsScreenState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => ProfileBloc(),
+      child: BlocListener<ProfileBloc, ProfileState>(
+        listener: (context, state) {
+          if (state is ProfileLoading) {
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (context) => const Center(
+                child: CircularProgressIndicator(color: AppTheme.darkCharcoal),
+              ),
+            );
+          } else if (state is ProfileSuccess) {
+            // Success -> Navigation
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (_) => const AuthScreen()),
+              (route) => false,
+            );
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: AppTheme.darkCharcoal,
+              ),
+            );
+          } else if (state is ProfileFailure) {
+            // Close loading dialog if open
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            }
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.error),
+                backgroundColor: Colors.redAccent,
+              ),
+            );
+          }
+        },
+        child: const AccountSettingsView(),
+      ),
+    );
+  }
 }
 
-class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
+class AccountSettingsView extends StatefulWidget {
+  const AccountSettingsView({super.key});
+
+  @override
+  State<AccountSettingsView> createState() => _AccountSettingsViewState();
+}
+
+class _AccountSettingsViewState extends State<AccountSettingsView> {
   late bool _isCacheEnabled;
   late bool _isAutoClearEnabled;
 
@@ -25,16 +77,15 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
   void initState() {
     super.initState();
     final storage = LocalStorageService();
-    // Assuming defaults are handled in service getter or we set them here if null
     _isCacheEnabled = storage.isCacheEnabled;
     _isAutoClearEnabled = storage.isAutoClearEnabled;
   }
 
   Future<void> _clearCache() async {
     try {
-      await DefaultCacheManager().emptyCache(); // Clears image cache
-      
+      await DefaultCacheManager().emptyCache(); 
       if (mounted) {
+        // Success
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(AppLocalizations.of(context)!.clearCacheSuccess),
@@ -77,7 +128,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
     );
   }
 
-  void _showDeleteConfirmation() {
+  void _showDeleteConfirmation(BuildContext parentContext) {
     showDialog(
       context: context,
       builder: (context) {
@@ -125,13 +176,8 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                   child: TextButton(
                     onPressed: () {
                       Navigator.pop(context);
-                      // Account deletion logic would go here.
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Account deleted (simulation)'),
-                          backgroundColor: AppTheme.darkCharcoal,
-                        ),
-                      );
+                      // Dispatch deletion event
+                      parentContext.read<ProfileBloc>().add(DeleteAccount());
                     },
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -197,10 +243,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Get the current user
     final user = FirebaseAuth.instance.currentUser;
-    
-    // 2. Check if the user has a password provider
     final bool hasPassword = user?.providerData
             .any((userInfo) => userInfo.providerId == 'password') ?? false;
 
@@ -219,7 +262,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- 1. CHANGE PASSWORD CARD (Visible only if user has a password) ---
+            // --- 1. CHANGE PASSWORD CARD ---
             if (hasPassword) ...[
               Container(
                 decoration: _cardDecoration,
@@ -281,7 +324,6 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                    Text(AppLocalizations.of(context)!.storageCache, style: _sectionHeaderStyle),
                    const SizedBox(height: 24),
                    
-                   // Switch 1: Enable Cache
                    _buildSwitchRow(
                      AppLocalizations.of(context)!.enableCaching,
                      AppLocalizations.of(context)!.saveImagesLocally,
@@ -293,7 +335,6 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                    ),
                    const SizedBox(height: 24),
                    
-                   // Switch 2: Auto-clear
                    _buildSwitchRow(
                      AppLocalizations.of(context)!.autoClear,
                      AppLocalizations.of(context)!.clearCacheStart,
@@ -307,7 +348,6 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
                    const SizedBox(height: 24),
                    const Divider(),
                    
-                   // Clear Button
                    ListTile(
                      contentPadding: EdgeInsets.zero,
                      title: Text(AppLocalizations.of(context)!.clearCacheNow, 
@@ -324,10 +364,10 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
             // Account deletion button.
             Center(
               child: TextButton(
-                onPressed: _showDeleteConfirmation,
+                onPressed: () => _showDeleteConfirmation(context),
                 child: Text(
                   AppLocalizations.of(context)!.deleteAccount,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.redAccent,
                     fontFamily: 'Inter',
                     fontWeight: FontWeight.w600,
@@ -342,7 +382,6 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
     );
   }
 
-  // Widget for a row with a switch.
   Widget _buildSwitchRow(
     String title,
     String subtitle,
@@ -372,7 +411,6 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
     );
   }
 
-  // Styles.
   static const _titleStyle = TextStyle(
     fontFamily: 'Inter',
     fontWeight: FontWeight.w700,
