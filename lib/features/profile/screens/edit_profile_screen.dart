@@ -35,7 +35,7 @@ class _EditProfileViewState extends State<EditProfileView> {
   final _formKey = GlobalKey<FormState>();
   final _nicknameController = TextEditingController();
   final _emailController = TextEditingController();
-  
+
   // Stores the path to the selected avatar.
   String _selectedAvatarPath = AvatarHelper.defaultAvatar;
   bool _hasChanges = false;
@@ -46,7 +46,7 @@ class _EditProfileViewState extends State<EditProfileView> {
   void initState() {
     super.initState();
     final user = FirebaseAuth.instance.currentUser;
-    
+
     _initialNickname = user?.displayName ?? 'Legoshi Fan1';
     // Use user's current photo URL or default avatar.
     _initialAvatar = user?.photoURL ?? AvatarHelper.defaultAvatar;
@@ -61,7 +61,7 @@ class _EditProfileViewState extends State<EditProfileView> {
   void _checkForChanges() {
     final nicknameChanged = _nicknameController.text.trim() != _initialNickname;
     final avatarChanged = _selectedAvatarPath != _initialAvatar;
-    
+
     final hasChanges = nicknameChanged || avatarChanged;
 
     if (_hasChanges != hasChanges) {
@@ -75,62 +75,71 @@ class _EditProfileViewState extends State<EditProfileView> {
   void _showAvatarPicker() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      isScrollControlled: true, // <--- Дозволяє розтягнути на весь екран
+      useSafeArea: true, // <--- Враховує "чубчик" телефону
+      backgroundColor: AppTheme.offWhite,
       builder: (context) {
-        return Container(
-          padding: const EdgeInsets.all(20),
-          height: 300,
-          child: Column(
-            children: [
-              Text(
-                AppLocalizations.of(context)!.chooseAvatar,
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  color: AppTheme.darkCharcoal,
-                ),
+        return Scaffold(
+          backgroundColor: AppTheme.offWhite,
+          // Додаємо AppBar для зручного закриття
+          appBar: AppBar(
+            backgroundColor: AppTheme.offWhite,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.close, color: AppTheme.darkCharcoal),
+              onPressed: () => Navigator.pop(context),
+            ),
+            title: Text(
+              AppLocalizations.of(context)!.chooseAvatar,
+              style: const TextStyle(
+                fontFamily: 'Inter',
+                fontWeight: FontWeight.w700,
+                color: AppTheme.darkCharcoal,
               ),
-              const SizedBox(height: 20),
-              Expanded(
-                child: GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 4, // 4 items per row
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                  ),
-                  itemCount: AvatarHelper.avatars.length,
-                  itemBuilder: (context, index) {
-                    final path = AvatarHelper.avatars[index];
-                    final isSelected = path == _selectedAvatarPath;
+            ),
+            centerTitle: true,
+          ),
+          body: GridView.builder(
+            padding: const EdgeInsets.all(16),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 4,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 1, // Квадратні
+            ),
+            itemCount: AvatarHelper.avatars.length,
+            itemBuilder: (context, index) {
+              final path = AvatarHelper.avatars[index];
+              final isSelected = path == _selectedAvatarPath;
 
-                    return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _selectedAvatarPath = path;
-                          _checkForChanges();
-                        });
-                        Navigator.pop(context); // Close sheet
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: isSelected 
-                              ? Border.all(color: AppTheme.darkCharcoal, width: 3)
-                              : null,
-                        ),
-                        child: CircleAvatar(
-                          backgroundImage: AvatarHelper.getAvatarProvider(path),
-                        ),
-                      ),
-                    );
-                  },
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedAvatarPath = path;
+                    _checkForChanges();
+                  });
+                  Navigator.pop(context); // Закриваємо при виборі
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    // Підсвічуємо вибрану жирною рамкою
+                    border: isSelected
+                        ? Border.all(color: AppTheme.darkCharcoal, width: 4)
+                        : Border.all(color: Colors.grey.shade300, width: 1),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(
+                      2.0,
+                    ), // Відступ між рамкою і фото
+                    child: CircleAvatar(
+                      backgroundColor: Colors.white,
+                      backgroundImage: AssetImage(path),
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              );
+            },
           ),
         );
       },
@@ -148,7 +157,7 @@ class _EditProfileViewState extends State<EditProfileView> {
       );
     }
   }
-  
+
   @override
   void dispose() {
     _nicknameController.dispose();
@@ -161,9 +170,11 @@ class _EditProfileViewState extends State<EditProfileView> {
     return BlocListener<ProfileBloc, ProfileState>(
       listener: (context, state) {
         if (state is ProfileSuccess) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.profileUpdated)));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.profileUpdated),
+            ),
+          );
           // Return true to notify previous screen to refresh.
           Navigator.pop(context, true);
         }
@@ -192,7 +203,8 @@ class _EditProfileViewState extends State<EditProfileView> {
                     style: ElevatedButton.styleFrom(
                       // Color depends on activity.
                       backgroundColor: isButtonEnabled
-                          ? AppTheme.darkCharcoal // Active (black)
+                          ? AppTheme
+                                .darkCharcoal // Active (black)
                           : Colors.grey.shade400, // Inactive (grey)
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
@@ -222,10 +234,13 @@ class _EditProfileViewState extends State<EditProfileView> {
             ),
           ],
         ),
-        body: Align( // Use Align instead of Center
+        body: Align(
+          // Use Align instead of Center
           alignment: Alignment.topCenter, // PUSH TO TOP
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600), // Optimal width for forms
+            constraints: const BoxConstraints(
+              maxWidth: 600,
+            ), // Optimal width for forms
             child: Form(
               key: _formKey,
               child: SingleChildScrollView(
@@ -246,7 +261,8 @@ class _EditProfileViewState extends State<EditProfileView> {
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: _selectedAvatarPath != _initialAvatar
+                                      color:
+                                          _selectedAvatarPath != _initialAvatar
                                           ? AppTheme.darkCharcoal
                                           : Colors.grey.shade400,
                                       width: 2,
@@ -260,9 +276,10 @@ class _EditProfileViewState extends State<EditProfileView> {
                                     child: CircleAvatar(
                                       radius: 50,
                                       backgroundColor: Colors.transparent,
-                                      backgroundImage: AvatarHelper.getAvatarProvider(
-                                        _selectedAvatarPath,
-                                      ), // Show selected
+                                      backgroundImage:
+                                          AvatarHelper.getAvatarProvider(
+                                            _selectedAvatarPath,
+                                          ), // Show selected
                                     ),
                                   ),
                                 ),
@@ -280,7 +297,9 @@ class _EditProfileViewState extends State<EditProfileView> {
                                       ),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.1),
+                                          color: Colors.black.withValues(
+                                            alpha: 0.1,
+                                          ),
                                           blurRadius: 4,
                                         ),
                                       ],
@@ -325,10 +344,9 @@ class _EditProfileViewState extends State<EditProfileView> {
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _nicknameController,
-                      validator: (val) =>
-                          val!.trim().isEmpty
-                              ? AppLocalizations.of(context)!.nicknameEmpty
-                              : null,
+                      validator: (val) => val!.trim().isEmpty
+                          ? AppLocalizations.of(context)!.nicknameEmpty
+                          : null,
                       style: const TextStyle(color: AppTheme.darkCharcoal),
                       decoration: InputDecoration(
                         filled: true,

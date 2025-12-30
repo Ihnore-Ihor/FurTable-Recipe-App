@@ -2,26 +2,36 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 class AvatarHelper {
-  static const List<String> avatars = [
-    'assets/images/legoshi_eating_auth.png',
-    'assets/images/gohin_empty.png',
-    'assets/images/legom_posing.png',
-  ];
+  // Генеруємо список із 40 шляху автоматично
+  static List<String> get avatars {
+    return List.generate(
+      40,
+      (index) => 'assets/images/profile_pictures/avatar_${index + 1}.jpg',
+    );
+  }
 
-  static const String defaultAvatar = 'assets/images/legoshi_eating_auth.png';
+  // Дефолтна аватарка (перша зі списку)
+  static String get defaultAvatar => avatars[0];
 
-  // Returns a random avatar path
+  // Випадкова аватарка (для нових юзерів)
   static String getRandomAvatar() {
     return avatars[Random().nextInt(avatars.length)];
   }
 
-  // Universal method to get ImageProvider
   static ImageProvider getAvatarProvider(String? path) {
-    // If it's a Google link (http), we ignore it and give default (or random could be used logic elsewhere),
-    // OR you can allow it, but you said you don't want Google photos.
-    if (path == null || path.isEmpty || path.startsWith('http')) {
-      return const AssetImage(defaultAvatar);
+    // 1. Якщо шляху немає — даємо дефолт
+    if (path == null || path.isEmpty) {
+      return AssetImage(defaultAvatar);
     }
+
+    // 2. Якщо це Google-фото (http)
+    if (path.startsWith('http')) {
+      return NetworkImage(path);
+    }
+
+    // 3. Якщо це локальний ассет
+    // (Тут буде працювати і для старих 'legoshi.png', якщо ви їх не видалили з папки images,
+    // і для нових 'avatar_X.jpg')
     return AssetImage(path);
   }
 }

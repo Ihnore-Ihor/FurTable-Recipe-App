@@ -80,31 +80,29 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
             recipe = widget.initialRecipe;
           }
 
-          return Center( // Center content on large screens
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 800), // Limit reading width
-              child: SingleChildScrollView(
-                // WAS: vertical: 8
-                // NOW: top: 0 (push to AppBar), bottom: 40 (scroll padding)
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 40),
+          return SingleChildScrollView(
+            // ЗБІЛЬШИЛИ ВІДСТУП ЗНИЗУ ДО 80, щоб було зручно скролити до кінця
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 800),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 1. Adaptive Image
+                    // Картинка
                     AspectRatio(
-                      aspectRatio: 16 / 10, // A bit taller than 16/9 so Haru is seen better
+                      aspectRatio: 16 / 10,
                       child: Hero(
                         tag: 'recipe_image_${recipe.id}',
                         child: AppImage(
                           imagePath: recipe.imageUrl,
-                          // AppImage knows Haru needs Alignment.topCenter
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16), // Reduced from 24
+                    const SizedBox(height: 24),
 
-                    // 2. Title
+                    // Заголовок
                     Text(
                       recipe.title,
                       style: const TextStyle(
@@ -117,7 +115,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    // 3. Author (FIXED OVERFLOW)
+                    // --- АВТОР (ЗБІЛЬШЕНА АВАТАРКА) ---
                     Row(
                       children: [
                         Container(
@@ -126,20 +124,21 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                             shape: BoxShape.circle,
                             border: Border.all(color: AppTheme.darkCharcoal, width: 1.5),
                           ),
+                          // ЗМІНЕНО: Radius 16 -> 24 (Діаметр 48px)
                           child: CircleAvatar(
-                            radius: 16,
+                            radius: 24, 
                             backgroundColor: Colors.white,
                             backgroundImage: AvatarHelper.getAvatarProvider(recipe.authorAvatarUrl),
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded( // <--- Expanded saves from overflow error
+                        const SizedBox(width: 14),
+                        Expanded(
                           child: Text(
                             AppLocalizations.of(context)!.byAuthor(recipe.authorName),
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                               fontFamily: 'Inter',
-                              fontSize: 16,
+                              fontSize: 18,
                               fontWeight: FontWeight.w600,
                               color: AppTheme.darkCharcoal,
                             ),
@@ -148,134 +147,136 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                       ],
                     ),
 
-                const SizedBox(height: 24),
-                Text(AppLocalizations.of(context)!.description, style: const TextStyle(fontFamily: 'Inter', fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
-                const SizedBox(height: 8),
-                Text(recipe.description.isNotEmpty ? recipe.description : AppLocalizations.of(context)!.noDescription, style: const TextStyle(fontFamily: 'Inter', fontSize: 15, height: 1.5, color: AppTheme.mediumGray)),
-                
-                const SizedBox(height: 24),
-                
-                // --- INGREDIENTS WITH CHECKBOXES ---
-                Text(AppLocalizations.of(context)!.ingredients, style: const TextStyle(fontFamily: 'Inter', fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
-                const SizedBox(height: 12),
-                if (recipe.ingredients.isEmpty)
-                  Text(AppLocalizations.of(context)!.noIngredients, style: const TextStyle(color: AppTheme.mediumGray)),
-                
-                ...recipe.ingredients.map((ingredient) {
-                  final isDone = _completedIngredients.contains(ingredient);
-                  
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        if (isDone) {
-                          _completedIngredients.remove(ingredient);
-                        } else {
-                          _completedIngredients.add(ingredient);
-                        }
-                      });
-                    },
-                    child: AnimatedOpacity(
-                      duration: const Duration(milliseconds: 200),
-                      opacity: isDone ? 0.5 : 1.0,
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 12.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _ThinCheckbox(isDone: isDone),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                ingredient,
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontSize: 16,
-                                  height: 1.4,
-                                  color: AppTheme.darkCharcoal,
-                                  decoration: isDone ? TextDecoration.lineThrough : null,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                    const SizedBox(height: 32),
+
+                    // Опис
+                    Text(AppLocalizations.of(context)!.description, style: const TextStyle(fontFamily: 'Inter', fontSize: 20, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
+                    const SizedBox(height: 12),
+                    Text(
+                      recipe.description.isNotEmpty ? recipe.description : AppLocalizations.of(context)!.noDescription,
+                      style: const TextStyle(fontFamily: 'Inter', fontSize: 16, height: 1.6, color: AppTheme.mediumGray),
                     ),
-                  );
-                }),
-                
-                const SizedBox(height: 24),
 
-                // --- INSTRUCTIONS WITH CHECKBOXES ---
-                Text(AppLocalizations.of(context)!.instructions, style: const TextStyle(fontFamily: 'Inter', fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
-                const SizedBox(height: 16),
-                if (recipe.steps.isEmpty)
-                  Text(AppLocalizations.of(context)!.noInstructions, style: const TextStyle(color: AppTheme.mediumGray)),
+                    const SizedBox(height: 32),
 
-                ...recipe.steps.asMap().entries.map((entry) {
-                  int idx = entry.key;
-                  String step = entry.value;
-                  final isDone = _completedSteps.contains(idx);
+                    // --- ІНГРЕДІЄНТИ (ЗБІЛЬШЕНІ ВІДСТУПИ) ---
+                    Text(AppLocalizations.of(context)!.ingredients, style: const TextStyle(fontFamily: 'Inter', fontSize: 20, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
+                    const SizedBox(height: 16),
+                    if (recipe.ingredients.isEmpty)
+                      Text(AppLocalizations.of(context)!.noIngredients, style: const TextStyle(color: AppTheme.mediumGray)),
 
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        if (isDone) {
-                          _completedSteps.remove(idx);
-                        } else {
-                          _completedSteps.add(idx);
-                        }
-                      });
-                    },
-                    child: AnimatedOpacity(
-                      duration: const Duration(milliseconds: 200),
-                      opacity: isDone ? 0.5 : 1.0,
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 20.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _ThinCheckbox(isDone: isDone),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    AppLocalizations.of(context)!.step(idx + 1),
-                                    style: const TextStyle(
-                                      fontFamily: 'Inter',
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppTheme.mediumGray,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    step,
+                    ...recipe.ingredients.map((ingredient) {
+                      final isDone = _completedIngredients.contains(ingredient);
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            if (isDone) {
+                              _completedIngredients.remove(ingredient);
+                            } else {
+                              _completedIngredients.add(ingredient);
+                            }
+                          });
+                        },
+                        child: AnimatedOpacity(
+                          duration: const Duration(milliseconds: 200),
+                          opacity: isDone ? 0.5 : 1.0,
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 16.0),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _ThinCheckbox(isDone: isDone),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Text(
+                                    ingredient,
                                     style: TextStyle(
                                       fontFamily: 'Inter',
-                                      fontSize: 16,
+                                      fontSize: 17,
                                       height: 1.5,
-                                      color: AppTheme.darkCharcoal.withValues(alpha: 0.9),
+                                      color: AppTheme.darkCharcoal,
                                       decoration: isDone ? TextDecoration.lineThrough : null,
                                     ),
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
-                  );
-                }),
-                
-                const SizedBox(height: 40),
-              ],
+                      );
+                    }),
+
+                    const SizedBox(height: 32),
+
+                    // --- ІНСТРУКЦІЇ (ЗБІЛЬШЕНІ ВІДСТУПИ) ---
+                    Text(AppLocalizations.of(context)!.instructions, style: const TextStyle(fontFamily: 'Inter', fontSize: 20, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
+                    const SizedBox(height: 16),
+                    if (recipe.steps.isEmpty)
+                      Text(AppLocalizations.of(context)!.noInstructions, style: const TextStyle(color: AppTheme.mediumGray)),
+
+                    ...recipe.steps.asMap().entries.map((entry) {
+                      int idx = entry.key;
+                      String step = entry.value;
+                      final isDone = _completedSteps.contains(idx);
+
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            if (isDone) {
+                              _completedSteps.remove(idx);
+                            } else {
+                              _completedSteps.add(idx);
+                            }
+                          });
+                        },
+                        child: AnimatedOpacity(
+                          duration: const Duration(milliseconds: 200),
+                          opacity: isDone ? 0.5 : 1.0,
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 24.0),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _ThinCheckbox(isDone: isDone),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        AppLocalizations.of(context)!.step(idx + 1),
+                                        style: const TextStyle(
+                                          fontFamily: 'Inter',
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppTheme.mediumGray,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        step,
+                                        style: TextStyle(
+                                          fontFamily: 'Inter',
+                                          fontSize: 17,
+                                          height: 1.6,
+                                          color: AppTheme.darkCharcoal.withValues(alpha: 0.9),
+                                          decoration: isDone ? TextDecoration.lineThrough : null,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ),
-      );
+          );
         },
       ),
     );
@@ -291,18 +292,18 @@ class _ThinCheckbox extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
-      width: 20,
-      height: 20,
+      width: 24,
+      height: 24,
       decoration: BoxDecoration(
         color: isDone ? AppTheme.darkCharcoal : Colors.transparent,
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(6),
         border: Border.all(
           color: AppTheme.darkCharcoal,
-          width: 1.0,
+          width: 1.2,
         ),
       ),
       child: isDone
-          ? const Icon(Icons.check, size: 14, color: Colors.white)
+          ? const Icon(Icons.check, size: 16, color: Colors.white)
           : null,
     );
   }
