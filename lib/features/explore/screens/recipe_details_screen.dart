@@ -104,7 +104,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                     const SizedBox(height: 24),
 
                     // Recipe Title
-                    Text(
+                    SelectableText(
                       recipe.title,
                       style: const TextStyle(
                         fontFamily: 'Inter',
@@ -134,9 +134,8 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                         ),
                         const SizedBox(width: 14),
                         Expanded(
-                          child: Text(
+                          child: SelectableText(
                             AppLocalizations.of(context)!.byAuthor(recipe.authorName),
-                            overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                               fontFamily: 'Inter',
                               fontSize: 18,

@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/core/utils/image_helper.dart';
 import 'package:furtable/core/widgets/app_image.dart';
+import 'package:furtable/core/widgets/scrollable_form_body.dart';
 import 'package:furtable/features/create_recipe/bloc/create_recipe_bloc.dart';
 import 'package:furtable/features/create_recipe/bloc/create_recipe_event.dart';
 import 'package:furtable/features/create_recipe/bloc/create_recipe_state.dart';
@@ -211,21 +212,23 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
         maxWidth: 1920,
       );
 
+      if (!mounted) return;
+
       if (image != null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(AppLocalizations.of(context)!.compressingImage),
-              duration: const Duration(seconds: 1),
-              backgroundColor: AppTheme.darkCharcoal,
-            ),
-          );
-        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.compressingImage),
+            duration: const Duration(seconds: 1),
+            backgroundColor: AppTheme.darkCharcoal,
+          ),
+        );
 
         final rawBytes = await image.readAsBytes();
+        if (!mounted) return;
         
         // 1. COMPRESS FIRST
         final compressedBytes = await ImageHelper.compressImage(rawBytes);
+        if (!mounted) return;
 
         // 2. CHECK SIZE (Optional but safe)
         if (compressedBytes.lengthInBytes > 1024 * 1024) {
@@ -238,13 +241,11 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
            return;
         }
 
-        if (mounted) {
-          setState(() {
-            _selectedImageBytes = compressedBytes;
-          });
-          // 3. SAVE COMPRESSED IMAGE TO DRAFT
-          _storage.saveDraftImage(compressedBytes);
-        }
+        setState(() {
+          _selectedImageBytes = compressedBytes;
+        });
+        // 3. SAVE COMPRESSED IMAGE TO DRAFT
+        _storage.saveDraftImage(compressedBytes);
       }
     } catch (e) {
       if (mounted) {
@@ -278,7 +279,6 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.recipeToEdit != null;
-    final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
 
     return BlocListener<CreateRecipeBloc, CreateRecipeState>(
         listener: (context, state) {
@@ -319,7 +319,6 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                 child: BlocBuilder<CreateRecipeBloc, CreateRecipeState>(
                   builder: (context, state) {
                     return ElevatedButton(
-                      // ПЕРЕВІРКА: Кнопка активна, якщо не вантажиться
                       onPressed: state is CreateRecipeLoading ? null : _submitForm,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.darkCharcoal,
@@ -338,225 +337,217 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
               ),
             ],
           ),
-          body: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 600),
-              child: SizedBox.expand(
-                child: Form( // FORM ТУТ
-                  key: _formKey,
-                  autovalidateMode: _autovalidateMode,
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.fromLTRB(16, 16, 16, bottomPadding + 40),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(AppLocalizations.of(context)!.recipeImage, style: const TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w700, fontSize: 16, color: AppTheme.darkCharcoal)),
-                        const SizedBox(height: 12),
-                        
-                        GestureDetector(
-                          onTap: _pickImage,
-                          child: Container(
-                            height: 200,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: AppTheme.offWhite,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: const Color(0xFFE0E0E0)),
-                            ),
-                            child: _selectedImageBytes != null
-                                ? Stack(
+          body: ScrollableFormBody(
+            padding: const EdgeInsets.all(16),
+            child: Form(
+              key: _formKey,
+              autovalidateMode: _autovalidateMode,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(AppLocalizations.of(context)!.recipeImage, style: const TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w700, fontSize: 16, color: AppTheme.darkCharcoal)),
+                  const SizedBox(height: 12),
+                  
+                  GestureDetector(
+                    onTap: _pickImage,
+                    child: Container(
+                      height: 200,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: AppTheme.offWhite,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFE0E0E0)),
+                      ),
+                      child: _selectedImageBytes != null
+                          ? Stack(
+                              children: [
+                                Positioned.fill(
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Image.memory(_selectedImageBytes!, fit: BoxFit.cover),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 8,
+                                  right: 8,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setState(() => _selectedImageBytes = null);
+                                      _storage.clearDraftImage();
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: const BoxDecoration(
+                                        color: Colors.white,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(Icons.close, size: 20, color: Colors.red),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )
+                          : (isEditing && widget.recipeToEdit!.imageUrl.isNotEmpty)
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: AppImage(
+                                    imagePath: widget.recipeToEdit!.imageUrl,
+                                    width: double.infinity,
+                                    height: 200,
+                                    fit: BoxFit.cover,
+                                  ),
+                                )
+                              : Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(Icons.file_upload_outlined, size: 32, color: AppTheme.mediumGray),
+                                    const SizedBox(height: 8),
+                                    Text(AppLocalizations.of(context)!.tapToAddPhoto, style: const TextStyle(fontFamily: 'Inter', color: AppTheme.mediumGray, fontSize: 14)),
+                                  ],
+                                ),
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  _buildLabel('${AppLocalizations.of(context)!.recipeTitle} *'),
+                  _buildTextFormField(
+                    controller: _titleController, 
+                    hintText: AppLocalizations.of(context)!.enterTitle, 
+                    validator: (v) => v!.isEmpty ? AppLocalizations.of(context)!.requiredField : null,
+                    keyboardType: TextInputType.text,
+                    autofillHints: const [AutofillHints.name],
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  _buildLabel(AppLocalizations.of(context)!.description),
+                  _buildTextFormField(controller: _descriptionController, hintText: AppLocalizations.of(context)!.describeRecipe, maxLines: 4),
+        
+                  const SizedBox(height: 24),
+                  _buildLabel('${AppLocalizations.of(context)!.cookTime} *'),
+                  GestureDetector(
+                    onTap: () {
+                       int initialMinutes = int.tryParse(_timeController.text) ?? 30;
+                       Duration tempDuration = Duration(minutes: initialMinutes);
+          
+                       showModalBottomSheet(
+                        context: context,
+                        backgroundColor: Colors.white,
+                        builder: (BuildContext builder) {
+                          return Container(
+                            height: 300,
+                            color: Colors.white,
+                            child: Column(
+                              children: [
+                                Container(
+                                  color: Colors.grey[100],
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end, 
                                     children: [
-                                      Positioned.fill(
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(12),
-                                          child: Image.memory(_selectedImageBytes!, fit: BoxFit.cover),
-                                        ),
-                                      ),
-                                      Positioned(
-                                        top: 8,
-                                        right: 8,
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            setState(() => _selectedImageBytes = null);
-                                            _storage.clearDraftImage();
-                                          },
-                                          child: Container(
-                                            padding: const EdgeInsets.all(4),
-                                            decoration: const BoxDecoration(
-                                              color: Colors.white,
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: const Icon(Icons.close, size: 20, color: Colors.red),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  )
-                                : (isEditing && widget.recipeToEdit!.imageUrl.isNotEmpty)
-                                    ? ClipRRect(
-                                        borderRadius: BorderRadius.circular(12),
-                                        child: AppImage(
-                                          imagePath: widget.recipeToEdit!.imageUrl,
-                                          width: double.infinity,
-                                          height: 200,
-                                          fit: BoxFit.cover,
-                                        ),
+                                      TextButton(
+                                        onPressed: () { 
+                                          setState(() => _timeController.text = tempDuration.inMinutes.toString()); 
+                                          _saveDraft(); 
+                                          Navigator.pop(context); 
+                                        }, 
+                                        child: Text(
+                                          AppLocalizations.of(context)!.done, 
+                                          style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.darkCharcoal)
+                                        )
                                       )
-                                    : Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          const Icon(Icons.file_upload_outlined, size: 32, color: AppTheme.mediumGray),
-                                          const SizedBox(height: 8),
-                                          Text(AppLocalizations.of(context)!.tapToAddPhoto, style: const TextStyle(fontFamily: 'Inter', color: AppTheme.mediumGray, fontSize: 14)),
-                                        ],
-                                      ),
-                          ),
-                        ),
-                        
-                        const SizedBox(height: 24),
-                        _buildLabel('${AppLocalizations.of(context)!.recipeTitle} *'),
-                        _buildTextFormField(
-                          controller: _titleController, 
-                          hintText: AppLocalizations.of(context)!.enterTitle, 
-                          validator: (v) => v!.isEmpty ? AppLocalizations.of(context)!.requiredField : null,
-                          keyboardType: TextInputType.text,
-                          autofillHints: const [AutofillHints.name],
-                        ),
-                        
-                        const SizedBox(height: 24),
-                        _buildLabel(AppLocalizations.of(context)!.description),
-                        _buildTextFormField(controller: _descriptionController, hintText: AppLocalizations.of(context)!.describeRecipe, maxLines: 4),
-              
-                        const SizedBox(height: 24),
-                        _buildLabel('${AppLocalizations.of(context)!.cookTime} *'),
-                        GestureDetector(
-                          onTap: () {
-                             int initialMinutes = int.tryParse(_timeController.text) ?? 30;
-                             Duration tempDuration = Duration(minutes: initialMinutes);
-
-                             showModalBottomSheet(
-                              context: context,
-                              backgroundColor: Colors.white,
-                              builder: (BuildContext builder) {
-                                return Container(
-                                  height: 300,
-                                  color: Colors.white,
-                                  child: Column(
+                                    ]
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Row(
                                     children: [
-                                      Container(
-                                        color: Colors.grey[100],
-                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.end, 
-                                          children: [
-                                            TextButton(
-                                              onPressed: () { 
-                                                setState(() => _timeController.text = tempDuration.inMinutes.toString()); 
-                                                _saveDraft(); // Save draft when time is changed
-                                                Navigator.pop(context); 
-                                              }, 
-                                              child: Text(
-                                                AppLocalizations.of(context)!.done, 
-                                                style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.darkCharcoal)
-                                              )
-                                            )
-                                          ]
-                                        ),
+                                       _buildPickerColumn(
+                                        title: AppLocalizations.of(context)!.days,
+                                        count: 32,
+                                        initialItem: tempDuration.inDays,
+                                        onChanged: (val) => tempDuration = Duration(days: val, hours: tempDuration.inHours % 24, minutes: tempDuration.inMinutes % 60),
                                       ),
-                                      Expanded(
-                                        child: Row(
-                                          children: [
-                                             _buildPickerColumn(
-                                              title: AppLocalizations.of(context)!.days,
-                                              count: 32,
-                                              initialItem: tempDuration.inDays,
-                                              onChanged: (val) => tempDuration = Duration(days: val, hours: tempDuration.inHours % 24, minutes: tempDuration.inMinutes % 60),
-                                            ),
-                                            _buildPickerColumn(
-                                              title: AppLocalizations.of(context)!.hours,
-                                              count: 24,
-                                              initialItem: tempDuration.inHours % 24,
-                                              onChanged: (val) => tempDuration = Duration(days: tempDuration.inDays, hours: val, minutes: tempDuration.inMinutes % 60),
-                                            ),
-                                            _buildPickerColumn(
-                                              title: AppLocalizations.of(context)!.mins,
-                                              count: 60,
-                                              initialItem: tempDuration.inMinutes % 60,
-                                              onChanged: (val) => tempDuration = Duration(days: tempDuration.inDays, hours: tempDuration.inHours % 24, minutes: val),
-                                            ),
-                                          ],
-                                        ),
+                                      _buildPickerColumn(
+                                        title: AppLocalizations.of(context)!.hours,
+                                        count: 24,
+                                        initialItem: tempDuration.inHours % 24,
+                                        onChanged: (val) => tempDuration = Duration(days: tempDuration.inDays, hours: val, minutes: tempDuration.inMinutes % 60),
+                                      ),
+                                      _buildPickerColumn(
+                                        title: AppLocalizations.of(context)!.mins,
+                                        count: 60,
+                                        initialItem: tempDuration.inMinutes % 60,
+                                        onChanged: (val) => tempDuration = Duration(days: tempDuration.inDays, hours: tempDuration.inHours % 24, minutes: val),
                                       ),
                                     ],
                                   ),
-                                );
-                              },
-                            );
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  _timeController.text.isEmpty || _timeController.text == '0' ? AppLocalizations.of(context)!.selectTime : DurationHelper.format(context, int.tryParse(_timeController.text) ?? 0),
-                                  style: TextStyle(
-                                    fontSize: 16, 
-                                    color: (_timeController.text.isEmpty || _timeController.text == '0') ? AppTheme.mediumGray : AppTheme.darkCharcoal
-                                  )
                                 ),
-                                const Icon(Icons.access_time, color: AppTheme.mediumGray),
                               ],
                             ),
+                          );
+                        },
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            _timeController.text.isEmpty || _timeController.text == '0' ? AppLocalizations.of(context)!.selectTime : DurationHelper.format(context, int.tryParse(_timeController.text) ?? 0),
+                            style: TextStyle(
+                              fontSize: 16, 
+                              color: (_timeController.text.isEmpty || _timeController.text == '0') ? AppTheme.mediumGray : AppTheme.darkCharcoal
+                            )
                           ),
-                        ),
-              
-                        const SizedBox(height: 24),
-                        _buildLabel('${AppLocalizations.of(context)!.ingredients} *'),
-                        _buildTextFormField(
-                          controller: _ingredientsController, 
-                          hintText: AppLocalizations.of(context)!.enterIngredientHint, 
-                          maxLines: 6, 
-                          validator: (v) => v!.isEmpty ? AppLocalizations.of(context)!.requiredField : null
-                        ),
-                        
-                        const SizedBox(height: 24),
-                        _buildLabel('${AppLocalizations.of(context)!.instructions} *'),
-                        _buildTextFormField(
-                          controller: _instructionsController, 
-                          hintText: AppLocalizations.of(context)!.enterInstructionHint, 
-                          maxLines: 8, 
-                          validator: (v) => v!.isEmpty ? AppLocalizations.of(context)!.requiredField : null
-                        ),
-                        
-                        const SizedBox(height: 24),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(AppLocalizations.of(context)!.makePublic, style: const TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w700, fontSize: 16, color: AppTheme.darkCharcoal)),
-                                const SizedBox(height: 4),
-                                Text(AppLocalizations.of(context)!.anyoneCanSee, style: const TextStyle(fontFamily: 'Inter', fontSize: 14, color: AppTheme.mediumGray)),
-                              ],
-                            ),
-                            Switch.adaptive(
-                              value: _isPublic, 
-                              activeTrackColor: AppTheme.darkCharcoal, 
-                              onChanged: (v) {
-                                setState(() => _isPublic = v);
-                                _saveDraft(); // Save draft when visibility changes
-                              },
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 40),
-                      ],
+                          const Icon(Icons.access_time, color: AppTheme.mediumGray),
+                        ],
+                      ),
                     ),
                   ),
-                ),
+        
+                  const SizedBox(height: 24),
+                  _buildLabel('${AppLocalizations.of(context)!.ingredients} *'),
+                  _buildTextFormField(
+                    controller: _ingredientsController, 
+                    hintText: AppLocalizations.of(context)!.enterIngredientHint, 
+                    maxLines: 6, 
+                    validator: (v) => v!.isEmpty ? AppLocalizations.of(context)!.requiredField : null
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  _buildLabel('${AppLocalizations.of(context)!.instructions} *'),
+                  _buildTextFormField(
+                    controller: _instructionsController, 
+                    hintText: AppLocalizations.of(context)!.enterInstructionHint, 
+                    maxLines: 8, 
+                    validator: (v) => v!.isEmpty ? AppLocalizations.of(context)!.requiredField : null
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(AppLocalizations.of(context)!.makePublic, style: const TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w700, fontSize: 16, color: AppTheme.darkCharcoal)),
+                          const SizedBox(height: 4),
+                          Text(AppLocalizations.of(context)!.anyoneCanSee, style: const TextStyle(fontFamily: 'Inter', fontSize: 14, color: AppTheme.mediumGray)),
+                        ],
+                      ),
+                      Switch.adaptive(
+                        value: _isPublic, 
+                        activeTrackColor: AppTheme.darkCharcoal, 
+                        onChanged: (v) {
+                          setState(() => _isPublic = v);
+                          _saveDraft(); 
+                        },
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),

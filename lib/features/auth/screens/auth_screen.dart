@@ -3,6 +3,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
 import 'package:furtable/core/app_theme.dart';
+import 'package:furtable/core/widgets/scrollable_form_body.dart';
 import 'package:furtable/core/utils/avatar_helper.dart';
 import 'package:furtable/l10n/app_localizations.dart';
 import 'package:furtable/features/explore/screens/explore_screen.dart';
@@ -83,7 +84,7 @@ class _AuthScreenState extends State<AuthScreen> {
           await userCredential.user!.updateDisplayName(
             _nicknameController.text.trim(),
           );
-          
+
           // Assign a random avatar to the new user.
           final randomAvatar = AvatarHelper.getRandomAvatar();
           await userCredential.user!.updatePhotoURL(randomAvatar);
@@ -94,7 +95,7 @@ class _AuthScreenState extends State<AuthScreen> {
             _nicknameController.text.trim(),
             randomAvatar,
           );
-          
+
           await userCredential.user!.sendEmailVerification();
         }
         await _analytics.logSignUp(signUpMethod: 'email_password');
@@ -251,10 +252,15 @@ class _AuthScreenState extends State<AuthScreen> {
       // If the user does not have a photo or has a Google-provided photo,
       // replace it with one of our random avatars for a consistent look.
       final user = userCredential.user;
-      if (user != null && (user.photoURL == null || user.photoURL!.startsWith('http'))) {
-         final randomAvatar = AvatarHelper.getRandomAvatar();
-         await user.updatePhotoURL(randomAvatar);
-         await UserRepository().saveUserProfile(user.uid, user.displayName ?? "User", randomAvatar);
+      if (user != null &&
+          (user.photoURL == null || user.photoURL!.startsWith('http'))) {
+        final randomAvatar = AvatarHelper.getRandomAvatar();
+        await user.updatePhotoURL(randomAvatar);
+        await UserRepository().saveUserProfile(
+          user.uid,
+          user.displayName ?? "User",
+          randomAvatar,
+        );
       }
 
       if (mounted && userCredential.user != null) {
@@ -444,13 +450,10 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 600), // Optimal width for forms
-          child: SingleChildScrollView(
-            child: Column(children: [_buildTopSection(), _buildBottomSection()]),
-          ),
-        ),
+      resizeToAvoidBottomInset: false,
+      body: ScrollableFormBody(
+        padding: EdgeInsets.zero,
+        child: Column(children: [_buildTopSection(), _buildBottomSection()]),
       ),
     );
   }
@@ -508,24 +511,36 @@ class _AuthScreenState extends State<AuthScreen> {
             if (_isLoginView) ...[
               Text(
                 AppLocalizations.of(context)!.welcomeBack,
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
                 AppLocalizations.of(context)!.fillInfo,
-                style: const TextStyle(color: AppTheme.mediumGray, fontSize: 16),
+                style: const TextStyle(
+                  color: AppTheme.mediumGray,
+                  fontSize: 16,
+                ),
               ),
               const SizedBox(height: 32),
               _buildLoginForm(),
             ] else ...[
               Text(
                 AppLocalizations.of(context)!.signUp,
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
                 AppLocalizations.of(context)!.letsGetStarted,
-                style: const TextStyle(color: AppTheme.mediumGray, fontSize: 16),
+                style: const TextStyle(
+                  color: AppTheme.mediumGray,
+                  fontSize: 16,
+                ),
               ),
               const SizedBox(height: 32),
               _buildRegistrationForm(),
@@ -612,8 +627,9 @@ class _AuthScreenState extends State<AuthScreen> {
           controller: _emailController,
           hintText: AppLocalizations.of(context)!.email,
           autofillHints: [AutofillHints.email],
-          validator: (val) =>
-              (val?.isEmpty ?? true) ? AppLocalizations.of(context)!.requiredField : null,
+          validator: (val) => (val?.isEmpty ?? true)
+              ? AppLocalizations.of(context)!.requiredField
+              : null,
         ),
         const SizedBox(height: 16),
         _buildTextField(
@@ -621,8 +637,9 @@ class _AuthScreenState extends State<AuthScreen> {
           hintText: AppLocalizations.of(context)!.password,
           isPassword: true,
           autofillHints: [AutofillHints.password],
-          validator: (val) =>
-              (val?.isEmpty ?? true) ? AppLocalizations.of(context)!.requiredField : null,
+          validator: (val) => (val?.isEmpty ?? true)
+              ? AppLocalizations.of(context)!.requiredField
+              : null,
           onSubmitted: _handleAuthentication,
         ),
         const SizedBox(height: 32),
@@ -700,7 +717,9 @@ class _AuthScreenState extends State<AuthScreen> {
       obscureText: isPassword && !_isPasswordVisible,
       autofillHints: autofillHints,
       validator: validator,
-      textInputAction: onSubmitted != null ? TextInputAction.done : TextInputAction.next,
+      textInputAction: onSubmitted != null
+          ? TextInputAction.done
+          : TextInputAction.next,
       onFieldSubmitted: (_) {
         if (onSubmitted != null) {
           onSubmitted();
