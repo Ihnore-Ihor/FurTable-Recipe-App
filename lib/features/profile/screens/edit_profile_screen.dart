@@ -76,8 +76,8 @@ class _EditProfileViewState extends State<EditProfileView> {
   void _showAvatarPicker() {
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true, // <--- Allows stretching to full screen
-      useSafeArea: true, // <--- Accounts for phone notch (safe area)
+      isScrollControlled: true, // Allows stretching the bottom sheet to full screen height.
+      useSafeArea: true, // Accounts for device notch and status bar.
       backgroundColor: AppTheme.offWhite,
       builder: (context) {
         return Scaffold(
@@ -130,9 +130,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                         : Border.all(color: Colors.grey.shade300, width: 1),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.all(
-                      2.0,
-                    ), // Padding between border and image
+                    padding: const EdgeInsets.all(2.0),
                     child: CircleAvatar(
                       backgroundColor: Colors.white,
                       backgroundImage: AssetImage(path),

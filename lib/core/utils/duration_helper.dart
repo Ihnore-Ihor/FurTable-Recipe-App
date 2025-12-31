@@ -3,7 +3,7 @@ import 'package:furtable/l10n/app_localizations.dart';
 
 /// Helper class for localized duration formatting.
 class DurationHelper {
-  /// Formats the given [minutes] into a localized string (e.g., "1d 2h 30m" or "1дн 2год 30хв").
+  /// Formats the given [minutes] into a localized string (e.g., "1d 2h 30m").
   static String format(BuildContext context, int minutes) {
     if (minutes <= 0) return AppLocalizations.of(context)!.selectTime;
     

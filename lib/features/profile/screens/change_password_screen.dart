@@ -189,7 +189,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                   obscure: _obscureNew,
                   onToggle: () => setState(() => _obscureNew = !_obscureNew),
                   hint: AppLocalizations.of(context)!.enterNewPassword,
-                  // Validation errors for red text.
+                  // Secondary validation for UI feedback.
                   validator: (val) {
                     if (val != null && val.isNotEmpty) {
                       if (val.length < 8) {

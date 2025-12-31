@@ -97,7 +97,7 @@ class _FeedbackViewState extends State<FeedbackView> {
               const SizedBox(height: 16),
 
               Container(
-                height: 200, // Fixed height instead of Expanded
+                height: 200, // Fixed height provides consistent layout during keyboard interaction.
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),

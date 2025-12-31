@@ -137,15 +137,13 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
 
 
 
-  // --- ЛОГІКА ЗБЕРЕЖЕННЯ ---
+  /// Validates the form and submits the recipe data to the BLoC.
   void _submitForm() {
-    debugPrint("Submit button pressed"); // Для діагностики
-    FocusScope.of(context).unfocus(); // Ховаємо клавіатуру
+    debugPrint("Submit button pressed");
+    FocusScope.of(context).unfocus();
 
-    // Перевіряємо валідність
+    // Verify form validity and ensure a cooking time has been selected.
     final isValid = _formKey.currentState?.validate() ?? false;
-    
-    // Перевіряємо, чи вказано час (це не поле форми, тому окрема перевірка)
     final timeEmpty = _timeController.text.isEmpty || _timeController.text == '0';
 
     if (!isValid || timeEmpty) {
@@ -153,7 +151,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
       if (_autovalidateMode == AutovalidateMode.disabled) {
         setState(() => _autovalidateMode = AutovalidateMode.onUserInteraction);
       }
-      // Якщо час не вибрано - покажемо повідомлення
+
       if (timeEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -171,7 +169,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
     final instructions = _instructionsController.text.trim();
     final time = int.tryParse(_timeController.text) ?? 30;
 
-    debugPrint("Sending event to BLoC..."); // Діагностика
+    debugPrint("Sending event to BLoC...");
 
     if (widget.recipeToEdit != null) {
       context.read<CreateRecipeBloc>().add(
@@ -203,6 +201,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
     }
   }
 
+  /// Picks an image from the gallery, compresses it, and saves it to the draft.
   Future<void> _pickImage() async {
     try {
       final ImagePicker picker = ImagePicker();
@@ -255,6 +254,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
   }
 
 
+  /// Builds a column with a property name and a [CupertinoPicker] for selection.
   Widget _buildPickerColumn({required String title, required int count, required int initialItem, required ValueChanged<int> onChanged}) {
     return Expanded(
       child: Column(

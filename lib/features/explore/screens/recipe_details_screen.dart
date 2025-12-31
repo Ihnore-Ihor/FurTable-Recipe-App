@@ -125,7 +125,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                             shape: BoxShape.circle,
                             border: Border.all(color: AppTheme.darkCharcoal, width: 1.5),
                           ),
-                          // CHANGED: Radius 16 -> 24 (48px diameter)
+                          // Increased radius from 16 to 24 (48px diameter).
                           child: CircleAvatar(
                             radius: 24, 
                             backgroundColor: Colors.white,
@@ -321,19 +321,18 @@ class _ThinCheckbox extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
-      // БУЛО: 24.0 -> СТАЛО: 20.0 (більш компактно)
-      width: 20, 
+      width: 20, // Reduced from 24.0 for a more compact look.
       height: 20,
       decoration: BoxDecoration(
         color: isDone ? AppTheme.darkCharcoal : Colors.transparent,
-        borderRadius: BorderRadius.circular(5), // Трохи менший радіус (було 6)
+        borderRadius: BorderRadius.circular(5), // Slightly reduced radius from 6.
         border: Border.all(
           color: AppTheme.darkCharcoal,
-          width: 1.0, // Тонка лінія
+          width: 1.0, // Thin border line.
         ),
       ),
       child: isDone
-          // БУЛО: 16 -> СТАЛО: 14 (щоб влізло в менший квадрат)
+          // Reduced size from 16 to 14 to fit the smaller container.
           ? const Icon(Icons.check, size: 14, color: Colors.white)
           : null,
     );
