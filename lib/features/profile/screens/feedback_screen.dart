@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/core/app_theme.dart';
+import 'package:furtable/core/widgets/scrollable_form_body.dart';
 import 'package:furtable/features/feedback/bloc/feedback_bloc.dart';
 import 'package:furtable/l10n/app_localizations.dart';
 
@@ -71,6 +72,7 @@ class _FeedbackViewState extends State<FeedbackView> {
       },
       child: Scaffold(
         backgroundColor: AppTheme.offWhite,
+        resizeToAvoidBottomInset: false, 
         appBar: AppBar(
           title: Text(AppLocalizations.of(context)!.sendFeedback),
           leading: IconButton(
@@ -78,7 +80,7 @@ class _FeedbackViewState extends State<FeedbackView> {
             onPressed: () => Navigator.pop(context),
           ),
         ),
-        body: Padding(
+        body: ScrollableFormBody(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -94,26 +96,25 @@ class _FeedbackViewState extends State<FeedbackView> {
               ),
               const SizedBox(height: 16),
 
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.shade200),
-                  ),
-                  child: TextField(
-                    controller: _controller,
-                    maxLines: null,
-                    maxLength: 1000,
-                    style: const TextStyle(color: AppTheme.darkCharcoal),
-                    decoration: InputDecoration(
-                      hintText:
-                          AppLocalizations.of(context)!.feedbackHint,
-                      hintStyle: TextStyle(color: AppTheme.mediumGray),
-                      contentPadding: EdgeInsets.all(16),
-                      border: InputBorder.none,
-                      counterText: '',
-                    ),
+              Container(
+                height: 200, // Fixed height provides consistent layout during keyboard interaction.
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: TextField(
+                  controller: _controller,
+                  maxLines: null,
+                  maxLength: 1000,
+                  style: const TextStyle(color: AppTheme.darkCharcoal),
+                  decoration: InputDecoration(
+                    hintText:
+                        AppLocalizations.of(context)!.feedbackHint,
+                    hintStyle: TextStyle(color: AppTheme.mediumGray),
+                    contentPadding: EdgeInsets.all(16),
+                    border: InputBorder.none,
+                    counterText: '',
                   ),
                 ),
               ),
