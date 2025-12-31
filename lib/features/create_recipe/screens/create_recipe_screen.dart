@@ -103,6 +103,11 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
         }
       });
     }
+
+    final savedImage = _storage.getDraftImage();
+    if (savedImage != null) {
+      setState(() => _selectedImageBytes = savedImage);
+    }
   }
 
   void _saveDraft() {
@@ -203,15 +208,27 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
       final XFile? image = await picker.pickImage(
         source: ImageSource.gallery,
         imageQuality: 80,
-        maxWidth: 1024,
+        maxWidth: 1920,
       );
 
       if (image != null) {
-        final bytes = await image.readAsBytes();
-        
-        if (!mounted) return;
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.compressingImage),
+              duration: const Duration(seconds: 1),
+              backgroundColor: AppTheme.darkCharcoal,
+            ),
+          );
+        }
 
-        if (bytes.lengthInBytes > 1024 * 1024) {
+        final rawBytes = await image.readAsBytes();
+        
+        // 1. COMPRESS FIRST
+        final compressedBytes = await ImageHelper.compressImage(rawBytes);
+
+        // 2. CHECK SIZE (Optional but safe)
+        if (compressedBytes.lengthInBytes > 1024 * 1024) {
            ScaffoldMessenger.of(context).showSnackBar(
              SnackBar(
                content: Text(AppLocalizations.of(context)!.imageTooLarge),
@@ -222,20 +239,11 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
         }
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(AppLocalizations.of(context)!.processingImage), 
-              duration: const Duration(milliseconds: 500),
-              backgroundColor: AppTheme.darkCharcoal,
-            ),
-          );
-        }
-
-        final compressedBytes = await ImageHelper.compressImage(bytes);
-        if (mounted) {
           setState(() {
             _selectedImageBytes = compressedBytes;
           });
+          // 3. SAVE COMPRESSED IMAGE TO DRAFT
+          _storage.saveDraftImage(compressedBytes);
         }
       }
     } catch (e) {
@@ -285,6 +293,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
             // NEW: Clear draft after successful creation
             if (!isEditing) {
               _storage.clearDraft();
+              _storage.clearDraftImage();
             }
 
             Navigator.pop(context, true);
@@ -355,7 +364,34 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                               border: Border.all(color: const Color(0xFFE0E0E0)),
                             ),
                             child: _selectedImageBytes != null
-                                ? ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.memory(_selectedImageBytes!, fit: BoxFit.cover))
+                                ? Stack(
+                                    children: [
+                                      Positioned.fill(
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(12),
+                                          child: Image.memory(_selectedImageBytes!, fit: BoxFit.cover),
+                                        ),
+                                      ),
+                                      Positioned(
+                                        top: 8,
+                                        right: 8,
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            setState(() => _selectedImageBytes = null);
+                                            _storage.clearDraftImage();
+                                          },
+                                          child: Container(
+                                            padding: const EdgeInsets.all(4),
+                                            decoration: const BoxDecoration(
+                                              color: Colors.white,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: const Icon(Icons.close, size: 20, color: Colors.red),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  )
                                 : (isEditing && widget.recipeToEdit!.imageUrl.isNotEmpty)
                                     ? ClipRRect(
                                         borderRadius: BorderRadius.circular(12),

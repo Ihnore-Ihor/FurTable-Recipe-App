@@ -81,36 +81,41 @@ class CreateRecipeBloc extends Bloc<CreateRecipeEvent, CreateRecipeState> {
     }
   }
 
-  /// Handles the recipe update event.
   Future<void> _onUpdate(
     UpdateRecipe event,
     Emitter<CreateRecipeState> emit,
   ) async {
     emit(CreateRecipeLoading());
     try {
-      final user = FirebaseAuth.instance.currentUser; // <--- MOVED UP to get uid
+      final user = FirebaseAuth.instance.currentUser;
       if (user == null) throw Exception("User not logged in");
 
+      // --- 1. GET LATEST AVATAR (Fix for resetting to default) ---
+      String currentAvatar = AvatarHelper.defaultAvatar;
+      try {
+        final fetchedAvatar = await _userRepo.getUserAvatar(user.uid);
+        if (fetchedAvatar != null && fetchedAvatar.isNotEmpty) {
+          currentAvatar = fetchedAvatar;
+        }
+      } catch (_) {
+        if (user.photoURL != null) currentAvatar = user.photoURL!;
+      }
+
+      // --- 2. Handle Recipe Image ---
       String imageUrl = event.currentImageUrl ?? '';
 
       // If user selected a NEW photo
       if (event.newImageBytes != null) {
-
-         // 1. FIRST delete the OLD photo
-         // Check if it's a Firebase Storage link (not a placeholder or asset)
+         // FIRST delete the OLD photo
          if (imageUrl.isNotEmpty && imageUrl.contains('firebasestorage')) {
-            try {
-              await _storageRepo.deleteImage(imageUrl);
-            } catch (e) {
-              // Continue even if old image deletion fails
-            }
+            try { await _storageRepo.deleteImage(imageUrl); } catch (_) {}
          }
          
-         // 2. THEN upload the NEW photo
+         // THEN upload the NEW photo
          imageUrl = await _storageRepo.uploadImageBytes(
             event.newImageBytes!, 
             'recipe_images',
-            user.uid, // <--- Pass user ID
+            user.uid,
          );
       }
       
@@ -118,9 +123,10 @@ class CreateRecipeBloc extends Bloc<CreateRecipeEvent, CreateRecipeState> {
         id: event.id,
         authorId: user.uid, 
         authorName: user.displayName ?? 'Chef',
+        authorAvatarUrl: currentAvatar, // <--- Using the fresh one
         title: event.title,
         description: event.description,
-        imageUrl: imageUrl, // New or existing URL
+        imageUrl: imageUrl,
         likesCount: event.likesCount,
         timeMinutes: event.timeMinutes,
         ingredients: event.ingredients.split('\n').where((s) => s.trim().isNotEmpty).toList(),
@@ -130,7 +136,6 @@ class CreateRecipeBloc extends Bloc<CreateRecipeEvent, CreateRecipeState> {
       );
 
       await _recipeRepo.updateRecipe(recipe);
-      
       emit(CreateRecipeSuccess());
     } catch (e) {
       emit(CreateRecipeFailure(e.toString()));
