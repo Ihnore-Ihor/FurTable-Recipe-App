@@ -11,6 +11,7 @@ import 'package:furtable/features/create_recipe/bloc/create_recipe_event.dart';
 import 'package:furtable/features/create_recipe/bloc/create_recipe_state.dart';
 import 'package:furtable/features/explore/models/recipe_model.dart';
 import 'package:furtable/core/services/local_storage_service.dart';
+import 'package:furtable/core/utils/duration_helper.dart';
 import 'package:furtable/l10n/app_localizations.dart';
 
 class CreateRecipeScreen extends StatelessWidget {
@@ -244,18 +245,6 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
     }
   }
 
-  String _formatDuration(int minutes) {
-    final duration = Duration(minutes: minutes);
-    final d = duration.inDays;
-    final h = duration.inHours % 24;
-    final m = duration.inMinutes % 60;
-    
-    String result = '';
-    if (d > 0) result += '${d}d ';
-    if (h > 0) result += '${h}h ';
-    result += '${m}m';
-    return result;
-  }
 
   Widget _buildPickerColumn({required String title, required int count, required int initialItem, required ValueChanged<int> onChanged}) {
     return Expanded(
@@ -475,7 +464,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  _timeController.text.isEmpty || _timeController.text == '0' ? AppLocalizations.of(context)!.selectTime : _formatDuration(int.tryParse(_timeController.text) ?? 0),
+                                  _timeController.text.isEmpty || _timeController.text == '0' ? AppLocalizations.of(context)!.selectTime : DurationHelper.format(context, int.tryParse(_timeController.text) ?? 0),
                                   style: TextStyle(
                                     fontSize: 16, 
                                     color: (_timeController.text.isEmpty || _timeController.text == '0') ? AppTheme.mediumGray : AppTheme.darkCharcoal

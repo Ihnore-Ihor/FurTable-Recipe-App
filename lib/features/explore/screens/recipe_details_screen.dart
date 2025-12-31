@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/core/utils/auth_helper.dart';
 import 'package:furtable/core/utils/avatar_helper.dart';
+import 'package:furtable/core/utils/duration_helper.dart';
 import 'package:furtable/core/widgets/app_image.dart';
 import 'package:furtable/features/explore/models/recipe_model.dart';
 import 'package:furtable/features/favorites/bloc/favorites_bloc.dart';
@@ -159,7 +160,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          recipe.durationString,
+                          DurationHelper.format(context, recipe.timeMinutes),
                           style: const TextStyle(
                             fontFamily: 'Inter',
                             fontSize: 16,
@@ -175,9 +176,14 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                     // Description
                     Text(AppLocalizations.of(context)!.description, style: const TextStyle(fontFamily: 'Inter', fontSize: 20, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
                     const SizedBox(height: 12),
-                    Text(
+                    SelectableText(
                       recipe.description.isNotEmpty ? recipe.description : AppLocalizations.of(context)!.noDescription,
-                      style: const TextStyle(fontFamily: 'Inter', fontSize: 16, height: 1.6, color: AppTheme.mediumGray),
+                      style: const TextStyle(
+                        fontFamily: 'Inter', 
+                        fontSize: 16, 
+                        height: 1.5, 
+                        color: AppTheme.darkCharcoal
+                      ),
                     ),
 
                     const SizedBox(height: 32),
@@ -211,7 +217,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                                 _ThinCheckbox(isDone: isDone),
                                 const SizedBox(width: 14),
                                 Expanded(
-                                  child: Text(
+                                  child: SelectableText(
                                     ingredient,
                                     style: TextStyle(
                                       fontFamily: 'Inter',
@@ -276,7 +282,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                                         ),
                                       ),
                                       const SizedBox(height: 4),
-                                      Text(
+                                      SelectableText(
                                         step,
                                         style: TextStyle(
                                           fontFamily: 'Inter',

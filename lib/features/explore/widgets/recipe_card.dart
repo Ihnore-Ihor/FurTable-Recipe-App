@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:furtable/core/app_theme.dart';
+import 'package:furtable/core/utils/duration_helper.dart';
 import 'package:furtable/core/widgets/app_image.dart';
 
 /// A card widget displaying a brief summary of a recipe.
@@ -11,7 +12,7 @@ class RecipeCard extends StatelessWidget {
   final String title;
   final String author;
   final String likes;
-  final String cookingTime;
+  final int cookingTime;
   final bool isFavorite;
   final VoidCallback? onFavoriteToggle;
 
@@ -124,7 +125,7 @@ class RecipeCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  cookingTime,
+                  DurationHelper.format(context, cookingTime),
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: AppTheme.mediumGray,
                   ),
