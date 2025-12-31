@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/core/utils/auth_helper.dart';
 import 'package:furtable/core/utils/avatar_helper.dart';
+import 'package:furtable/core/utils/duration_helper.dart';
 import 'package:furtable/core/widgets/app_image.dart';
 import 'package:furtable/features/explore/models/recipe_model.dart';
 import 'package:furtable/features/favorites/bloc/favorites_bloc.dart';
@@ -103,7 +104,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                     const SizedBox(height: 24),
 
                     // Recipe Title
-                    Text(
+                    SelectableText(
                       recipe.title,
                       style: const TextStyle(
                         fontFamily: 'Inter',
@@ -124,7 +125,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                             shape: BoxShape.circle,
                             border: Border.all(color: AppTheme.darkCharcoal, width: 1.5),
                           ),
-                          // CHANGED: Radius 16 -> 24 (48px diameter)
+                          // Increased radius from 16 to 24 (48px diameter).
                           child: CircleAvatar(
                             radius: 24, 
                             backgroundColor: Colors.white,
@@ -133,9 +134,8 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                         ),
                         const SizedBox(width: 14),
                         Expanded(
-                          child: Text(
+                          child: SelectableText(
                             AppLocalizations.of(context)!.byAuthor(recipe.authorName),
-                            overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                               fontFamily: 'Inter',
                               fontSize: 18,
@@ -159,7 +159,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          recipe.durationString,
+                          DurationHelper.format(context, recipe.timeMinutes),
                           style: const TextStyle(
                             fontFamily: 'Inter',
                             fontSize: 16,
@@ -175,9 +175,14 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                     // Description
                     Text(AppLocalizations.of(context)!.description, style: const TextStyle(fontFamily: 'Inter', fontSize: 20, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
                     const SizedBox(height: 12),
-                    Text(
+                    SelectableText(
                       recipe.description.isNotEmpty ? recipe.description : AppLocalizations.of(context)!.noDescription,
-                      style: const TextStyle(fontFamily: 'Inter', fontSize: 16, height: 1.6, color: AppTheme.mediumGray),
+                      style: const TextStyle(
+                        fontFamily: 'Inter', 
+                        fontSize: 16, 
+                        height: 1.5, 
+                        color: AppTheme.darkCharcoal
+                      ),
                     ),
 
                     const SizedBox(height: 32),
@@ -211,7 +216,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                                 _ThinCheckbox(isDone: isDone),
                                 const SizedBox(width: 14),
                                 Expanded(
-                                  child: Text(
+                                  child: SelectableText(
                                     ingredient,
                                     style: TextStyle(
                                       fontFamily: 'Inter',
@@ -276,7 +281,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                                         ),
                                       ),
                                       const SizedBox(height: 4),
-                                      Text(
+                                      SelectableText(
                                         step,
                                         style: TextStyle(
                                           fontFamily: 'Inter',
@@ -316,19 +321,18 @@ class _ThinCheckbox extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
-      // БУЛО: 24.0 -> СТАЛО: 20.0 (більш компактно)
-      width: 20, 
+      width: 20, // Reduced from 24.0 for a more compact look.
       height: 20,
       decoration: BoxDecoration(
         color: isDone ? AppTheme.darkCharcoal : Colors.transparent,
-        borderRadius: BorderRadius.circular(5), // Трохи менший радіус (було 6)
+        borderRadius: BorderRadius.circular(5), // Slightly reduced radius from 6.
         border: Border.all(
           color: AppTheme.darkCharcoal,
-          width: 1.0, // Тонка лінія
+          width: 1.0, // Thin border line.
         ),
       ),
       child: isDone
-          // БУЛО: 16 -> СТАЛО: 14 (щоб влізло в менший квадрат)
+          // Reduced size from 16 to 14 to fit the smaller container.
           ? const Icon(Icons.check, size: 14, color: Colors.white)
           : null,
     );

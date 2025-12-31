@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Service for managing persistence using [SharedPreferences].
@@ -95,5 +97,35 @@ class LocalStorageService {
   Future<void> clearDraft() async {
     final prefs = _prefs ?? await SharedPreferences.getInstance();
     await prefs.remove(_draftKey);
+  }
+  // --- DRAFT IMAGE ---
+  static const _draftImageKey = 'recipe_draft_image';
+
+  /// Saves the draft image as a Base64 string.
+  Future<void> saveDraftImage(Uint8List? bytes) async {
+    final prefs = _prefs ?? await SharedPreferences.getInstance();
+    if (bytes == null) {
+      await prefs.remove(_draftImageKey);
+      return;
+    }
+    final String base64String = base64Encode(bytes);
+    await prefs.setString(_draftImageKey, base64String);
+  }
+
+  /// Retrieves the draft image bytes.
+  Uint8List? getDraftImage() {
+    final String? base64String = _prefs?.getString(_draftImageKey);
+    if (base64String == null) return null;
+    try {
+      return base64Decode(base64String);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Clears the draft image.
+  Future<void> clearDraftImage() async {
+    final prefs = _prefs ?? await SharedPreferences.getInstance();
+    await prefs.remove(_draftImageKey);
   }
 }

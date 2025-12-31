@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/core/utils/navigation_helper.dart';
 import 'package:furtable/core/widgets/guest_view.dart';
+import 'package:furtable/features/auth/screens/auth_screen.dart';
+import 'package:furtable/features/profile/screens/profile_screen.dart';
 import 'package:furtable/features/explore/widgets/responsive_recipe_grid.dart';
 import 'package:furtable/features/favorites/bloc/favorites_bloc.dart';
 import 'package:furtable/features/favorites/bloc/favorites_state.dart';
@@ -26,6 +28,15 @@ class FavoritesScreen extends StatelessWidget {
             child: Text(AppLocalizations.of(context)!.favorites),
           ),
           automaticallyImplyLeading: false,
+          actions: [
+            IconButton(
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const AuthScreen()));
+              },
+              icon: const Icon(Icons.person_outline, color: AppTheme.darkCharcoal),
+            ),
+            const SizedBox(width: 8),
+          ],
         ),
         body: GuestView(
           title: AppLocalizations.of(context)!.guestFavoritesTitle,
@@ -96,7 +107,15 @@ class _FavoritesViewState extends State<FavoritesView> {
           child: Text(AppLocalizations.of(context)!.favorites),
         ),
         automaticallyImplyLeading: false,
-        // Profile is handled via NavigationHelper or AppBar Actions
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen()));
+            },
+            icon: const Icon(Icons.person_outline, color: AppTheme.darkCharcoal),
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: BlocBuilder<FavoritesBloc, FavoritesState>(
         builder: (context, state) {

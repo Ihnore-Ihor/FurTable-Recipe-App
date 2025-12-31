@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/core/app_theme.dart';
+import 'package:furtable/core/widgets/scrollable_form_body.dart';
 import 'package:furtable/features/profile/bloc/profile_bloc.dart';
 import 'package:furtable/features/profile/bloc/profile_event.dart';
 import 'package:furtable/features/profile/bloc/profile_state.dart';
@@ -113,6 +114,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
       },
       child: Scaffold(
         backgroundColor: AppTheme.offWhite,
+        resizeToAvoidBottomInset: false, 
         appBar: AppBar(
           title: Text(AppLocalizations.of(context)!.changePassword),
           centerTitle: true,
@@ -162,12 +164,12 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
             ),
           ],
         ),
-        body: Form(
-          key: _formKey,
-          // Enable autovalidateMode to show errors (red text).
-          autovalidateMode: AutovalidateMode.onUserInteraction,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
+        body: ScrollableFormBody(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            // Enable autovalidateMode to show errors (red text).
+            autovalidateMode: AutovalidateMode.onUserInteraction,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -187,7 +189,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
                   obscure: _obscureNew,
                   onToggle: () => setState(() => _obscureNew = !_obscureNew),
                   hint: AppLocalizations.of(context)!.enterNewPassword,
-                  // Validation errors for red text.
+                  // Secondary validation for UI feedback.
                   validator: (val) {
                     if (val != null && val.isNotEmpty) {
                       if (val.length < 8) {
