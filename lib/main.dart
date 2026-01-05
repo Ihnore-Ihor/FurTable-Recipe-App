@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/services.dart';
 import 'package:furtable/features/explore/screens/explore_screen.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'firebase_options.dart';
@@ -34,6 +35,16 @@ Future<void> main() async {
       // 1. Initialize local storage
       final storage = LocalStorageService();
       await storage.init();
+
+      // --- OPTIMIZATION: PRE-CACHE ---
+      // Load critical images into memory to prevent UI flickering.
+      // ignore: unawaited_futures
+      Future.wait([
+        _precacheImage('assets/images/legoshi_eating_auth.png'),
+        _precacheImage('assets/images/legoshi_loading.png'),
+        _precacheImage('assets/images/haru_eating_en.png'),
+        _precacheImage('assets/images/gohin_empty.png'),
+      ]);
 
       // 2. Clear cache if auto-clear is enabled.
       if (storage.isAutoClearEnabled) {
@@ -88,5 +99,16 @@ class MyApp extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+/// Pre-caches an image by loading it via [rootBundle].
+///
+/// This is used to warm up the image cache for local assets.
+Future<void> _precacheImage(String path) async {
+  try {
+    await rootBundle.load(path);
+  } catch (e) {
+    debugPrint('Failed to precache $path: $e');
   }
 }
