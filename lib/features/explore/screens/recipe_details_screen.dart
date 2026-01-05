@@ -81,226 +81,231 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
             recipe = widget.initialRecipe;
           }
 
-          return SingleChildScrollView(
-            // Increased bottom padding to 80 for comfortable scrolling to the end
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 800),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Recipe Image
-                    AspectRatio(
-                      aspectRatio: 16 / 10,
-                      child: Hero(
-                        tag: 'recipe_image_${recipe.id}',
-                        child: AppImage(
-                          imagePath: recipe.imageUrl,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Recipe Title
-                    SelectableText(
-                      recipe.title,
-                      style: const TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 28,
-                        fontWeight: FontWeight.w800,
-                        color: AppTheme.darkCharcoal,
-                        height: 1.2,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // --- AUTHOR (ENLARGED AVATAR) ---
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(2),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: AppTheme.darkCharcoal, width: 1.5),
-                          ),
-                          // Increased radius from 16 to 24 (48px diameter).
-                          child: CircleAvatar(
-                            radius: 24, 
-                            backgroundColor: Colors.white,
-                            backgroundImage: AvatarHelper.getAvatarProvider(recipe.authorAvatarUrl),
+          return SizedBox.expand(
+            child: SingleChildScrollView(
+              // Increased bottom padding to 80 for comfortable scrolling to the end
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Container(
+                width: double.infinity, // Ensure the entire width is scrollable.
+                alignment: Alignment.topCenter, // Center the content horizontally.
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 800),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Recipe Image
+                      AspectRatio(
+                        aspectRatio: 16 / 10,
+                        child: Hero(
+                          tag: 'recipe_image_${recipe.id}',
+                          child: AppImage(
+                            imagePath: recipe.imageUrl,
+                            borderRadius: BorderRadius.circular(16),
                           ),
                         ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: SelectableText(
-                            AppLocalizations.of(context)!.byAuthor(recipe.authorName),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Recipe Title
+                      SelectableText(
+                        recipe.title,
+                        style: const TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 28,
+                          fontWeight: FontWeight.w800,
+                          color: AppTheme.darkCharcoal,
+                          height: 1.2,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Author Info
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: AppTheme.darkCharcoal, width: 1.5),
+                            ),
+                            // Increased radius from 16 to 24 (48px diameter).
+                            child: CircleAvatar(
+                              radius: 24, 
+                              backgroundColor: Colors.white,
+                              backgroundImage: AvatarHelper.getAvatarProvider(recipe.authorAvatarUrl),
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: SelectableText(
+                              AppLocalizations.of(context)!.byAuthor(recipe.authorName),
+                              style: const TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: AppTheme.darkCharcoal,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 16),
+                      
+                      // Cooking Time Info
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.access_time_filled, 
+                            color: AppTheme.darkCharcoal, 
+                            size: 20
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            DurationHelper.format(context, recipe.timeMinutes),
                             style: const TextStyle(
                               fontFamily: 'Inter',
-                              fontSize: 18,
+                              fontSize: 16,
                               fontWeight: FontWeight.w600,
                               color: AppTheme.darkCharcoal,
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 16),
-                    
-                    // --- COOKING TIME ---
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.access_time_filled, 
-                          color: AppTheme.darkCharcoal, 
-                          size: 20
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          DurationHelper.format(context, recipe.timeMinutes),
-                          style: const TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: AppTheme.darkCharcoal,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 32),
-
-                    // Description
-                    Text(AppLocalizations.of(context)!.description, style: const TextStyle(fontFamily: 'Inter', fontSize: 20, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
-                    const SizedBox(height: 12),
-                    SelectableText(
-                      recipe.description.isNotEmpty ? recipe.description : AppLocalizations.of(context)!.noDescription,
-                      style: const TextStyle(
-                        fontFamily: 'Inter', 
-                        fontSize: 16, 
-                        height: 1.5, 
-                        color: AppTheme.darkCharcoal
+                        ],
                       ),
-                    ),
 
-                    const SizedBox(height: 32),
+                      const SizedBox(height: 32),
 
-                    // --- INGREDIENTS (INCREASED SPACING) ---
-                    Text(AppLocalizations.of(context)!.ingredients, style: const TextStyle(fontFamily: 'Inter', fontSize: 20, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
-                    const SizedBox(height: 16),
-                    if (recipe.ingredients.isEmpty)
-                      Text(AppLocalizations.of(context)!.noIngredients, style: const TextStyle(color: AppTheme.mediumGray)),
+                      // Description Section
+                      Text(AppLocalizations.of(context)!.description, style: const TextStyle(fontFamily: 'Inter', fontSize: 20, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
+                      const SizedBox(height: 12),
+                      SelectableText(
+                        recipe.description.isNotEmpty ? recipe.description : AppLocalizations.of(context)!.noDescription,
+                        style: const TextStyle(
+                          fontFamily: 'Inter', 
+                          fontSize: 16, 
+                          height: 1.5, 
+                          color: AppTheme.darkCharcoal
+                        ),
+                      ),
 
-                    ...recipe.ingredients.map((ingredient) {
-                      final isDone = _completedIngredients.contains(ingredient);
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            if (isDone) {
-                              _completedIngredients.remove(ingredient);
-                            } else {
-                              _completedIngredients.add(ingredient);
-                            }
-                          });
-                        },
-                        child: AnimatedOpacity(
-                          duration: const Duration(milliseconds: 200),
-                          opacity: isDone ? 0.5 : 1.0,
-                          child: Padding(
-                            padding: const EdgeInsets.only(bottom: 16.0),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _ThinCheckbox(isDone: isDone),
-                                const SizedBox(width: 14),
-                                Expanded(
-                                  child: SelectableText(
-                                    ingredient,
-                                    style: TextStyle(
-                                      fontFamily: 'Inter',
-                                      fontSize: 17,
-                                      height: 1.5,
-                                      color: AppTheme.darkCharcoal,
-                                      decoration: isDone ? TextDecoration.lineThrough : null,
+                      const SizedBox(height: 32),
+
+                      // Ingredients Checklist
+                      Text(AppLocalizations.of(context)!.ingredients, style: const TextStyle(fontFamily: 'Inter', fontSize: 20, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
+                      const SizedBox(height: 16),
+                      if (recipe.ingredients.isEmpty)
+                        Text(AppLocalizations.of(context)!.noIngredients, style: const TextStyle(color: AppTheme.mediumGray)),
+
+                      ...recipe.ingredients.map((ingredient) {
+                        final isDone = _completedIngredients.contains(ingredient);
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              if (isDone) {
+                                _completedIngredients.remove(ingredient);
+                              } else {
+                                _completedIngredients.add(ingredient);
+                              }
+                            });
+                          },
+                          child: AnimatedOpacity(
+                            duration: const Duration(milliseconds: 200),
+                            opacity: isDone ? 0.5 : 1.0,
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 16.0),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _ThinCheckbox(isDone: isDone),
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: SelectableText(
+                                      ingredient,
+                                      style: TextStyle(
+                                        fontFamily: 'Inter',
+                                        fontSize: 17,
+                                        height: 1.5,
+                                        color: AppTheme.darkCharcoal,
+                                        decoration: isDone ? TextDecoration.lineThrough : null,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    }),
+                        );
+                      }),
 
-                    const SizedBox(height: 32),
+                      const SizedBox(height: 32),
 
-                    // --- INSTRUCTIONS ---
-                    Text(AppLocalizations.of(context)!.instructions, style: const TextStyle(fontFamily: 'Inter', fontSize: 20, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
-                    const SizedBox(height: 16),
-                    if (recipe.steps.isEmpty)
-                      Text(AppLocalizations.of(context)!.noInstructions, style: const TextStyle(color: AppTheme.mediumGray)),
+                      // Instructions Checklist
+                      Text(AppLocalizations.of(context)!.instructions, style: const TextStyle(fontFamily: 'Inter', fontSize: 20, fontWeight: FontWeight.w700, color: AppTheme.darkCharcoal)),
+                      const SizedBox(height: 16),
+                      if (recipe.steps.isEmpty)
+                        Text(AppLocalizations.of(context)!.noInstructions, style: const TextStyle(color: AppTheme.mediumGray)),
 
-                    ...recipe.steps.asMap().entries.map((entry) {
-                      int idx = entry.key;
-                      String step = entry.value;
-                      final isDone = _completedSteps.contains(idx);
+                      ...recipe.steps.asMap().entries.map((entry) {
+                        int idx = entry.key;
+                        String step = entry.value;
+                        final isDone = _completedSteps.contains(idx);
 
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            if (isDone) {
-                              _completedSteps.remove(idx);
-                            } else {
-                              _completedSteps.add(idx);
-                            }
-                          });
-                        },
-                        child: AnimatedOpacity(
-                          duration: const Duration(milliseconds: 200),
-                          opacity: isDone ? 0.5 : 1.0,
-                          child: Padding(
-                            padding: const EdgeInsets.only(bottom: 24.0),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _ThinCheckbox(isDone: isDone),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        AppLocalizations.of(context)!.step(idx + 1),
-                                        style: const TextStyle(
-                                          fontFamily: 'Inter',
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppTheme.mediumGray,
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              if (isDone) {
+                                _completedSteps.remove(idx);
+                              } else {
+                                _completedSteps.add(idx);
+                              }
+                            });
+                          },
+                          child: AnimatedOpacity(
+                            duration: const Duration(milliseconds: 200),
+                            opacity: isDone ? 0.5 : 1.0,
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 24.0),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _ThinCheckbox(isDone: isDone),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          AppLocalizations.of(context)!.step(idx + 1),
+                                          style: const TextStyle(
+                                            fontFamily: 'Inter',
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.bold,
+                                            color: AppTheme.mediumGray,
+                                          ),
                                         ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      SelectableText(
-                                        step,
-                                        style: TextStyle(
-                                          fontFamily: 'Inter',
-                                          fontSize: 17,
-                                          height: 1.6,
-                                          color: AppTheme.darkCharcoal.withValues(alpha: 0.9),
-                                          decoration: isDone ? TextDecoration.lineThrough : null,
+                                        const SizedBox(height: 4),
+                                        SelectableText(
+                                          step,
+                                          style: TextStyle(
+                                            fontFamily: 'Inter',
+                                            fontSize: 17,
+                                            height: 1.6,
+                                            color: AppTheme.darkCharcoal.withValues(alpha: 0.9),
+                                            decoration: isDone ? TextDecoration.lineThrough : null,
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    }),
-                  ],
+                        );
+                      }),
+                    ],
+                  ),
                 ),
               ),
             ),
