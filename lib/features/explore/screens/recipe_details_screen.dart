@@ -248,43 +248,57 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    if (isDone) {
-                                      _completedIngredients.remove(ingredient);
-                                    } else {
-                                      _completedIngredients.add(ingredient);
-                                    }
-                                  });
-                                },
-                                child: AnimatedOpacity(
-                                  duration: const Duration(milliseconds: 200),
-                                  opacity: isDone ? 0.5 : 1.0,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(bottom: 16.0),
-                                    child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        _ThinCheckbox(isDone: isDone),
-                                        const SizedBox(width: 14),
-                                        Expanded(
-                                          child: Text(
-                                            ingredient,
-                                            style: TextStyle(
-                                              fontFamily: 'Inter',
-                                              fontSize: 17,
-                                              height: 1.5,
-                                              color: AppTheme.darkCharcoal,
-                                              decoration: isDone
-                                                  ? TextDecoration.lineThrough
-                                                  : null,
-                                            ),
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 16.0),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          if (isDone) {
+                                            _completedIngredients.remove(
+                                              ingredient,
+                                            );
+                                          } else {
+                                            _completedIngredients.add(
+                                              ingredient,
+                                            );
+                                          }
+                                        });
+                                      },
+                                      child: Container(
+                                        color: Colors.transparent,
+                                        padding: const EdgeInsets.only(
+                                          right: 8.0,
+                                          top: 2.0,
+                                          bottom: 2.0,
+                                        ),
+                                        child: _ThinCheckbox(isDone: isDone),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: AnimatedOpacity(
+                                        duration: const Duration(
+                                          milliseconds: 200,
+                                        ),
+                                        opacity: isDone ? 0.5 : 1.0,
+                                        child: Text(
+                                          ingredient,
+                                          style: TextStyle(
+                                            fontFamily: 'Inter',
+                                            fontSize: 17,
+                                            height: 1.5,
+                                            color: AppTheme.darkCharcoal,
+                                            decoration: isDone
+                                                ? TextDecoration.lineThrough
+                                                : null,
                                           ),
                                         ),
-                                      ],
+                                      ),
                                     ),
-                                  ),
+                                  ],
                                 ),
                               ),
                               const CopyableNewline(),
@@ -322,63 +336,73 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    if (isDone) {
-                                      _completedSteps.remove(idx);
-                                    } else {
-                                      _completedSteps.add(idx);
-                                    }
-                                  });
-                                },
-                                child: AnimatedOpacity(
-                                  duration: const Duration(milliseconds: 200),
-                                  opacity: isDone ? 0.5 : 1.0,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(bottom: 24.0),
-                                    child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        _ThinCheckbox(isDone: isDone),
-                                        const SizedBox(width: 16),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                AppLocalizations.of(
-                                                  context,
-                                                )!.step(idx + 1),
-                                                style: const TextStyle(
-                                                  fontFamily: 'Inter',
-                                                  fontSize: 13,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: AppTheme.mediumGray,
-                                                ),
-                                              ),
-                                              const CopyableNewline(),
-                                              const SizedBox(height: 4),
-                                              Text(
-                                                step,
-                                                style: TextStyle(
-                                                  fontFamily: 'Inter',
-                                                  fontSize: 17,
-                                                  height: 1.6,
-                                                  color: AppTheme.darkCharcoal
-                                                      .withValues(alpha: 0.9),
-                                                  decoration: isDone
-                                                      ? TextDecoration.lineThrough
-                                                      : null,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 24.0),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          if (isDone) {
+                                            _completedSteps.remove(idx);
+                                          } else {
+                                            _completedSteps.add(idx);
+                                          }
+                                        });
+                                      },
+                                      child: Container(
+                                        color: Colors.transparent,
+                                        padding: const EdgeInsets.only(
+                                          right: 8.0,
+                                          top: 2.0,
+                                          bottom: 2.0,
                                         ),
-                                      ],
+                                        child: _ThinCheckbox(isDone: isDone),
+                                      ),
                                     ),
-                                  ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: AnimatedOpacity(
+                                        duration: const Duration(
+                                          milliseconds: 200,
+                                        ),
+                                        opacity: isDone ? 0.5 : 1.0,
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              AppLocalizations.of(
+                                                context,
+                                              )!.step(idx + 1),
+                                              style: const TextStyle(
+                                                fontFamily: 'Inter',
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.bold,
+                                                color: AppTheme.mediumGray,
+                                              ),
+                                            ),
+                                            const CopyableNewline(),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              step,
+                                              style: TextStyle(
+                                                fontFamily: 'Inter',
+                                                fontSize: 17,
+                                                height: 1.6,
+                                                color: AppTheme.darkCharcoal
+                                                    .withValues(alpha: 0.9),
+                                                decoration: isDone
+                                                    ? TextDecoration.lineThrough
+                                                    : null,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                               const CopyableNewline(),
