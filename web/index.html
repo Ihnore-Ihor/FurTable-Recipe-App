@@ -58,33 +58,36 @@
       overflow: hidden;
     }
 
-    /* 1. РОБИМО БРАУЗЕРНЕ ВИДІЛЕННЯ НЕВИДИМИМ */
-    /* Важливо: transparent для фону І для тексту, щоб не було ефекту "двоїння" літер */
+    /* 1. Глобальне виділення тексту (для Details Screen) */
     ::selection {
-      background-color: transparent !important;
-      color: transparent !important;
+      background-color: #2C2C2C !important;
+      /* Наш Dark Charcoal */
+      color: #FFFFFF !important;
+      /* Білий текст */
     }
 
     ::-moz-selection {
-      background-color: transparent !important;
-      color: transparent !important;
+      background-color: #2C2C2C !important;
+      color: #FFFFFF !important;
     }
 
-    /* 2. ПРИБИРАЄМО СИНІЙ КУРСОР БРАУЗЕРА */
-    /* Курсор буде малювати Flutter (чорний, рівний) */
-    input,
-    textarea {
-      caret-color: transparent !important;
-    }
-
-    /* 3. ОЧИЩЕННЯ IOS */
+    /* 2. Поля вводу (Create Recipe / Auth) */
     input::selection,
     textarea::selection {
-      background-color: transparent !important;
-      color: transparent !important;
-      -webkit-text-fill-color: transparent !important;
+      background-color: #2C2C2C !important;
+      color: #FFFFFF !important;
+      -webkit-text-fill-color: #FFFFFF !important;
+      /* iOS фікс */
     }
 
+    /* 3. Курсор у полях вводу */
+    input,
+    textarea {
+      caret-color: #2C2C2C !important;
+      /* ЧОРНИЙ КУРСОР */
+    }
+
+    /* 4. Прибираємо синій клік */
     * {
       -webkit-tap-highlight-color: transparent !important;
       outline: none !important;

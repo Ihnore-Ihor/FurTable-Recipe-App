@@ -178,6 +178,14 @@
     "error": "Error",
     "success": "Success",
     "cancel": "Cancel",
+    "copied": "{label} copied",
+    "@copied": {
+        "placeholders": {
+            "label": {
+                "type": "String"
+            }
+        }
+    },
     "delete": "Delete",
     "edit": "Edit",
     "update": "Update",

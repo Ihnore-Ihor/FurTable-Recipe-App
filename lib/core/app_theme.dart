@@ -40,11 +40,12 @@ class AppTheme {
       highlightColor: Colors.transparent,
 
       textSelectionTheme: TextSelectionThemeData(
-        // ПОВЕРТАЄМО ЧОРНИЙ КОЛІР
-        cursorColor: darkCharcoal,
-        // Напівпрозорий сірий для фону виділення
+        // 1. КУРСОР: Прозорий (покладаємося на CSS caret-color)
+        // Це прибере "подвійний курсор".
+        cursorColor: Colors.transparent,
+        // 2. ВИДІЛЕННЯ: Наше фірмове (для RecipeDetailsScreen)
         selectionColor: darkCharcoal.withValues(alpha: 0.3),
-        // Чорні "крапельки" (ручки)
+        // 3. РУЧКИ: Наші фірмові
         selectionHandleColor: darkCharcoal,
       ),
 

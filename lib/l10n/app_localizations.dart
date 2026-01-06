@@ -842,6 +842,12 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get cancel;
 
+  /// No description provided for @copied.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} copied'**
+  String copied(String label);
+
   /// No description provided for @delete.
   ///
   /// In en, this message translates to:

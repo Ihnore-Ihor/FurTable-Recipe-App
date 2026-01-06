@@ -135,6 +135,14 @@
     "error": "Помилка",
     "success": "Успішно",
     "cancel": "Скасувати",
+    "copied": "{label} скопійовано",
+    "@copied": {
+        "placeholders": {
+            "label": {
+                "type": "String"
+            }
+        }
+    },
     "delete": "Видалити",
     "edit": "Редагувати",
     "update": "Оновити",

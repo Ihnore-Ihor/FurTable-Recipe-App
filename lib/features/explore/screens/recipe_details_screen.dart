@@ -54,7 +54,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
     Clipboard.setData(ClipboardData(text: content));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('$label copied'),
+        content: Text(AppLocalizations.of(context)!.copied(label)),
         backgroundColor: AppTheme.darkCharcoal,
         duration: const Duration(seconds: 1),
       ),

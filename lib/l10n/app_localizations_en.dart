@@ -405,6 +405,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancel => 'Cancel';
 
   @override
+  String copied(String label) {
+    return '$label copied';
+  }
+
+  @override
   String get delete => 'Delete';
 
   @override
