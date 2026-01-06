@@ -62,48 +62,55 @@ This project goes beyond basics, implementing enterprise-level patterns:
 
 ## 📂 Project Structure
 
+```text
 lib/
-├── core/                  # Global utilities, themes, widgets, env config
-├── features/              # Feature-based modules
-│   ├── auth/              # Authentication logic & screens
-│   ├── create_recipe/     # Recipe creation form & BLoC
-│   ├── explore/           # Main feed, Recipe Details, Repositories
-│   ├── favorites/         # Favorites logic
-│   ├── profile/           # User profile, settings, feedback
-│   └── search/            # Search logic & history
-├── l10n/                  # Localization files (.arb)
-└── main.dart              # Entry point & App configuration
+├── core/                 # Global utilities, themes, widgets, env config
+├── features/             # Feature-based modules
+│   ├── auth/             # Authentication logic & screens
+│   ├── create_recipe/    # Recipe creation form & BLoC
+│   ├── explore/          # Main feed, Recipe Details, Repositories
+│   ├── favorites/        # Favorites logic
+│   ├── profile/          # User profile, settings, feedback
+│   └── search/           # Search logic & history
+├── l10n/                 # Localization files (.arb)
+└── main.dart             # Entry point & App configuration
 🚀 Getting Started
 Prerequisites
-Flutter SDK (3.22 or higher recommended)
+
+Flutter SDK 3.22 or higher (recommended)
 Firebase Project credentials
+
 Installation
-Clone the repository:
-code
-Sh
-git clone https://github.com/your_username/FurTable-Recipe-App.git
+
+Clone the repositoryBashgit clone https://github.com/your_username/FurTable-Recipe-App.git
 cd FurTable-Recipe-App
-Install dependencies:
-code
-Sh
-flutter pub get
-Configure Environment Variables:
-Create a .env file in the root directory and add your keys (required for envied generator):
-code
-Env
-SENTRY_DSN=your_dsn
+Install dependenciesBashflutter pub get
+Configure Environment Variables
+Create a .env file in the root directory and add your keys
+(required for envied code generation):envSENTRY_DSN=your_dsn
 FB_API_KEY=your_key
-# ... other Firebase config keys
-Generate Code:
-Run build_runner to generate secure configuration files and localization:
-code
-Sh
+FB_AUTH_DOMAIN=your_auth_domain
+FB_PROJECT_ID=your_project_id
+FB_STORAGE_BUCKET=your_storage_bucket
+FB_MESSAGING_SENDER_ID=your_messaging_sender_id
+FB_APP_ID=your_app_id
+# ... add other Firebase config keys if needed
+Generate code
+Run build_runner to generate secure configuration files and localization:Bash# Generate envied classes, freezed models, etc.
 dart run build_runner build --delete-conflicting-outputs
+
+# Generate localization files
 flutter gen-l10n
-Run the App:
-code
-Sh
+Run the appBash# For web (recommended for development)
 flutter run -d chrome
+
+# Or on a connected device/emulator
+flutter run
+
 📜 License & Credits
-Design Inspiration: Beastars (Manga aesthetic).
-Course Project: Developed for "Cross-Platform Programming" at Lviv Polytechnic National University.
+
+Design Inspiration: Beastars (manga aesthetic)
+Course Project: Developed for "Cross-Platform Programming" at Lviv Polytechnic National University
+
+
+Made with ❤️ using Flutter
