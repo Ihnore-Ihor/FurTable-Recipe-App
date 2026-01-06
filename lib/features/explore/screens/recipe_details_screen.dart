@@ -232,7 +232,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                             color: AppTheme.darkCharcoal,
                           ),
                         ),
-                        const CopyableNewline(), // 1 Enter
+                        const CopyableNewline(),
 
                         const SizedBox(height: 16),
                         if (recipe.ingredients.isEmpty)
