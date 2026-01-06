@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:furtable/features/explore/screens/explore_screen.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -36,6 +37,11 @@ Future<void> main() async {
       // 1. Initialize local storage
       final storage = LocalStorageService();
       await storage.init();
+
+      // Enable native browser context menu (right-click) on Web.
+      if (kIsWeb) {
+        await BrowserContextMenu.enableContextMenu();
+      }
 
       // --- OPTIMIZATION: PRE-CACHE ---
       // Load critical images into memory to prevent UI flickering.
