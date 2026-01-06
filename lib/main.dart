@@ -39,9 +39,9 @@ Future<void> main() async {
       await storage.init();
 
       // Enable native browser context menu (right-click) on Web.
-      // This is critical for PWA selection and standard browser menus.
+      // Disable the browser context menu to prevent conflicts with Flutter's custom selection menu.
       if (kIsWeb) {
-        await BrowserContextMenu.enableContextMenu();
+        await BrowserContextMenu.disableContextMenu();
       }
 
       // --- OPTIMIZATION: PRE-CACHE ---

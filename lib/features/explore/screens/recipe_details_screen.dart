@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Required for Clipboard access
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/core/utils/auth_helper.dart';
@@ -28,10 +29,41 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
   final Set<String> _completedIngredients = {};
   final Set<int> _completedSteps = {};
 
+  /// Copies a list of items to the clipboard with clean formatting.
+  void _copyListToClipboard(String title, List<String> items, {bool isSteps = false}) {
+    final buffer = StringBuffer();
+    buffer.writeln(title.toUpperCase());
+    buffer.writeln(); 
+    
+    for (int i = 0; i < items.length; i++) {
+      if (isSteps) {
+        buffer.writeln('${i + 1}. ${items[i]}');
+      } else {
+        buffer.writeln('- ${items[i]}');
+      }
+    }
+
+    _copyToClipboard(buffer.toString(), title);
+  }
+
+  void _copyTextToClipboard(String label, String text) {
+    _copyToClipboard(text, label);
+  }
+
+  void _copyToClipboard(String content, String label) {
+    Clipboard.setData(ClipboardData(text: content));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$label copied'),
+        backgroundColor: AppTheme.darkCharcoal,
+        duration: const Duration(seconds: 1),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SelectionArea(
-      child: Scaffold(
+    return Scaffold(
         backgroundColor: AppTheme.offWhite,
         appBar: AppBar(
           backgroundColor: AppTheme.offWhite,
@@ -115,7 +147,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                         const SizedBox(height: 24),
 
                         // Recipe Title
-                        Text(
+                        SelectableText(
                           recipe.title,
                           style: const TextStyle(
                             fontFamily: 'Inter',
@@ -125,7 +157,6 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                             height: 1.2,
                           ),
                         ),
-                        const CopyableNewline(),
                         const SizedBox(height: 16),
 
                         // Author Info
@@ -151,9 +182,8 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                             ),
                             const SizedBox(width: 14),
                             Expanded(
-                              child: Text(
+                              child: SelectableText(
                                 AppLocalizations.of(context)!.byAuthor(recipe.authorName),
-                                overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
                                   fontFamily: 'Inter',
                                   fontSize: 18,
@@ -164,7 +194,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                             ),
                           ],
                         ),
-                        const CopyableNewline(),
+                        const SizedBox(height: 12),
 
                         const SizedBox(height: 16),
 
@@ -177,36 +207,46 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                               size: 20,
                             ),
                             const SizedBox(width: 8),
-                            Text(
+                            SelectableText(
                               DurationHelper.format(context, recipe.timeMinutes),
                               style: const TextStyle(
                                 fontFamily: 'Inter',
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
-                                  color: AppTheme.darkCharcoal),
+                                color: AppTheme.darkCharcoal,
+                              ),
                             ),
                           ],
                         ),
-                        const CopyableNewline(),
-                        const CopyableNewline(),
-
+                        
                         const SizedBox(height: 32),
 
                         // Description Section
-                        Text(
-                          AppLocalizations.of(context)!.description,
-                          style: const TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                            color: AppTheme.darkCharcoal,
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              AppLocalizations.of(context)!.description,
+                              style: const TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                                color: AppTheme.darkCharcoal,
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.copy, size: 20, color: AppTheme.darkCharcoal),
+                              tooltip: 'Copy Description',
+                              onPressed: () => _copyTextToClipboard(
+                                AppLocalizations.of(context)!.description, 
+                                recipe.description.isNotEmpty ? recipe.description : AppLocalizations.of(context)!.noDescription
+                              ),
+                            ),
+                          ],
                         ),
-                        const CopyableNewline(),
-
                         const SizedBox(height: 12),
 
-                        Text(
+                        SelectableText(
                           recipe.description.isNotEmpty
                               ? recipe.description
                               : AppLocalizations.of(context)!.noDescription,
@@ -217,22 +257,36 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                             color: AppTheme.darkCharcoal,
                           ),
                         ),
-                        const CopyableNewline(),
-                        const CopyableNewline(),
 
                         const SizedBox(height: 32),
 
                         // Ingredients Checklist
-                        Text(
-                          AppLocalizations.of(context)!.ingredients,
-                          style: const TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                            color: AppTheme.darkCharcoal,
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              AppLocalizations.of(context)!.ingredients,
+                              style: const TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                                color: AppTheme.darkCharcoal,
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.copy,
+                                size: 20,
+                                color: AppTheme.darkCharcoal,
+                              ),
+                              tooltip: 'Copy Ingredients',
+                              onPressed: () => _copyListToClipboard(
+                                AppLocalizations.of(context)!.ingredients,
+                                recipe.ingredients,
+                              ),
+                            ),
+                          ],
                         ),
-                        const CopyableNewline(),
 
                         const SizedBox(height: 16),
                         if (recipe.ingredients.isEmpty)
@@ -245,82 +299,91 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                           final isDone = _completedIngredients.contains(
                             ingredient,
                           );
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 16.0),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          if (isDone) {
-                                            _completedIngredients.remove(
-                                              ingredient,
-                                            );
-                                          } else {
-                                            _completedIngredients.add(
-                                              ingredient,
-                                            );
-                                          }
-                                        });
-                                      },
-                                      child: Container(
-                                        color: Colors.transparent,
-                                        padding: const EdgeInsets.only(
-                                          right: 8.0,
-                                          top: 2.0,
-                                          bottom: 2.0,
-                                        ),
-                                        child: _ThinCheckbox(isDone: isDone),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Expanded(
-                                      child: AnimatedOpacity(
-                                        duration: const Duration(
-                                          milliseconds: 200,
-                                        ),
-                                        opacity: isDone ? 0.5 : 1.0,
-                                        child: Text(
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 16.0),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      if (isDone) {
+                                        _completedIngredients.remove(
                                           ingredient,
-                                          style: TextStyle(
-                                            fontFamily: 'Inter',
-                                            fontSize: 17,
-                                            height: 1.5,
-                                            color: AppTheme.darkCharcoal,
-                                            decoration: isDone
-                                                ? TextDecoration.lineThrough
-                                                : null,
-                                          ),
-                                        ),
+                                        );
+                                      } else {
+                                        _completedIngredients.add(
+                                          ingredient,
+                                        );
+                                      }
+                                    });
+                                  },
+                                  child: Container(
+                                    color: Colors.transparent,
+                                    padding: const EdgeInsets.only(
+                                      right: 8.0,
+                                      top: 2.0,
+                                      bottom: 2.0,
+                                    ),
+                                    child: _ThinCheckbox(isDone: isDone),
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: AnimatedOpacity(
+                                    duration: const Duration(
+                                      milliseconds: 200,
+                                    ),
+                                    opacity: isDone ? 0.5 : 1.0,
+                                    child: SelectableText(
+                                      ingredient,
+                                      style: TextStyle(
+                                        fontFamily: 'Inter',
+                                        fontSize: 17,
+                                        height: 1.5,
+                                        color: AppTheme.darkCharcoal,
+                                        decoration: isDone
+                                            ? TextDecoration.lineThrough
+                                            : null,
                                       ),
                                     ),
-                                  ],
+                                  ),
                                 ),
-                              ),
-                              const CopyableNewline(),
-                            ],
+                              ],
+                            ),
                           );
                         }),
-
-                        const CopyableNewline(),
 
                         const SizedBox(height: 32),
 
                         // Instructions Checklist
-                        Text(
-                          AppLocalizations.of(context)!.instructions,
-                          style: const TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                            color: AppTheme.darkCharcoal,
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              AppLocalizations.of(context)!.instructions,
+                              style: const TextStyle(
+                                fontFamily: 'Inter',
+                                fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                                color: AppTheme.darkCharcoal,
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.copy,
+                                size: 20,
+                                color: AppTheme.darkCharcoal,
+                              ),
+                              tooltip: 'Copy Instructions',
+                              onPressed: () => _copyListToClipboard(
+                                AppLocalizations.of(context)!.instructions,
+                                recipe.steps,
+                                isSteps: true,
+                              ),
+                            ),
+                          ],
                         ),
-                        const CopyableNewline(),
                         const SizedBox(height: 16),
                         if (recipe.steps.isEmpty)
                           Text(
@@ -333,81 +396,71 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                           String step = entry.value;
                           final isDone = _completedSteps.contains(idx);
 
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 24.0),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          if (isDone) {
-                                            _completedSteps.remove(idx);
-                                          } else {
-                                            _completedSteps.add(idx);
-                                          }
-                                        });
-                                      },
-                                      child: Container(
-                                        color: Colors.transparent,
-                                        padding: const EdgeInsets.only(
-                                          right: 8.0,
-                                          top: 2.0,
-                                          bottom: 2.0,
-                                        ),
-                                        child: _ThinCheckbox(isDone: isDone),
-                                      ),
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 24.0),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      if (isDone) {
+                                        _completedSteps.remove(idx);
+                                      } else {
+                                        _completedSteps.add(idx);
+                                      }
+                                    });
+                                  },
+                                  child: Container(
+                                    color: Colors.transparent,
+                                    padding: const EdgeInsets.only(
+                                      right: 8.0,
+                                      top: 2.0,
+                                      bottom: 2.0,
                                     ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: AnimatedOpacity(
-                                        duration: const Duration(
-                                          milliseconds: 200,
-                                        ),
-                                        opacity: isDone ? 0.5 : 1.0,
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              AppLocalizations.of(
-                                                context,
-                                              )!.step(idx + 1),
-                                              style: const TextStyle(
-                                                fontFamily: 'Inter',
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.bold,
-                                                color: AppTheme.mediumGray,
-                                              ),
-                                            ),
-                                            const CopyableNewline(),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              step,
-                                              style: TextStyle(
-                                                fontFamily: 'Inter',
-                                                fontSize: 17,
-                                                height: 1.6,
-                                                color: AppTheme.darkCharcoal
-                                                    .withValues(alpha: 0.9),
-                                                decoration: isDone
-                                                    ? TextDecoration.lineThrough
-                                                    : null,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                    child: _ThinCheckbox(isDone: isDone),
+                                  ),
                                 ),
-                              ),
-                              const CopyableNewline(),
-                              const CopyableNewline(),
-                            ],
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: AnimatedOpacity(
+                                    duration: const Duration(
+                                      milliseconds: 200,
+                                    ),
+                                    opacity: isDone ? 0.5 : 1.0,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          AppLocalizations.of(context)!.step(idx + 1),
+                                          style: const TextStyle(
+                                            fontFamily: 'Inter',
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.bold,
+                                            color: AppTheme.mediumGray,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        SelectableText(
+                                          step,
+                                          style: TextStyle(
+                                            fontFamily: 'Inter',
+                                            fontSize: 17,
+                                            height: 1.6,
+                                            color: AppTheme.darkCharcoal
+                                                .withValues(alpha: 0.9),
+                                            decoration: isDone
+                                                ? TextDecoration.lineThrough
+                                                : null,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           );
                         }),
                       ],
@@ -418,7 +471,6 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
             );
           },
         ),
-      ),
     );
   }
 }
@@ -433,39 +485,21 @@ class _ThinCheckbox extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
-      width: 20, // Reduced from 24.0 for a more compact look.
+      width: 20,
       height: 20,
       decoration: BoxDecoration(
         color: isDone ? AppTheme.darkCharcoal : Colors.transparent,
-        borderRadius: BorderRadius.circular(
-          5,
-        ), // Slightly reduced radius from 6.
+        borderRadius: BorderRadius.circular(5),
         border: Border.all(
           color: AppTheme.darkCharcoal,
-          width: 1.0, // Thin border line.
+          width: 1.0,
         ),
       ),
       child: isDone
-          // Reduced size from 16 to 14 to fit the smaller container.
           ? const Icon(Icons.check, size: 14, color: Colors.white)
           : null,
     );
   }
 }
 
-/// A widget that is invisible to the eye but adds a newline character when text is copied via SelectionArea.
-class CopyableNewline extends StatelessWidget {
-  const CopyableNewline({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return const Text(
-      '\n',
-      style: TextStyle(
-        fontSize: 1, // Minimum size for Flutter to render it.
-        height: 0,   // Zero height to avoid breaking the UI layout.
-        color: Colors.transparent, // Invisible.
-      ),
-    );
-  }
-}

@@ -58,21 +58,28 @@
       overflow: hidden;
     }
 
-    /* Hide native browser selection, so only our custom Flutter one remains */
+    /* Aggressive rules for transparent native selection and clean UI */
+    * {
+      -webkit-tap-highlight-color: transparent !important;
+      outline: none !important;
+    }
+
     ::selection {
-      background-color: transparent !important;
+      background: transparent !important;
       color: inherit !important;
     }
 
     ::-moz-selection {
-      background-color: transparent !important;
+      background: transparent !important;
       color: inherit !important;
     }
 
-    /* Additional for mobile */
-    * {
-      -webkit-tap-highlight-color: transparent;
+    input::selection,
+    textarea::selection {
+      background: transparent !important;
+      color: inherit !important;
     }
+
 
     #splash-container {
       position: fixed;
