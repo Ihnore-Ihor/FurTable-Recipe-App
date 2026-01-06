@@ -58,12 +58,35 @@
       overflow: hidden;
     }
 
-    /* 1. Глобальне виділення тексту (для Details Screen) */
+    /* 1. ГЛОБАЛЬНА ЗАБОРОНА ВИДІЛЕННЯ */
+    /* Це зробить додаток схожим на нативний: текст не світиться синім, коли скролиш */
+    body {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* 2. ДОЗВІЛ ДЛЯ ПОЛІВ ВВОДУ ТА ВИБРАНИХ ЕЛЕМЕНТІВ */
+    /* Тільки в Input, Textarea та спеціальних платформах (для SelectableText) можна виділяти текст */
+    input,
+    textarea,
+    flt-platform-view {
+      -webkit-user-select: text !important;
+      -moz-user-select: text !important;
+      -ms-user-select: text !important;
+      user-select: text !important;
+
+      /* Наш фірмовий стиль для браузерного курсора */
+      caret-color: #2C2C2C !important;
+    }
+
+    /* 3. КОЛІР ВИДІЛЕННЯ (Тільки для Input/Textarea/Selectable) */
+    /* Браузер намалює це ідеально рівно поверх тексту */
     ::selection {
       background-color: #2C2C2C !important;
-      /* Наш Dark Charcoal */
       color: #FFFFFF !important;
-      /* Білий текст */
     }
 
     ::-moz-selection {
@@ -71,26 +94,12 @@
       color: #FFFFFF !important;
     }
 
-    /* 2. Поля вводу (Create Recipe / Auth) */
+    /* iOS Fix */
     input::selection,
     textarea::selection {
       background-color: #2C2C2C !important;
       color: #FFFFFF !important;
       -webkit-text-fill-color: #FFFFFF !important;
-      /* iOS фікс */
-    }
-
-    /* 3. Курсор у полях вводу */
-    input,
-    textarea {
-      caret-color: #2C2C2C !important;
-      /* ЧОРНИЙ КУРСОР */
-    }
-
-    /* 4. Прибираємо синій клік */
-    * {
-      -webkit-tap-highlight-color: transparent !important;
-      outline: none !important;
     }
 
 

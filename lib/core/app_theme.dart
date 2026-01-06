@@ -39,14 +39,10 @@ class AppTheme {
       splashColor: Colors.transparent,
       highlightColor: Colors.transparent,
 
-      textSelectionTheme: TextSelectionThemeData(
-        // 1. КУРСОР: Прозорий (покладаємося на CSS caret-color)
-        // Це прибере "подвійний курсор".
+      textSelectionTheme: const TextSelectionThemeData(
         cursorColor: Colors.transparent,
-        // 2. ВИДІЛЕННЯ: Наше фірмове (для RecipeDetailsScreen)
-        selectionColor: darkCharcoal.withValues(alpha: 0.3),
-        // 3. РУЧКИ: Наші фірмові
-        selectionHandleColor: darkCharcoal,
+        selectionColor: Colors.transparent,
+        selectionHandleColor: Colors.transparent,
       ),
 
       // Styles the Flutter text selection menu (toolbar).
