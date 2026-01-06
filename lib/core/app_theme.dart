@@ -39,13 +39,11 @@ class AppTheme {
       splashColor: Colors.transparent,
       highlightColor: Colors.transparent,
 
+      // ВАЖЛИВО: Вимикаємо візуалізацію виділення у Flutter
       textSelectionTheme: const TextSelectionThemeData(
-        // Курсор Flutter стає невидимим (ми бачимо тільки CSS-курсор)
-        cursorColor: Colors.transparent,
-        // Виділення Flutter стає невидимим (ми бачимо тільки CSS-виділення)
-        selectionColor: Colors.transparent,
-        // Ручки (крапельки) Flutter стає невидимим (на iOS/Android будуть нативні)
-        selectionHandleColor: Colors.transparent,
+        cursorColor: Colors.transparent, // Невидимий курсор Flutter
+        selectionColor: Colors.transparent, // Невидиме виділення Flutter
+        selectionHandleColor: Colors.transparent, // Невидимі ручки Flutter
       ),
 
       // Styles the Flutter text selection menu (toolbar).
