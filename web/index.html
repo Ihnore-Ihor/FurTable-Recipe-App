@@ -58,35 +58,33 @@
       overflow: hidden;
     }
 
-    /* 1. Глобальне виділення (для тексту рецептів) */
+    /* 1. РОБИМО БРАУЗЕРНЕ ВИДІЛЕННЯ НЕВИДИМИМ */
+    /* Важливо: transparent для фону І для тексту, щоб не було ефекту "двоїння" літер */
     ::selection {
-      background-color: #2C2C2C !important;
-      /* Чорний фон */
-      color: #FFFFFF !important;
-      /* Білий текст */
+      background-color: transparent !important;
+      color: transparent !important;
     }
 
     ::-moz-selection {
-      background-color: #2C2C2C !important;
-      color: #FFFFFF !important;
+      background-color: transparent !important;
+      color: transparent !important;
     }
 
-    /* 2. Поля вводу (щоб курсор був чорним, а виділення чорним) */
+    /* 2. ПРИБИРАЄМО СИНІЙ КУРСОР БРАУЗЕРА */
+    /* Курсор буде малювати Flutter (чорний, рівний) */
     input,
     textarea {
-      caret-color: #2C2C2C !important;
-      /* Чорний курсор */
+      caret-color: transparent !important;
     }
 
+    /* 3. ОЧИЩЕННЯ IOS */
     input::selection,
     textarea::selection {
-      background-color: #2C2C2C !important;
-      color: #FFFFFF !important;
-      -webkit-text-fill-color: #FFFFFF !important;
-      /* Фікс для iOS */
+      background-color: transparent !important;
+      color: transparent !important;
+      -webkit-text-fill-color: transparent !important;
     }
 
-    /* 3. Прибираємо синій тап */
     * {
       -webkit-tap-highlight-color: transparent !important;
       outline: none !important;

@@ -39,11 +39,13 @@ class AppTheme {
       splashColor: Colors.transparent,
       highlightColor: Colors.transparent,
 
-      // ВАЖЛИВО: Вимикаємо візуалізацію виділення у Flutter
-      textSelectionTheme: const TextSelectionThemeData(
-        cursorColor: Colors.transparent, // Невидимий курсор Flutter
-        selectionColor: Colors.transparent, // Невидиме виділення Flutter
-        selectionHandleColor: Colors.transparent, // Невидимі ручки Flutter
+      textSelectionTheme: TextSelectionThemeData(
+        // ПОВЕРТАЄМО ЧОРНИЙ КОЛІР
+        cursorColor: darkCharcoal,
+        // Напівпрозорий сірий для фону виділення
+        selectionColor: darkCharcoal.withValues(alpha: 0.3),
+        // Чорні "крапельки" (ручки)
+        selectionHandleColor: darkCharcoal,
       ),
 
       // Styles the Flutter text selection menu (toolbar).
