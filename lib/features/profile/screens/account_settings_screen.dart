@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/core/services/local_storage_service.dart';
@@ -375,6 +376,31 @@ class _AccountSettingsViewState extends State<AccountSettingsView> {
                 ),
               ),
             ),
+            const SizedBox(height: 32),
+
+            // --- APP VERSION ---
+            Center(
+              child: FutureBuilder<PackageInfo>(
+                future: PackageInfo.fromPlatform(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) return const SizedBox();
+
+                  final version = snapshot.data!.version;
+                  final buildNumber = snapshot.data!.buildNumber;
+
+                  return Text(
+                    'v$version ($buildNumber)',
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      color: AppTheme.mediumGray.withValues(alpha: 0.5),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  );
+                },
+              ),
+            ),
+
             const SizedBox(height: 20),
           ],
         ),

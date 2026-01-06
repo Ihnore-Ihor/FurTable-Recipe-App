@@ -45,6 +45,12 @@ class AppTheme {
         selectionHandleColor: darkCharcoal,
       ),
 
+      // Styles the Flutter text selection menu (toolbar).
+      cardTheme: const CardThemeData(
+        color: darkCharcoal,
+        surfaceTintColor: Colors.transparent,
+      ),
+
       appBarTheme: AppBarTheme(
         backgroundColor: offWhite,
         elevation: 0,

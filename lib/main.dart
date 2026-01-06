@@ -1,5 +1,4 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:furtable/features/explore/screens/explore_screen.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -38,10 +37,12 @@ Future<void> main() async {
       final storage = LocalStorageService();
       await storage.init();
 
-      // Enable native browser context menu (right-click) on Web.
+      // Reverted to Flutter's native selection menu for better styling control.
+      /*
       if (kIsWeb) {
         await BrowserContextMenu.enableContextMenu();
       }
+      */
 
       // --- OPTIMIZATION: PRE-CACHE ---
       // Load critical images into memory to prevent UI flickering.
@@ -63,9 +64,7 @@ Future<void> main() async {
       runApp(
         MultiBlocProvider(
           providers: [
-            BlocProvider<FavoritesBloc>(
-              create: (context) => FavoritesBloc(),
-            ),
+            BlocProvider<FavoritesBloc>(create: (context) => FavoritesBloc()),
             BlocProvider(create: (_) => LocaleCubit()),
           ],
           child: const MyApp(),
@@ -103,10 +102,7 @@ class MyApp extends StatelessWidget {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          supportedLocales: const [
-            Locale('en'),
-            Locale('uk'),
-          ],
+          supportedLocales: const [Locale('en'), Locale('uk')],
           home: const ExploreScreen(),
         );
       },
