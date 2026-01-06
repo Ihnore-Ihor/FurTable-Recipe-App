@@ -21,11 +21,13 @@
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="Create and share recipes">
 
-  <!-- iOS meta tags & icons -->
+  <!-- iOS PWA Settings -->
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="FurTable">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- IMPORTANT: Link to new 180x180 icon -->
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png" />
@@ -56,6 +58,16 @@
       overflow: hidden;
     }
 
+    /* Hide native browser selection, 
+       so only our custom Flutter one remains */
+    ::selection {
+      background: transparent;
+    }
+
+    ::-moz-selection {
+      background: transparent;
+    }
+
     #splash-container {
       position: fixed;
       top: 0;
@@ -82,33 +94,33 @@
       animation: breathe 3s infinite ease-in-out;
     }
 
-    /* Обгортка, щоб курсор не стрибав */
+    /* Wrapper to prevent cursor jumping */
     .typewriter {
       display: inline-block;
     }
 
     .splash-text {
       font-family: 'Inter', 'Courier New', Courier, monospace;
-      /* Обов'язково моноширинний! */
+      /* Must be monospace! */
       font-size: 24px;
       font-weight: bold;
       color: #2C2C2C;
       letter-spacing: 2px;
 
       overflow: hidden;
-      /* Ховаємо те, що ще не написали */
+      /* Hide what hasn't been written yet */
       white-space: nowrap;
-      /* Забороняємо перенос рядків */
+      /* Prevent line wrapping */
       border-right: 3px solid #2C2C2C;
-      /* Курсор */
+      /* Cursor */
 
       width: 0;
-      /* Початковий стан - 0 символів */
+      /* Initial state - 0 characters */
 
-      /* Анімація:
-         typing: змінює ширину від 0 до 9ch.
-         steps(8): "FurTable" має 8 букв. Ми робимо 8 кроків.
-         forwards: залишаємо текст на екрані після завершення.
+      /* Animation:
+         typing: changes width from 0 to 9ch.
+         steps(8): "FurTable" has 8 letters. We take 8 steps.
+         forwards: keep text on screen after completion.
       */
       animation:
         typing 1.5s steps(8, end) forwards,
@@ -147,7 +159,7 @@
         width: 0;
       }
 
-      /* 8ch - це ширина 8 букв. Додаємо трохи запасу (0.5ch), щоб курсор не прилипав */
+      /* 8ch - is the width of 8 letters. Add a little buffer (0.5ch) so cursor doesn't stick */
       to {
         width: 9ch;
       }
@@ -180,7 +192,7 @@
     <div class="splash-logo"></div>
 
     <div class="typewriter">
-      <!-- Текст має бути без пробілів навколо, щоб steps працював точно -->
+      <!-- Text must be without spaces around for steps to work accurately -->
       <div class="splash-text">FurTable</div>
     </div>
 
