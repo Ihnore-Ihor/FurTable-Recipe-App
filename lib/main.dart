@@ -17,7 +17,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:furtable/l10n/app_localizations.dart';
 import 'package:furtable/core/bloc/locale/locale_cubit.dart';
 import 'package:furtable/core/utils/splash_handler.dart';
-import 'package:furtable/core/utils/no_toolbar.dart';
 
 /// The entry point of the application.
 ///
