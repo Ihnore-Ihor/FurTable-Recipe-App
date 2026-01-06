@@ -23,7 +23,15 @@ class AppTheme {
   /// Configures the font family, scaffold background color, app bar,
   /// text theme, and bottom navigation bar.
   static ThemeData get theme {
-    final baseTheme = ThemeData(fontFamily: GoogleFonts.inter().fontFamily);
+    final baseTheme = ThemeData(
+      fontFamily: GoogleFonts.inter().fontFamily,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: darkCharcoal,
+        primary: darkCharcoal,
+        secondary: darkCharcoal,
+        surface: offWhite,
+      ),
+    );
 
     return baseTheme.copyWith(
       scaffoldBackgroundColor: offWhite,
