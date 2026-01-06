@@ -59,28 +59,42 @@
     }
 
     /* 1. Робимо нативне виділення тексту повністю прозорим */
+    /* 1. Standard */
     ::selection {
       background-color: transparent !important;
       color: inherit !important;
     }
 
+    /* 2. Firefox */
     ::-moz-selection {
       background-color: transparent !important;
       color: inherit !important;
     }
 
-    /* 2. Те саме для полів вводу (Input/Textarea) */
+    /* 3. iOS Safari & Chrome (ВАЖЛИВО) */
+    ::-webkit-selection {
+      background-color: transparent !important;
+      color: inherit !important;
+    }
+
+    /* 4. Прибираємо синій колір курсору/виділення в полях вводу на iOS */
+    input,
+    textarea {
+      caret-color: #2C2C2C !important;
+      /* Твій darkCharcoal */
+    }
+
     input::selection,
     textarea::selection {
       background-color: transparent !important;
       color: inherit !important;
-      /* Прибираємо синій колір тексту при виділенні на iOS */
       -webkit-text-fill-color: inherit !important;
     }
 
-    /* 3. Прибираємо колір натискання (Tap Highlight) */
+    /* 5. Clean UI: remove highlight on tap */
     * {
       -webkit-tap-highlight-color: transparent !important;
+      outline: none !important;
     }
 
 

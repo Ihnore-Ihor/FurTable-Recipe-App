@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 /// This allows the native browser context menu to be used without
 /// overlapping with Flutter's own selection menu.
 class NoToolbar extends MaterialTextSelectionControls {
-  // Не малюємо тулбар (меню "Copy/Paste" від Flutter)
+  // 1. Повертаємо пустий віджет замість меню. 
+  // Це дозволяє нативному меню браузера з'явитися без перешкод.
   @override
   Widget buildToolbar(
     BuildContext context,
@@ -17,19 +18,6 @@ class NoToolbar extends MaterialTextSelectionControls {
     ValueListenable<ClipboardStatus>? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
-    return const SizedBox.shrink(); // Повертаємо пустий віджет
-  }
-
-  // Не малюємо "ручки" (крапельки) від Flutter, 
-  // якщо хочемо покладатися на нативні (але на Web Flutter малює їх на Canvas, 
-  // тому краще їх залишити, щоб користувач бачив, що він виділяє).
-  // Якщо залишити код нижче закоментованим - будуть Flutter-ручки (чорні).
-  // Якщо розкоментувати - ручок не буде видно (але нативні невидимі теж).
-  
-  /*
-  @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
     return const SizedBox.shrink();
   }
-  */
 }
