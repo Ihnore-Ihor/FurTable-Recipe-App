@@ -76,7 +76,8 @@ class _EditProfileViewState extends State<EditProfileView> {
   void _showAvatarPicker() {
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true, // Allows stretching the bottom sheet to full screen height.
+      isScrollControlled:
+          true, // Allows stretching the bottom sheet to full screen height.
       useSafeArea: true, // Accounts for device notch and status bar.
       backgroundColor: AppTheme.offWhite,
       builder: (context) {
@@ -180,7 +181,7 @@ class _EditProfileViewState extends State<EditProfileView> {
       },
       child: Scaffold(
         backgroundColor: AppTheme.offWhite,
-        resizeToAvoidBottomInset: false, 
+        resizeToAvoidBottomInset: true,
         appBar: AppBar(
           title: Text(AppLocalizations.of(context)!.editProfile),
           centerTitle: true,
@@ -254,8 +255,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                  color:
-                                      _selectedAvatarPath != _initialAvatar
+                                  color: _selectedAvatarPath != _initialAvatar
                                       ? AppTheme.darkCharcoal
                                       : Colors.grey.shade400,
                                   width: 2,
@@ -337,6 +337,8 @@ class _EditProfileViewState extends State<EditProfileView> {
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _nicknameController,
+                  maxLength: 50,
+                  autofillHints: null,
                   validator: (val) => val!.trim().isEmpty
                       ? AppLocalizations.of(context)!.nicknameEmpty
                       : null,

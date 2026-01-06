@@ -114,7 +114,7 @@ class _ChangePasswordViewState extends State<ChangePasswordView> {
       },
       child: Scaffold(
         backgroundColor: AppTheme.offWhite,
-        resizeToAvoidBottomInset: false, 
+        resizeToAvoidBottomInset: true,
         appBar: AppBar(
           title: Text(AppLocalizations.of(context)!.changePassword),
           centerTitle: true,
