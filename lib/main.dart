@@ -15,6 +15,7 @@ import 'package:furtable/core/env/env.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:furtable/l10n/app_localizations.dart';
 import 'package:furtable/core/bloc/locale/locale_cubit.dart';
+import 'package:furtable/core/utils/splash_handler.dart';
 
 /// The entry point of the application.
 ///
@@ -64,6 +65,11 @@ Future<void> main() async {
           child: const MyApp(),
         ),
       );
+
+      // --- REMOVE WEB SPLASH ---
+      // Give Flutter a moment to render the first frame.
+      await Future.delayed(const Duration(milliseconds: 500));
+      SplashHandler.remove();
     },
   );
 }
