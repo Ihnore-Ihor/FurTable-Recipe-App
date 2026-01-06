@@ -59,42 +59,36 @@
     }
 
     /* 1. Робимо нативне виділення тексту повністю прозорим */
-    /* 1. Standard */
+    /* Налаштовуємо НАТИВНЕ виділення браузера під наш стиль */
     ::selection {
-      background-color: transparent !important;
-      color: inherit !important;
+      background-color: #2C2C2C !important;
+      /* Наш darkCharcoal */
+      color: #FFFFFF !important;
+      /* Білий текст при виділенні */
     }
 
-    /* 2. Firefox */
     ::-moz-selection {
-      background-color: transparent !important;
-      color: inherit !important;
+      background-color: #2C2C2C !important;
+      color: #FFFFFF !important;
     }
 
-    /* 3. iOS Safari & Chrome (ВАЖЛИВО) */
-    ::-webkit-selection {
-      background-color: transparent !important;
-      color: inherit !important;
+    /* Для полів вводу на iOS */
+    input::selection,
+    textarea::selection {
+      background-color: #2C2C2C !important;
+      color: #FFFFFF !important;
+      -webkit-text-fill-color: #FFFFFF !important;
     }
 
-    /* 4. Прибираємо синій колір курсору/виділення в полях вводу на iOS */
+    /* Колір каретки (курсора) на iOS */
     input,
     textarea {
       caret-color: #2C2C2C !important;
-      /* Твій darkCharcoal */
     }
 
-    input::selection,
-    textarea::selection {
-      background-color: transparent !important;
-      color: inherit !important;
-      -webkit-text-fill-color: inherit !important;
-    }
-
-    /* 5. Clean UI: remove highlight on tap */
+    /* Прибираємо підсвітку тапу, бо Flutter має свій InkWell */
     * {
       -webkit-tap-highlight-color: transparent !important;
-      outline: none !important;
     }
 
 

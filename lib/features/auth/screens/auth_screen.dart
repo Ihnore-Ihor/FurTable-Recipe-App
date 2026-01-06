@@ -8,7 +8,6 @@ import 'package:furtable/core/utils/avatar_helper.dart';
 import 'package:furtable/l10n/app_localizations.dart';
 import 'package:furtable/features/explore/screens/explore_screen.dart';
 import 'package:furtable/features/profile/repositories/user_repository.dart';
-import 'package:furtable/core/utils/no_toolbar.dart';
 import 'package:flutter/services.dart';
 
 /// The authentication screen handling both login and registration.
@@ -715,7 +714,6 @@ class _AuthScreenState extends State<AuthScreen> {
   }) {
     return TextFormField(
       controller: controller,
-      selectionControls: NoToolbar(),
       obscureText: isPassword && !_isPasswordVisible,
       autofillHints: autofillHints,
       validator: validator,

@@ -41,8 +41,9 @@ class AppTheme {
 
       textSelectionTheme: TextSelectionThemeData(
         cursorColor: darkCharcoal,
-        selectionColor: darkCharcoal.withValues(alpha: 0.3),
-        selectionHandleColor: darkCharcoal,
+        // Сховати виділення Flutter (малюватиме браузер)
+        selectionColor: Colors.transparent,
+        selectionHandleColor: Colors.transparent,
       ),
 
       // Styles the Flutter text selection menu (toolbar).

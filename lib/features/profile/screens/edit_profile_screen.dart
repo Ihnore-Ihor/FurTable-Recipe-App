@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/core/utils/avatar_helper.dart';
-import 'package:furtable/core/utils/no_toolbar.dart';
 import 'package:furtable/core/widgets/scrollable_form_body.dart';
 import 'package:furtable/features/profile/bloc/profile_bloc.dart';
 import 'package:furtable/features/profile/bloc/profile_event.dart';
@@ -338,7 +337,6 @@ class _EditProfileViewState extends State<EditProfileView> {
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _nicknameController,
-                  selectionControls: NoToolbar(),
                   maxLength: 50,
                   autofillHints: null,
                   validator: (val) => val!.trim().isEmpty
@@ -372,7 +370,6 @@ class _EditProfileViewState extends State<EditProfileView> {
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _emailController,
-                  selectionControls: NoToolbar(),
                   enabled: false,
                   style: const TextStyle(
                     color: AppTheme.mediumGray,
