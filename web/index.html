@@ -21,11 +21,13 @@
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="Create and share recipes">
 
-  <!-- iOS meta tags & icons -->
+  <!-- iOS PWA Settings -->
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="FurTable">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- ВАЖЛИВО: Посилання на нову іконку 180x180 -->
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png" />
@@ -54,6 +56,16 @@
       justify-content: center;
       align-items: center;
       overflow: hidden;
+    }
+
+    /* Приховуємо нативне виділення браузера, 
+       щоб залишилося тільки наше кастомне від Flutter */
+    ::selection {
+      background: transparent;
+    }
+
+    ::-moz-selection {
+      background: transparent;
     }
 
     #splash-container {
