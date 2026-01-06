@@ -17,6 +17,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:furtable/l10n/app_localizations.dart';
 import 'package:furtable/core/bloc/locale/locale_cubit.dart';
 import 'package:furtable/core/utils/splash_handler.dart';
+import 'package:furtable/core/utils/no_toolbar.dart';
 
 /// The entry point of the application.
 ///
@@ -39,9 +40,8 @@ Future<void> main() async {
       await storage.init();
 
       // Enable native browser context menu (right-click) on Web.
-      // Disable the browser context menu to prevent conflicts with Flutter's custom selection menu.
       if (kIsWeb) {
-        await BrowserContextMenu.disableContextMenu();
+        await BrowserContextMenu.enableContextMenu();
       }
 
       // --- OPTIMIZATION: PRE-CACHE ---
@@ -103,6 +103,22 @@ class MyApp extends StatelessWidget {
             GlobalCupertinoLocalizations.delegate,
           ],
           supportedLocales: const [Locale('en'), Locale('uk')],
+          builder: (context, child) {
+            return Theme(
+              data: Theme.of(context).copyWith(
+                textSelectionTheme: TextSelectionThemeData(
+                  cursorColor: AppTheme.darkCharcoal,
+                  selectionColor: AppTheme.darkCharcoal.withValues(alpha: 0.3),
+                  selectionHandleColor: AppTheme.darkCharcoal,
+                ),
+              ),
+              child: DefaultSelectionStyle(
+                selectionColor: AppTheme.darkCharcoal.withValues(alpha: 0.3),
+                cursorColor: AppTheme.darkCharcoal,
+                child: child!,
+              ),
+            );
+          },
           home: const ExploreScreen(),
         );
       },

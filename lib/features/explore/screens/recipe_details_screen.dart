@@ -7,6 +7,7 @@ import 'package:furtable/core/app_theme.dart';
 import 'package:furtable/core/utils/auth_helper.dart';
 import 'package:furtable/core/utils/avatar_helper.dart';
 import 'package:furtable/core/utils/duration_helper.dart';
+import 'package:furtable/core/utils/no_toolbar.dart';
 import 'package:furtable/core/widgets/app_image.dart';
 import 'package:furtable/features/explore/models/recipe_model.dart';
 import 'package:furtable/features/favorites/bloc/favorites_bloc.dart';
@@ -149,6 +150,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                         // Recipe Title
                         SelectableText(
                           recipe.title,
+                          selectionControls: NoToolbar(),
                           style: const TextStyle(
                             fontFamily: 'Inter',
                             fontSize: 28,
@@ -184,6 +186,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                             Expanded(
                               child: SelectableText(
                                 AppLocalizations.of(context)!.byAuthor(recipe.authorName),
+                                selectionControls: NoToolbar(),
                                 style: const TextStyle(
                                   fontFamily: 'Inter',
                                   fontSize: 18,
@@ -209,6 +212,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                             const SizedBox(width: 8),
                             SelectableText(
                               DurationHelper.format(context, recipe.timeMinutes),
+                              selectionControls: NoToolbar(),
                               style: const TextStyle(
                                 fontFamily: 'Inter',
                                 fontSize: 16,
@@ -250,6 +254,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                           recipe.description.isNotEmpty
                               ? recipe.description
                               : AppLocalizations.of(context)!.noDescription,
+                          selectionControls: NoToolbar(),
                           style: const TextStyle(
                             fontFamily: 'Inter',
                             fontSize: 16,
@@ -337,6 +342,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                                     opacity: isDone ? 0.5 : 1.0,
                                     child: SelectableText(
                                       ingredient,
+                                      selectionControls: NoToolbar(),
                                       style: TextStyle(
                                         fontFamily: 'Inter',
                                         fontSize: 17,
@@ -444,6 +450,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                                         const SizedBox(height: 4),
                                         SelectableText(
                                           step,
+                                          selectionControls: NoToolbar(),
                                           style: TextStyle(
                                             fontFamily: 'Inter',
                                             fontSize: 17,

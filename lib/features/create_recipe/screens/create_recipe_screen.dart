@@ -13,6 +13,7 @@ import 'package:furtable/features/create_recipe/bloc/create_recipe_state.dart';
 import 'package:furtable/features/explore/models/recipe_model.dart';
 import 'package:furtable/core/services/local_storage_service.dart';
 import 'package:furtable/core/utils/duration_helper.dart';
+import 'package:furtable/core/utils/no_toolbar.dart';
 import 'package:furtable/l10n/app_localizations.dart';
 
 class CreateRecipeScreen extends StatelessWidget {
@@ -723,6 +724,7 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
       maxLength: maxLength,
       minLines: (maxLines ?? 1) > 1 ? 3 : 1,
       validator: validator,
+      selectionControls: NoToolbar(),
       inputFormatters: inputFormatters,
       keyboardType: keyboardType,
       autofillHints: autofillHints,
