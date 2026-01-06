@@ -58,16 +58,20 @@
       overflow: hidden;
     }
 
-    /* Hide native browser selection, 
-       so only our custom Flutter one remains */
-    *::selection {
+    /* Hide native browser selection, so only our custom Flutter one remains */
+    ::selection {
       background-color: transparent !important;
       color: inherit !important;
     }
-    
-    *::-moz-selection {
+
+    ::-moz-selection {
       background-color: transparent !important;
       color: inherit !important;
+    }
+
+    /* Additional for mobile */
+    * {
+      -webkit-tap-highlight-color: transparent;
     }
 
     #splash-container {
