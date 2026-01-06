@@ -39,10 +39,12 @@ class AppTheme {
       splashColor: Colors.transparent,
       highlightColor: Colors.transparent,
 
-      textSelectionTheme: TextSelectionThemeData(
-        cursorColor: darkCharcoal,
-        // Сховати виділення Flutter (малюватиме браузер)
+      textSelectionTheme: const TextSelectionThemeData(
+        // Курсор Flutter стає невидимим (ми бачимо тільки CSS-курсор)
+        cursorColor: Colors.transparent,
+        // Виділення Flutter стає невидимим (ми бачимо тільки CSS-виділення)
         selectionColor: Colors.transparent,
+        // Ручки (крапельки) Flutter стає невидимим (на iOS/Android будуть нативні)
         selectionHandleColor: Colors.transparent,
       ),
 
