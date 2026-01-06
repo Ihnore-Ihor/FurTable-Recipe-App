@@ -60,12 +60,14 @@
 
     /* Hide native browser selection, 
        so only our custom Flutter one remains */
-    ::selection {
-      background: transparent;
+    *::selection {
+      background-color: transparent !important;
+      color: inherit !important;
     }
-
-    ::-moz-selection {
-      background: transparent;
+    
+    *::-moz-selection {
+      background-color: transparent !important;
+      color: inherit !important;
     }
 
     #splash-container {
