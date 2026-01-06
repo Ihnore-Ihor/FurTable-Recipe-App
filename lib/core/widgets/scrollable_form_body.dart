@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:furtable/core/app_theme.dart';
 
 /// A wrapper widget that provides a scrollable body for forms.
 ///
@@ -20,25 +21,24 @@ class ScrollableFormBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Get the height of the software keyboard.
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-
     return LayoutBuilder(
       builder: (context, constraints) {
-        return Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600),
-            child: SingleChildScrollView(
-              // Add bottom padding for the keyboard plus a 40px buffer.
-              padding: padding.add(EdgeInsets.only(bottom: bottomInset + 40)),
+        // 1. The ScrollView is the primary container, occupying 100% width and height.
+        return SingleChildScrollView(
+          // Allows scrolling even if the content is shorter than the screen.
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Container(
+            // Ensures the container inside the scrollable area fills at least the available screen height.
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            color: AppTheme.offWhite, // Background color for the entire screen.
+            width: double
+                .infinity, // Expand width to ensure the entire screen remains scrollable.
+            // 2. Center the content within the scrollable area.
+            child: Center(
               child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  // Ensure the content occupies at least the full screen height.
-                  minHeight: constraints.maxHeight,
-                ),
-                child: IntrinsicHeight(
-                  child: child,
-                ),
+                // 3. Limit the maximum width of the content for better readability on large screens.
+                constraints: const BoxConstraints(maxWidth: 600),
+                child: Padding(padding: padding, child: child),
               ),
             ),
           ),

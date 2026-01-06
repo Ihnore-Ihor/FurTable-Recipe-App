@@ -42,10 +42,154 @@
 </head>
 
 <body>
-  <!-- 1. Include heic2any library -->
-  <script src="heic2any.min.js" type="application/javascript"></script>
+  <!-- --- SPLASH SCREEN START --- -->
+  <style>
+    body {
+      background-color: #F5F5F5;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
 
-  <!-- 2. Helper function for Flutter (from heckofaheic docs) -->
+    #splash-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      background-color: #F5F5F5;
+      transition: opacity 0.5s ease-out;
+    }
+
+    .splash-logo {
+      width: 220px;
+      height: 220px;
+      background-image: url('splash_logo.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      margin-bottom: 20px;
+      animation: breathe 3s infinite ease-in-out;
+    }
+
+    /* Обгортка, щоб курсор не стрибав */
+    .typewriter {
+      display: inline-block;
+    }
+
+    .splash-text {
+      font-family: 'Inter', 'Courier New', Courier, monospace;
+      /* Обов'язково моноширинний! */
+      font-size: 24px;
+      font-weight: bold;
+      color: #2C2C2C;
+      letter-spacing: 2px;
+
+      overflow: hidden;
+      /* Ховаємо те, що ще не написали */
+      white-space: nowrap;
+      /* Забороняємо перенос рядків */
+      border-right: 3px solid #2C2C2C;
+      /* Курсор */
+
+      width: 0;
+      /* Початковий стан - 0 символів */
+
+      /* Анімація:
+         typing: змінює ширину від 0 до 9ch.
+         steps(8): "FurTable" має 8 букв. Ми робимо 8 кроків.
+         forwards: залишаємо текст на екрані після завершення.
+      */
+      animation:
+        typing 1.5s steps(8, end) forwards,
+        blink 0.75s step-end infinite;
+    }
+
+    .splash-loader {
+      margin-top: 30px;
+      width: 30px;
+      height: 30px;
+      border: 3px solid #e0e0e0;
+      border-top: 3px solid #2C2C2C;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes breathe {
+      0% {
+        transform: scale(1);
+        opacity: 0.9;
+      }
+
+      50% {
+        transform: scale(1.05);
+        opacity: 1;
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 0.9;
+      }
+    }
+
+    @keyframes typing {
+      from {
+        width: 0;
+      }
+
+      /* 8ch - це ширина 8 букв. Додаємо трохи запасу (0.5ch), щоб курсор не прилипав */
+      to {
+        width: 9ch;
+      }
+    }
+
+    @keyframes blink {
+
+      from,
+      to {
+        border-color: transparent;
+      }
+
+      50% {
+        border-color: #2C2C2C;
+      }
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+
+  <div id="splash-container">
+    <div class="splash-logo"></div>
+
+    <div class="typewriter">
+      <!-- Текст має бути без пробілів навколо, щоб steps працював точно -->
+      <div class="splash-text">FurTable</div>
+    </div>
+
+    <div class="splash-loader"></div>
+  </div>
+  <!-- --- SPLASH SCREEN END --- -->
+
+  <!-- Existing scripts -->
+  <script src="heic2any.min.js" type="application/javascript"></script>
   <script>
     function executeHeic2any(blob, multiple, toType, quality, gifInterval) {
       return heic2any({
@@ -63,7 +207,7 @@
   <script>
     // Your web app's Firebase configuration
     var firebaseConfig = {
-      apiKey: "AIzaSyCInx-HkXQYzfpzY1A9e37zHtSdAdQUuoQ",
+      apiKey: "AIzaSyC7QIB2ygn7fdapar2GmKvtsXKUzRBJL0s",
       authDomain: "furtable.firebaseapp.com",
       projectId: "furtable",
       storageBucket: "furtable.firebasestorage.app",

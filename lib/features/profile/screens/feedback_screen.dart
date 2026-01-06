@@ -64,7 +64,9 @@ class _FeedbackViewState extends State<FeedbackView> {
         } else if (state is FeedbackFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(AppLocalizations.of(context)!.feedbackError(state.error)),
+              content: Text(
+                AppLocalizations.of(context)!.feedbackError(state.error),
+              ),
               backgroundColor: Colors.redAccent,
             ),
           );
@@ -72,7 +74,7 @@ class _FeedbackViewState extends State<FeedbackView> {
       },
       child: Scaffold(
         backgroundColor: AppTheme.offWhite,
-        resizeToAvoidBottomInset: false, 
+        resizeToAvoidBottomInset: true,
         appBar: AppBar(
           title: Text(AppLocalizations.of(context)!.sendFeedback),
           leading: IconButton(
@@ -97,7 +99,8 @@ class _FeedbackViewState extends State<FeedbackView> {
               const SizedBox(height: 16),
 
               Container(
-                height: 200, // Fixed height provides consistent layout during keyboard interaction.
+                height:
+                    200, // Fixed height provides consistent layout during keyboard interaction.
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
@@ -109,8 +112,7 @@ class _FeedbackViewState extends State<FeedbackView> {
                   maxLength: 1000,
                   style: const TextStyle(color: AppTheme.darkCharcoal),
                   decoration: InputDecoration(
-                    hintText:
-                        AppLocalizations.of(context)!.feedbackHint,
+                    hintText: AppLocalizations.of(context)!.feedbackHint,
                     hintStyle: TextStyle(color: AppTheme.mediumGray),
                     contentPadding: EdgeInsets.all(16),
                     border: InputBorder.none,

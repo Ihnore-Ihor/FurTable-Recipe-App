@@ -450,7 +450,7 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       body: ScrollableFormBody(
         padding: EdgeInsets.zero,
         child: Column(children: [_buildTopSection(), _buildBottomSection()]),
