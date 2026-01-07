@@ -400,6 +400,27 @@ class AppLocalizationsUk extends AppLocalizations {
   String get cancel => 'Скасувати';
 
   @override
+  String get copied => 'скопійовано';
+
+  @override
+  String get titleLabel => 'Назву';
+
+  @override
+  String get authorLabel => 'Ім\'я автора';
+
+  @override
+  String get timeLabel => 'Час готування';
+
+  @override
+  String get descLabel => 'Опис';
+
+  @override
+  String get ingredientsLabel => 'Список інгредієнтів';
+
+  @override
+  String get instructionsLabel => 'Список інструкцій';
+
+  @override
   String get delete => 'Видалити';
 
   @override
@@ -487,6 +508,13 @@ class AppLocalizationsUk extends AppLocalizations {
   @override
   String get faqA_profile =>
       'Так, перейдіть у Профіль > Редагувати профіль та натисніть на поточний аватар, щоб обрати нового персонажа.';
+
+  @override
+  String get faqQ_copy => 'Як скопіювати текст?';
+
+  @override
+  String get faqA_copy =>
+      'Просто натисніть на текст (Назва, Автор, Час, Опис), щоб скопіювати його. Для інгредієнтів та інструкцій використовуйте кнопку копіювання біля заголовка.';
 
   @override
   String get faqQ_legoshi => 'Чому вовк дивиться на мене при завантаженні?';

@@ -1,27 +1,24 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
-import 'package:furtable/features/explore/screens/explore_screen.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'firebase_options.dart';
+import 'package:flutter/foundation.dart'; // For kIsWeb
 import 'package:flutter/material.dart';
-import 'package:furtable/core/app_theme.dart';
-import 'package:furtable/features/auth/screens/auth_screen.dart';
-import 'package:furtable/core/services/local_storage_service.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:flutter/services.dart'; // For BrowserContextMenu
+import 'package:flutter/gestures.dart'; // For ScrollBehavior
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:furtable/features/favorites/bloc/favorites_bloc.dart';
-import 'package:furtable/core/env/env.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:furtable/l10n/app_localizations.dart';
-import 'package:furtable/core/bloc/locale/locale_cubit.dart';
-import 'package:furtable/core/utils/splash_handler.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
-/// The entry point of the application.
-///
-/// Initializes Sentry for error tracking, Firebase for backend services,
-/// and runs the [MyApp] widget.
+import 'package:furtable/core/app_theme.dart';
+import 'package:furtable/core/bloc/locale/locale_cubit.dart';
+import 'package:furtable/core/env/env.dart';
+import 'package:furtable/core/services/local_storage_service.dart';
+import 'package:furtable/features/explore/screens/explore_screen.dart';
+import 'package:furtable/features/favorites/bloc/favorites_bloc.dart';
+import 'package:furtable/l10n/app_localizations.dart';
+
+import 'package:furtable/core/utils/splash_handler.dart'; // Keep portable splash handler
+
 Future<void> main() async {
   await SentryFlutter.init(
     (options) {
@@ -30,62 +27,64 @@ Future<void> main() async {
     },
     appRunner: () async {
       WidgetsFlutterBinding.ensureInitialized();
+      
+      // Firebase initialization
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
 
-      // 1. Initialize local storage
+      // Local Storage initialization
       final storage = LocalStorageService();
       await storage.init();
 
-      // Enable native browser context menu (right-click) on Web.
-      if (kIsWeb) {
-        await BrowserContextMenu.enableContextMenu();
-      }
-
-      // --- OPTIMIZATION: PRE-CACHE ---
-      // Load critical images into memory to prevent UI flickering.
+      // Precache images (to prevent flickering)
       // ignore: unawaited_futures
       Future.wait([
         _precacheImage('assets/images/legoshi_eating_auth.png'),
         _precacheImage('assets/images/legoshi_loading.png'),
         _precacheImage('assets/images/haru_eating_en.png'),
+        _precacheImage('assets/images/haru_eating_uk.png'),
         _precacheImage('assets/images/gohin_empty.png'),
+        _precacheImage('assets/images/jack_writing.png'),
       ]);
 
-      // 2. Clear cache if auto-clear is enabled.
-      if (storage.isAutoClearEnabled) {
-        await DefaultCacheManager().emptyCache();
+      // Enable native browser menu (for copy/paste)
+      if (kIsWeb) {
+        await BrowserContextMenu.enableContextMenu();
       }
 
       await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
-
+      
       runApp(
         MultiBlocProvider(
           providers: [
-            BlocProvider<FavoritesBloc>(
-              create: (context) => FavoritesBloc(),
+            // Global Favorites bloc
+            BlocProvider(
+              create: (_) => FavoritesBloc(), // Constructor will start the Auth listener itself
             ),
+            // Global Locale bloc
             BlocProvider(create: (_) => LocaleCubit()),
           ],
           child: const MyApp(),
         ),
       );
 
-      // --- REMOVE WEB SPLASH ---
-      // Give Flutter a moment to render the first frame.
+      // Remove splash screen
       await Future.delayed(const Duration(milliseconds: 500));
       SplashHandler.remove();
     },
   );
 }
 
-/// The root widget of the application.
-///
-/// Configures the [MaterialApp] with the app theme and sets the
-/// [AuthScreen] as the home screen.
+Future<void> _precacheImage(String path) async {
+  try {
+    await rootBundle.load(path);
+  } catch (e) {
+    // Ignore precache errors
+  }
+}
+
 class MyApp extends StatelessWidget {
-  /// Creates a [MyApp] instance.
   const MyApp({super.key});
 
   @override
@@ -96,6 +95,8 @@ class MyApp extends StatelessWidget {
           title: 'FurTable',
           theme: AppTheme.theme,
           debugShowCheckedModeBanner: false,
+
+          // Localization
           locale: locale,
           localizationsDelegates: const [
             AppLocalizations.delegate,
@@ -107,20 +108,25 @@ class MyApp extends StatelessWidget {
             Locale('en'),
             Locale('uk'),
           ],
+
+          // Desktop scroll settings (mouse)
+          scrollBehavior: const MaterialScrollBehavior().copyWith(
+            dragDevices: {
+              PointerDeviceKind.mouse,
+              PointerDeviceKind.touch,
+              PointerDeviceKind.stylus,
+              PointerDeviceKind.unknown,
+            },
+          ),
+
+          // --- MAIN CHANGE HERE ---
+          // Removed StreamBuilder. 
+          // Now we always start with the main feed.
+          // If the user is logged in, the BLoC will see this and show data.
+          // If not, the BLoC and screens will show guest mode.
           home: const ExploreScreen(),
         );
       },
     );
-  }
-}
-
-/// Pre-caches an image by loading it via [rootBundle].
-///
-/// This is used to warm up the image cache for local assets.
-Future<void> _precacheImage(String path) async {
-  try {
-    await rootBundle.load(path);
-  } catch (e) {
-    debugPrint('Failed to precache $path: $e');
   }
 }

@@ -2,75 +2,38 @@
 <html>
 
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="Create and share recipes">
+  <meta name="description" content="FurTable - Recipe App">
 
-  <!-- iOS PWA Settings -->
+  <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="FurTable">
-
-  <!-- IMPORTANT: Link to new 180x180 icon -->
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="icon" type="image/png" href="favicon.png?v=2" />
 
   <title>FurTable</title>
   <link rel="manifest" href="manifest.json">
 
-  <!-- The core Firebase JS SDK is always required and must be listed first -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-
-  <!-- Add SDKs for Firebase products that you want to use -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-analytics.js"></script>
-</head>
-
-<body>
-  <!-- --- SPLASH SCREEN START --- -->
   <style>
+    /* --- 1. SPLASH SCREEN SETTINGS --- */
     body {
       background-color: #F5F5F5;
       margin: 0;
       padding: 0;
       height: 100vh;
       width: 100vw;
-      display: flex;
-      justify-content: center;
-      align-items: center;
       overflow: hidden;
-    }
-
-    /* Hide native browser selection, so only our custom Flutter one remains */
-    ::selection {
-      background-color: transparent !important;
-      color: inherit !important;
-    }
-
-    ::-moz-selection {
-      background-color: transparent !important;
-      color: inherit !important;
-    }
-
-    /* Additional for mobile */
-    * {
+      font-family: 'Courier New', Courier, monospace;
+      /* Prevent UI selection (buttons, images), 
+         but DO NOT affect input/textarea */
+      -webkit-user-select: none;
+      user-select: none;
       -webkit-tap-highlight-color: transparent;
     }
 
@@ -90,8 +53,8 @@
     }
 
     .splash-logo {
-      width: 220px;
-      height: 220px;
+      width: 180px;
+      height: 180px;
       background-image: url('splash_logo.png');
       background-size: contain;
       background-repeat: no-repeat;
@@ -100,41 +63,25 @@
       animation: breathe 3s infinite ease-in-out;
     }
 
-    /* Wrapper to prevent cursor jumping */
-    .typewriter {
-      display: inline-block;
-    }
-
     .splash-text {
-      font-family: 'Inter', 'Courier New', Courier, monospace;
-      /* Must be monospace! */
       font-size: 24px;
       font-weight: bold;
       color: #2C2C2C;
       letter-spacing: 2px;
-
-      overflow: hidden;
-      /* Hide what hasn't been written yet */
       white-space: nowrap;
-      /* Prevent line wrapping */
       border-right: 3px solid #2C2C2C;
-      /* Cursor */
-
+      /* Typewriter cursor */
+      overflow: hidden;
       width: 0;
-      /* Initial state - 0 characters */
+      animation: typing 1.5s steps(8, end) forwards, blink 0.75s step-end infinite;
+    }
 
-      /* Animation:
-         typing: changes width from 0 to 9ch.
-         steps(8): "FurTable" has 8 letters. We take 8 steps.
-         forwards: keep text on screen after completion.
-      */
-      animation:
-        typing 1.5s steps(8, end) forwards,
-        blink 0.75s step-end infinite;
+    .loader-container {
+      margin-top: 30px;
+      height: 30px;
     }
 
     .splash-loader {
-      margin-top: 30px;
       width: 30px;
       height: 30px;
       border: 3px solid #e0e0e0;
@@ -165,66 +112,48 @@
         width: 0;
       }
 
-      /* 8ch - is the width of 8 letters. Add a little buffer (0.5ch) so cursor doesn't stick */
       to {
         width: 9ch;
       }
     }
 
     @keyframes blink {
-
-      from,
-      to {
-        border-color: transparent;
-      }
-
       50% {
-        border-color: #2C2C2C;
+        border-color: transparent;
       }
     }
 
     @keyframes spin {
-      0% {
-        transform: rotate(0deg);
-      }
-
       100% {
         transform: rotate(360deg);
       }
     }
-  </style>
 
+    /* --- 2. CONFLICT RESOLUTION --- */
+    /* IMPORTANT: We REMOVED all rules for input and textarea. 
+       Let Flutter handle the cursor and the browser manage input. 
+       This will fix "chaotic input" on Android. */
+  </style>
+</head>
+
+<body>
+  <!-- HTML SPINNER -->
   <div id="splash-container">
     <div class="splash-logo"></div>
-
-    <div class="typewriter">
-      <!-- Text must be without spaces around for steps to work accurately -->
+    <div style="display: inline-block;"> <!-- Wrapper for width stability -->
       <div class="splash-text">FurTable</div>
     </div>
-
-    <div class="splash-loader"></div>
+    <div class="loader-container">
+      <div class="splash-loader"></div>
+    </div>
   </div>
-  <!-- --- SPLASH SCREEN END --- -->
 
-  <!-- Existing scripts -->
-  <script src="heic2any.min.js" type="application/javascript"></script>
-  <script>
-    function executeHeic2any(blob, multiple, toType, quality, gifInterval) {
-      return heic2any({
-        blob,
-        multiple: multiple,
-        toType: toType,
-        quality: quality,
-        gifInterval: gifInterval
-      });
-    }
-  </script>
+  <!-- FIREBASE CONFIG -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
 
-  <script src="flutter_bootstrap.js" async></script>
-
-  <script>
-    // Your web app's Firebase configuration
-    var firebaseConfig = {
+    const firebaseConfig = {
       apiKey: "AIzaSyC7QIB2ygn7fdapar2GmKvtsXKUzRBJL0s",
       authDomain: "furtable.firebaseapp.com",
       projectId: "furtable",
@@ -233,10 +162,62 @@
       appId: "1:119425224593:web:edf5ca4ea2f5eb9fb35430",
       measurementId: "G-ZPD8D1J3F8"
     };
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    firebase.analytics();
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
   </script>
+
+  <!-- CLIPBOARD SCRIPT (Reliable) -->
+  <script>
+    window.copyToClipboard = function (text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).catch(err => {
+          fallbackCopyTextToClipboard(text);
+        });
+      } else {
+        fallbackCopyTextToClipboard(text);
+      }
+    }
+
+    function fallbackCopyTextToClipboard(text) {
+      var textArea = document.createElement("textarea");
+      textArea.value = text;
+
+      // IMPORTANT FOR iOS: Make the element editable so the keyboard doesn't jump,
+      // but hide it
+      textArea.contentEditable = true;
+      textArea.readOnly = false;
+      textArea.style.position = "absolute";
+      textArea.style.left = "-9999px";
+
+      document.body.appendChild(textArea);
+
+      // Specific selection for iOS
+      var range = document.createRange();
+      range.selectNodeContents(textArea);
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      textArea.setSelectionRange(0, 999999);
+
+      try {
+        document.execCommand('copy');
+      } catch (err) {
+        console.error('Fallback copy failed', err);
+      }
+      document.body.removeChild(textArea);
+    }
+  </script>
+
+  <!-- HEIC SCRIPT -->
+  <script src="heic2any.min.js" type="application/javascript"></script>
+  <script>
+    function executeHeic2any(blob, multiple, toType, quality, gifInterval) {
+      return heic2any({ blob, multiple, toType, quality, gifInterval });
+    }
+  </script>
+
+  <script src="flutter_bootstrap.js" async></script>
 </body>
 
 </html>
