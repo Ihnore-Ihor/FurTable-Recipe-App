@@ -33,8 +33,9 @@ class ScrollableFormBody extends StatelessWidget {
             color: AppTheme.offWhite, // Background color for the entire screen.
             width: double
                 .infinity, // Expand width to ensure the entire screen remains scrollable.
-            // 2. Center the content within the scrollable area.
-            child: Center(
+            // 2. Align the content to the top-center within the scrollable area.
+            child: Align(
+              alignment: Alignment.topCenter,
               child: ConstrainedBox(
                 // 3. Limit the maximum width of the content for better readability on large screens.
                 constraints: const BoxConstraints(maxWidth: 600),

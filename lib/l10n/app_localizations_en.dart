@@ -405,6 +405,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancel => 'Cancel';
 
   @override
+  String get copied => 'copied';
+
+  @override
+  String get titleLabel => 'Title';
+
+  @override
+  String get authorLabel => 'Author name';
+
+  @override
+  String get timeLabel => 'Cooking time';
+
+  @override
+  String get descLabel => 'Description';
+
+  @override
+  String get ingredientsLabel => 'Ingredients list';
+
+  @override
+  String get instructionsLabel => 'Instructions list';
+
+  @override
   String get delete => 'Delete';
 
   @override
@@ -491,6 +512,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get faqA_profile =>
       'Yes, go to Profile > Edit Profile and tap on your current avatar to choose a new character.';
+
+  @override
+  String get faqQ_copy => 'How do I copy text?';
+
+  @override
+  String get faqA_copy =>
+      'Simply tap on the text (Title, Author, Time, Description) to copy it to your clipboard. For ingredients and instructions, use the copy button next to the section title.';
 
   @override
   String get faqQ_legoshi => 'Why is a wolf staring at me when loading?';

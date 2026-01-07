@@ -17,6 +17,7 @@ class FAQScreen extends StatelessWidget {
       {'q': l10n.faqQ_favorites, 'a': l10n.faqA_favorites},
       {'q': l10n.faqQ_search, 'a': l10n.faqA_search},
       {'q': l10n.faqQ_profile, 'a': l10n.faqA_profile},
+      {'q': l10n.faqQ_copy, 'a': l10n.faqA_copy},
       // Jokes / Easter eggs
       {'q': l10n.faqQ_legoshi, 'a': l10n.faqA_legoshi},
       {'q': l10n.faqQ_egg, 'a': l10n.faqA_egg},

@@ -842,6 +842,48 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get cancel;
 
+  /// No description provided for @copied.
+  ///
+  /// In en, this message translates to:
+  /// **'copied'**
+  String get copied;
+
+  /// No description provided for @titleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get titleLabel;
+
+  /// No description provided for @authorLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Author name'**
+  String get authorLabel;
+
+  /// No description provided for @timeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooking time'**
+  String get timeLabel;
+
+  /// No description provided for @descLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get descLabel;
+
+  /// No description provided for @ingredientsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredients list'**
+  String get ingredientsLabel;
+
+  /// No description provided for @instructionsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Instructions list'**
+  String get instructionsLabel;
+
   /// No description provided for @delete.
   ///
   /// In en, this message translates to:
@@ -1003,6 +1045,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Yes, go to Profile > Edit Profile and tap on your current avatar to choose a new character.'**
   String get faqA_profile;
+
+  /// No description provided for @faqQ_copy.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I copy text?'**
+  String get faqQ_copy;
+
+  /// No description provided for @faqA_copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Simply tap on the text (Title, Author, Time, Description) to copy it to your clipboard. For ingredients and instructions, use the copy button next to the section title.'**
+  String get faqA_copy;
 
   /// No description provided for @faqQ_legoshi.
   ///
