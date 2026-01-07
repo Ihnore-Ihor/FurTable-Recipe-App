@@ -135,14 +135,14 @@
     "error": "Помилка",
     "success": "Успішно",
     "cancel": "Скасувати",
-    "copied": "{label} скопійовано",
-    "@copied": {
-        "placeholders": {
-            "label": {
-                "type": "String"
-            }
-        }
-    },
+    "copied": "скопійовано",
+    "titleLabel": "Назву",
+    "authorLabel": "Ім'я автора",
+    "timeLabel": "Час готування",
+    "descLabel": "Опис",
+    "ingredientsLabel": "Список інгредієнтів",
+    "instructionsLabel": "Список інструкцій",
+    "@copied": {},
     "delete": "Видалити",
     "edit": "Редагувати",
     "update": "Оновити",

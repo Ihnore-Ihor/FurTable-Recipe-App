@@ -400,9 +400,25 @@ class AppLocalizationsUk extends AppLocalizations {
   String get cancel => 'Скасувати';
 
   @override
-  String copied(String label) {
-    return '$label скопійовано';
-  }
+  String get copied => 'скопійовано';
+
+  @override
+  String get titleLabel => 'Назву';
+
+  @override
+  String get authorLabel => 'Ім\'я автора';
+
+  @override
+  String get timeLabel => 'Час готування';
+
+  @override
+  String get descLabel => 'Опис';
+
+  @override
+  String get ingredientsLabel => 'Список інгредієнтів';
+
+  @override
+  String get instructionsLabel => 'Список інструкцій';
 
   @override
   String get delete => 'Видалити';

@@ -1,3 +1,4 @@
+import 'dart:js' as js;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -51,32 +52,27 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
   }
 
   void _copyToClipboard(String content, String label) {
-    Clipboard.setData(ClipboardData(text: content));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(AppLocalizations.of(context)!.copied(label)),
-        backgroundColor: AppTheme.darkCharcoal,
-        duration: const Duration(seconds: 1),
-      ),
-    );
+    // Викликаємо JS функцію
+    try {
+      js.context.callMethod('copyToClipboard', [content]);
+
+      // Показуємо повідомлення
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$label ${AppLocalizations.of(context)!.copied}'),
+          backgroundColor: AppTheme.darkCharcoal,
+          duration: const Duration(seconds: 1),
+        ),
+      );
+    } catch (e) {
+      debugPrint("Copy error: $e");
+    }
   }
 
   Widget _buildCopyable(Widget child, String textToCopy, String label) {
     return GestureDetector(
-      onLongPress: () {
-        Clipboard.setData(ClipboardData(text: textToCopy));
-        // Легка вібрація для тактильного відгуку (HapticFeedback)
-        HapticFeedback.mediumImpact();
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('$label copied'),
-            backgroundColor: AppTheme.darkCharcoal,
-            duration: const Duration(seconds: 1),
-          ),
-        );
-      },
-      child: child, // Сам текст
+      onLongPress: () => _copyToClipboard(textToCopy, label),
+      child: child,
     );
   }
 
@@ -178,7 +174,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                             ),
                           ),
                           recipe.title, // Що копіювати
-                          "Title", // Назва для повідомлення
+                          AppLocalizations.of(context)!.titleLabel, // Назва для повідомлення
                         ),
                         const SizedBox(height: 16),
 
@@ -218,7 +214,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                                   ),
                                 ),
                                 recipe.authorName, // Копіюємо тільки ім'я
-                                "Author name",
+                                AppLocalizations.of(context)!.authorLabel,
                               ),
                             ),
                           ],
@@ -249,7 +245,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                               ),
                               DurationHelper.format(
                                   context, recipe.timeMinutes),
-                              "Time",
+                              AppLocalizations.of(context)!.timeLabel,
                             ),
                           ],
                         ),
@@ -281,16 +277,20 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                         ),
                         const SizedBox(height: 12),
 
-                        SelectableText(
-                          recipe.description.isNotEmpty
-                              ? recipe.description
-                              : AppLocalizations.of(context)!.noDescription,
-                          style: const TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 16,
-                            height: 1.6,
-                            color: AppTheme.darkCharcoal,
+                        _buildCopyable(
+                          Text(
+                            recipe.description.isNotEmpty
+                                ? recipe.description
+                                : AppLocalizations.of(context)!.noDescription,
+                            style: const TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 16,
+                              height: 1.6,
+                              color: AppTheme.darkCharcoal,
+                            ),
                           ),
+                          recipe.description,
+                          AppLocalizations.of(context)!.descLabel,
                         ),
 
                         const SizedBox(height: 32),
@@ -370,17 +370,21 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                                       milliseconds: 200,
                                     ),
                                     opacity: isDone ? 0.5 : 1.0,
-                                    child: SelectableText(
-                                      ingredient,
-                                      style: TextStyle(
-                                        fontFamily: 'Inter',
-                                        fontSize: 17,
-                                        height: 1.5,
-                                        color: AppTheme.darkCharcoal,
-                                        decoration: isDone
-                                            ? TextDecoration.lineThrough
-                                            : null,
+                                    child: _buildCopyable(
+                                      Text(
+                                        ingredient,
+                                        style: TextStyle(
+                                          fontFamily: 'Inter',
+                                          fontSize: 17,
+                                          height: 1.5,
+                                          color: AppTheme.darkCharcoal,
+                                          decoration: isDone
+                                              ? TextDecoration.lineThrough
+                                              : null,
+                                        ),
                                       ),
+                                      ingredient,
+                                      AppLocalizations.of(context)!.ingredientsLabel,
                                     ),
                                   ),
                                 ),
@@ -477,18 +481,22 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                                           ),
                                         ),
                                         const SizedBox(height: 4),
-                                        SelectableText(
-                                          step,
-                                          style: TextStyle(
-                                            fontFamily: 'Inter',
-                                            fontSize: 17,
-                                            height: 1.6,
-                                            color: AppTheme.darkCharcoal
-                                                .withValues(alpha: 0.9),
-                                            decoration: isDone
-                                                ? TextDecoration.lineThrough
-                                                : null,
+                                        _buildCopyable(
+                                          Text(
+                                            step,
+                                            style: TextStyle(
+                                              fontFamily: 'Inter',
+                                              fontSize: 17,
+                                              height: 1.6,
+                                              color: AppTheme.darkCharcoal
+                                                  .withValues(alpha: 0.9),
+                                              decoration: isDone
+                                                  ? TextDecoration.lineThrough
+                                                  : null,
+                                            ),
                                           ),
+                                          step,
+                                          AppLocalizations.of(context)!.instructionsLabel,
                                         ),
                                       ],
                                     ),

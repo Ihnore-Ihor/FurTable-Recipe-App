@@ -57,7 +57,39 @@
       align-items: center;
       overflow: hidden;
     }
+  </style>
 
+  <script> // Надійна функція копіювання для мобільних браузерів
+
+    window.copyToClipboard = (text) => {
+      if (navigator.clipboard && window.isSecureContext) {
+        return navigator.clipboard.writeText(text);
+      }
+
+      else {
+        // Fallback для старіших браузерів або незахищених з'єднань
+        let textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+          document.execCommand('copy');
+        }
+
+        catch (err) {
+          console.error('Unable to copy', err);
+        }
+
+        document.body.removeChild(textArea);
+      }
+    }
+
+  </script>
+  <style>
     /* 1. ВИМИКАЄМО ВИДІЛЕННЯ ТЕКСТУ НА САЙТІ (щоб не було синього в Деталях) */
     body {
       -webkit-user-select: none !important;
@@ -72,6 +104,11 @@
       user-select: text !important;
       caret-color: #2C2C2C !important;
       /* ЧОРНИЙ КУРСОР */
+      /* Спроба синхронізувати шрифт браузера з Flutter */
+      font-family: 'Inter', sans-serif !important;
+      font-size: 16px !important;
+      /* Стандартний розмір, щоб iOS не зумив */
+      line-height: normal !important;
     }
 
     /* 3. КОЛІР ВИДІЛЕННЯ В ПОЛЯХ (Чорний замість синього) */
@@ -86,126 +123,127 @@
       color: #FFFFFF !important;
       -webkit-text-fill-color: #FFFFFF !important;
     }
+  </style>
 
 
-    #splash-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      background-color: #F5F5F5;
-      transition: opacity 0.5s ease-out;
-    }
+  #splash-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  background-color: #F5F5F5;
+  transition: opacity 0.5s ease-out;
+  }
 
-    .splash-logo {
-      width: 220px;
-      height: 220px;
-      background-image: url('splash_logo.png');
-      background-size: contain;
-      background-repeat: no-repeat;
-      background-position: center;
-      margin-bottom: 20px;
-      animation: breathe 3s infinite ease-in-out;
-    }
+  .splash-logo {
+  width: 220px;
+  height: 220px;
+  background-image: url('splash_logo.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  margin-bottom: 20px;
+  animation: breathe 3s infinite ease-in-out;
+  }
 
-    /* Wrapper to prevent cursor jumping */
-    .typewriter {
-      display: inline-block;
-    }
+  /* Wrapper to prevent cursor jumping */
+  .typewriter {
+  display: inline-block;
+  }
 
-    .splash-text {
-      font-family: 'Inter', 'Courier New', Courier, monospace;
-      /* Must be monospace! */
-      font-size: 24px;
-      font-weight: bold;
-      color: #2C2C2C;
-      letter-spacing: 2px;
+  .splash-text {
+  font-family: 'Inter', 'Courier New', Courier, monospace;
+  /* Must be monospace! */
+  font-size: 24px;
+  font-weight: bold;
+  color: #2C2C2C;
+  letter-spacing: 2px;
 
-      overflow: hidden;
-      /* Hide what hasn't been written yet */
-      white-space: nowrap;
-      /* Prevent line wrapping */
-      border-right: 3px solid #2C2C2C;
-      /* Cursor */
+  overflow: hidden;
+  /* Hide what hasn't been written yet */
+  white-space: nowrap;
+  /* Prevent line wrapping */
+  border-right: 3px solid #2C2C2C;
+  /* Cursor */
 
-      width: 0;
-      /* Initial state - 0 characters */
+  width: 0;
+  /* Initial state - 0 characters */
 
-      /* Animation:
-         typing: changes width from 0 to 9ch.
-         steps(8): "FurTable" has 8 letters. We take 8 steps.
-         forwards: keep text on screen after completion.
-      */
-      animation:
-        typing 1.5s steps(8, end) forwards,
-        blink 0.75s step-end infinite;
-    }
+  /* Animation:
+  typing: changes width from 0 to 9ch.
+  steps(8): "FurTable" has 8 letters. We take 8 steps.
+  forwards: keep text on screen after completion.
+  */
+  animation:
+  typing 1.5s steps(8, end) forwards,
+  blink 0.75s step-end infinite;
+  }
 
-    .splash-loader {
-      margin-top: 30px;
-      width: 30px;
-      height: 30px;
-      border: 3px solid #e0e0e0;
-      border-top: 3px solid #2C2C2C;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
+  .splash-loader {
+  margin-top: 30px;
+  width: 30px;
+  height: 30px;
+  border: 3px solid #e0e0e0;
+  border-top: 3px solid #2C2C2C;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  }
 
-    @keyframes breathe {
-      0% {
-        transform: scale(1);
-        opacity: 0.9;
-      }
+  @keyframes breathe {
+  0% {
+  transform: scale(1);
+  opacity: 0.9;
+  }
 
-      50% {
-        transform: scale(1.05);
-        opacity: 1;
-      }
+  50% {
+  transform: scale(1.05);
+  opacity: 1;
+  }
 
-      100% {
-        transform: scale(1);
-        opacity: 0.9;
-      }
-    }
+  100% {
+  transform: scale(1);
+  opacity: 0.9;
+  }
+  }
 
-    @keyframes typing {
-      from {
-        width: 0;
-      }
+  @keyframes typing {
+  from {
+  width: 0;
+  }
 
-      /* 8ch - is the width of 8 letters. Add a little buffer (0.5ch) so cursor doesn't stick */
-      to {
-        width: 9ch;
-      }
-    }
+  /* 8ch - is the width of 8 letters. Add a little buffer (0.5ch) so cursor doesn't stick */
+  to {
+  width: 9ch;
+  }
+  }
 
-    @keyframes blink {
+  @keyframes blink {
 
-      from,
-      to {
-        border-color: transparent;
-      }
+  from,
+  to {
+  border-color: transparent;
+  }
 
-      50% {
-        border-color: #2C2C2C;
-      }
-    }
+  50% {
+  border-color: #2C2C2C;
+  }
+  }
 
-    @keyframes spin {
-      0% {
-        transform: rotate(0deg);
-      }
+  @keyframes spin {
+  0% {
+  transform: rotate(0deg);
+  }
 
-      100% {
-        transform: rotate(360deg);
-      }
-    }
+  100% {
+  transform: rotate(360deg);
+  }
+  }
   </style>
 
   <div id="splash-container">

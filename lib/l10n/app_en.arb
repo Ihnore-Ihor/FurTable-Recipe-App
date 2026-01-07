@@ -178,14 +178,14 @@
     "error": "Error",
     "success": "Success",
     "cancel": "Cancel",
-    "copied": "{label} copied",
-    "@copied": {
-        "placeholders": {
-            "label": {
-                "type": "String"
-            }
-        }
-    },
+    "copied": "copied",
+    "titleLabel": "Title",
+    "authorLabel": "Author name",
+    "timeLabel": "Cooking time",
+    "descLabel": "Description",
+    "ingredientsLabel": "Ingredients list",
+    "instructionsLabel": "Instructions list",
+    "@copied": {},
     "delete": "Delete",
     "edit": "Edit",
     "update": "Update",

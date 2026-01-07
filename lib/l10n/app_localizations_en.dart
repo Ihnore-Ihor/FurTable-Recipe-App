@@ -405,9 +405,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancel => 'Cancel';
 
   @override
-  String copied(String label) {
-    return '$label copied';
-  }
+  String get copied => 'copied';
+
+  @override
+  String get titleLabel => 'Title';
+
+  @override
+  String get authorLabel => 'Author name';
+
+  @override
+  String get timeLabel => 'Cooking time';
+
+  @override
+  String get descLabel => 'Description';
+
+  @override
+  String get ingredientsLabel => 'Ingredients list';
+
+  @override
+  String get instructionsLabel => 'Instructions list';
 
   @override
   String get delete => 'Delete';

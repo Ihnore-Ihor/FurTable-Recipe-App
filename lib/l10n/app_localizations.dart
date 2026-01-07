@@ -845,8 +845,44 @@ abstract class AppLocalizations {
   /// No description provided for @copied.
   ///
   /// In en, this message translates to:
-  /// **'{label} copied'**
-  String copied(String label);
+  /// **'copied'**
+  String get copied;
+
+  /// No description provided for @titleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get titleLabel;
+
+  /// No description provided for @authorLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Author name'**
+  String get authorLabel;
+
+  /// No description provided for @timeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooking time'**
+  String get timeLabel;
+
+  /// No description provided for @descLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get descLabel;
+
+  /// No description provided for @ingredientsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredients list'**
+  String get ingredientsLabel;
+
+  /// No description provided for @instructionsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Instructions list'**
+  String get instructionsLabel;
 
   /// No description provided for @delete.
   ///
