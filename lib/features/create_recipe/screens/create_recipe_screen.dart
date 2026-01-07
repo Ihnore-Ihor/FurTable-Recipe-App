@@ -50,10 +50,29 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
   bool _isPublic = true;
   Uint8List? _selectedImageBytes;
   final _storage = LocalStorageService();
+  bool _isPopBlocked = false; // To prevent concurrent dialogs
+  bool _canPopNow = false; // To allow programmatic pop when canPop is false
+
+  // Variables for initial state
+  late String _initTitle;
+  late String _initDesc;
+  late String _initIngr;
+  late String _initInstr;
+  late String _initTime;
+  late bool _initPublic;
 
   @override
   void initState() {
     super.initState();
+
+    // Initialize default values
+    _initTitle = '';
+    _initDesc = '';
+    _initIngr = '';
+    _initInstr = '';
+    _initTime = '30';
+    _initPublic = true;
+
     if (widget.recipeToEdit != null) {
       final r = widget.recipeToEdit!;
       _titleController.text = r.title;
@@ -62,9 +81,25 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
       _instructionsController.text = r.steps.join('\n');
       _timeController.text = r.timeMinutes.toString();
       _isPublic = r.isPublic;
+
+      // Cache initial state for comparison
+      _initTitle = r.title;
+      _initDesc = r.description;
+      _initIngr = r.ingredients.join('\n');
+      _initInstr = r.steps.join('\n');
+      _initTime = r.timeMinutes.toString();
+      _initPublic = r.isPublic;
     } else {
       // NEW: Load draft if not editing an existing recipe
       _loadDraft();
+      // Update init state after draft load in _loadDraft if needed, 
+      // but let's do it after _loadDraft call here for simplicity.
+      _initTitle = _titleController.text;
+      _initDesc = _descriptionController.text;
+      _initIngr = _ingredientsController.text;
+      _initInstr = _instructionsController.text;
+      _initTime = _timeController.text;
+      _initPublic = _isPublic;
     }
 
     // NEW: Listen for changes to auto-save draft
@@ -72,7 +107,87 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
     _descriptionController.addListener(_saveDraft);
     _ingredientsController.addListener(_saveDraft);
     _instructionsController.addListener(_saveDraft);
-    // Note: time is picked via dialog, so it's manually saved when set
+  }
+
+  bool _hasChanges() {
+    // 1. If a new image is selected - definitely changed
+    if (_selectedImageBytes != null) return true;
+
+    // 2. Compare text fields
+    if (_titleController.text != _initTitle) return true;
+    if (_descriptionController.text != _initDesc) return true;
+    if (_ingredientsController.text != _initIngr) return true;
+    if (_instructionsController.text != _initInstr) return true;
+    if (_timeController.text != _initTime) return true;
+    if (_isPublic != _initPublic) return true;
+
+    return false;
+  }
+
+  Future<void> _handleExit() async {
+    // If we are already in the exit process or showing a dialog, ignore
+    if (_isPopBlocked) return;
+
+    // If no changes -> exit directly
+    if (!_hasChanges()) {
+      setState(() => _canPopNow = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) Navigator.of(context).pop();
+      });
+      return;
+    }
+
+    _isPopBlocked = true;
+    // If there ARE changes -> show dialog
+    final shouldDiscard = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          AppLocalizations.of(context)!.discardChanges,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: Text(AppLocalizations.of(context)!.unsavedChangesMsg),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false), // Cancel
+            child: Text(
+              AppLocalizations.of(context)!.cancel,
+              style: const TextStyle(color: AppTheme.mediumGray),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.darkCharcoal,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape:
+                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            onPressed: () => Navigator.of(context).pop(true), // Discard
+            child: Text(AppLocalizations.of(context)!.discard),
+          ),
+        ],
+      ),
+    );
+
+    _isPopBlocked = false;
+
+    if (shouldDiscard == true && mounted) {
+      if (widget.recipeToEdit == null) {
+        _storage.clearDraft();
+        _storage.clearDraftImage();
+      }
+      
+      // Update state to allow the pop to proceed
+      setState(() => _canPopNow = true);
+      
+      // Use PostFrameCallback to ensure the state update is processed
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) Navigator.of(context).pop();
+      });
+    }
   }
 
   void _loadDraft() {
@@ -320,20 +435,25 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
           );
         }
       },
-      child: Scaffold(
-        backgroundColor: AppTheme.offWhite,
-        resizeToAvoidBottomInset: true,
-
-        appBar: AppBar(
-          title: Text(
-            isEditing
-                ? AppLocalizations.of(context)!.editRecipe
-                : AppLocalizations.of(context)!.createRecipe,
-          ),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-            onPressed: () => Navigator.pop(context),
-          ),
+      child: PopScope(
+        canPop: _canPopNow,
+        onPopInvokedWithResult: (didPop, result) async {
+          if (didPop) return;
+          await _handleExit();
+        },
+        child: Scaffold(
+          backgroundColor: AppTheme.offWhite,
+          resizeToAvoidBottomInset: true,
+          appBar: AppBar(
+            title: Text(
+              isEditing
+                  ? AppLocalizations.of(context)!.editRecipe
+                  : AppLocalizations.of(context)!.createRecipe,
+            ),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new, size: 20),
+              onPressed: _handleExit,
+            ),
           actions: [
             Padding(
               padding: const EdgeInsets.only(right: 16.0),
@@ -691,8 +811,9 @@ class _CreateRecipeViewState extends State<CreateRecipeView> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildLabel(String text) => Padding(
     padding: const EdgeInsets.only(bottom: 12),

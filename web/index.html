@@ -21,7 +21,7 @@
   <link rel="manifest" href="manifest.json">
 
   <style>
-    /* --- 1. НАЛАШТУВАННЯ СПЛЕШ-СКРІНУ --- */
+    /* --- 1. SPLASH SCREEN SETTINGS --- */
     body {
       background-color: #F5F5F5;
       margin: 0;
@@ -30,8 +30,8 @@
       width: 100vw;
       overflow: hidden;
       font-family: 'Courier New', Courier, monospace;
-      /* Забороняємо виділення інтерфейсу (кнопок, картинок), 
-         але НЕ чіпаємо input/textarea */
+      /* Prevent UI selection (buttons, images), 
+         but DO NOT affect input/textarea */
       -webkit-user-select: none;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
@@ -70,7 +70,7 @@
       letter-spacing: 2px;
       white-space: nowrap;
       border-right: 3px solid #2C2C2C;
-      /* Курсор друкарської машинки */
+      /* Typewriter cursor */
       overflow: hidden;
       width: 0;
       animation: typing 1.5s steps(8, end) forwards, blink 0.75s step-end infinite;
@@ -129,10 +129,10 @@
       }
     }
 
-    /* --- 2. ОЧИЩЕННЯ КОНФЛІКТІВ --- */
-    /* ВАЖЛИВО: Ми ПРИБРАЛИ всі правила для input і textarea. 
-       Нехай Flutter сам малює курсор, а браузер керує вводом. 
-       Це виправить "хаотичне введення" на Android. */
+    /* --- 2. CONFLICT RESOLUTION --- */
+    /* IMPORTANT: We REMOVED all rules for input and textarea. 
+       Let Flutter handle the cursor and the browser manage input. 
+       This will fix "chaotic input" on Android. */
   </style>
 </head>
 
@@ -140,7 +140,7 @@
   <!-- HTML SPINNER -->
   <div id="splash-container">
     <div class="splash-logo"></div>
-    <div style="display: inline-block;"> <!-- Обгортка для стабільності ширини -->
+    <div style="display: inline-block;"> <!-- Wrapper for width stability -->
       <div class="splash-text">FurTable</div>
     </div>
     <div class="loader-container">
@@ -167,7 +167,7 @@
     const analytics = getAnalytics(app);
   </script>
 
-  <!-- СКРИПТ ДЛЯ КОПІЮВАННЯ (Надійний) -->
+  <!-- CLIPBOARD SCRIPT (Reliable) -->
   <script>
     window.copyToClipboard = function (text) {
       if (navigator.clipboard && window.isSecureContext) {
@@ -183,8 +183,8 @@
       var textArea = document.createElement("textarea");
       textArea.value = text;
 
-      // ВАЖЛИВО ДЛЯ iOS: Робимо елемент редагованим, щоб клавіатура не стрибала,
-      // але ховаємо його
+      // IMPORTANT FOR iOS: Make the element editable so the keyboard doesn't jump,
+      // but hide it
       textArea.contentEditable = true;
       textArea.readOnly = false;
       textArea.style.position = "absolute";
@@ -192,7 +192,7 @@
 
       document.body.appendChild(textArea);
 
-      // Специфічне виділення для iOS
+      // Specific selection for iOS
       var range = document.createRange();
       range.selectNodeContents(textArea);
       var sel = window.getSelection();
@@ -209,7 +209,7 @@
     }
   </script>
 
-  <!-- СКРИПТ ДЛЯ HEIC -->
+  <!-- HEIC SCRIPT -->
   <script src="heic2any.min.js" type="application/javascript"></script>
   <script>
     function executeHeic2any(blob, multiple, toType, quality, gifInterval) {

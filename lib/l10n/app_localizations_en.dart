@@ -514,6 +514,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Yes, go to Profile > Edit Profile and tap on your current avatar to choose a new character.';
 
   @override
+  String get faqQ_copy => 'How do I copy text?';
+
+  @override
+  String get faqA_copy =>
+      'Simply tap on the text (Title, Author, Time, Description) to copy it to your clipboard. For ingredients and instructions, use the copy button next to the section title.';
+
+  @override
   String get faqQ_legoshi => 'Why is a wolf staring at me when loading?';
 
   @override

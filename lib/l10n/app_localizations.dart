@@ -1046,6 +1046,18 @@ abstract class AppLocalizations {
   /// **'Yes, go to Profile > Edit Profile and tap on your current avatar to choose a new character.'**
   String get faqA_profile;
 
+  /// No description provided for @faqQ_copy.
+  ///
+  /// In en, this message translates to:
+  /// **'How do I copy text?'**
+  String get faqQ_copy;
+
+  /// No description provided for @faqA_copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Simply tap on the text (Title, Author, Time, Description) to copy it to your clipboard. For ingredients and instructions, use the copy button next to the section title.'**
+  String get faqA_copy;
+
   /// No description provided for @faqQ_legoshi.
   ///
   /// In en, this message translates to:

@@ -53,7 +53,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
 
   void _copyToClipboard(String content, String label) {
     try {
-      // Виклик JS функції, яку ми додали в index.html
+      // Call JS function added in index.html
       js.context.callMethod('copyToClipboard', [content]);
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -64,7 +64,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
         ),
       );
     } catch (e) {
-      // Якщо JS не спрацював (наприклад, не Web), пробуємо Flutter метод
+      // If JS fails (e.g., not Web), fallback to Flutter method
       Clipboard.setData(ClipboardData(text: content));
       debugPrint("Copy error context JS failed: $e");
     }
@@ -177,8 +177,8 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                               height: 1.2,
                             ),
                           ),
-                          recipe.title, // Що копіювати
-                          AppLocalizations.of(context)!.titleLabel, // Назва для повідомлення
+                          recipe.title, // Content to copy
+                          AppLocalizations.of(context)!.titleLabel, // Label for the notification
                         ),
                         const SizedBox(height: 16),
 
@@ -217,7 +217,7 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                                     color: AppTheme.darkCharcoal,
                                   ),
                                 ),
-                                recipe.authorName, // Копіюємо тільки ім'я
+                                recipe.authorName, // Copy only the name
                                 AppLocalizations.of(context)!.authorLabel,
                               ),
                             ),
