@@ -61,6 +61,25 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
     );
   }
 
+  Widget _buildCopyable(Widget child, String textToCopy, String label) {
+    return GestureDetector(
+      onLongPress: () {
+        Clipboard.setData(ClipboardData(text: textToCopy));
+        // Легка вібрація для тактильного відгуку (HapticFeedback)
+        HapticFeedback.mediumImpact();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('$label copied'),
+            backgroundColor: AppTheme.darkCharcoal,
+            duration: const Duration(seconds: 1),
+          ),
+        );
+      },
+      child: child, // Сам текст
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -147,15 +166,19 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                         const SizedBox(height: 24),
 
                         // Recipe Title
-                        SelectableText(
-                          recipe.title,
-                          style: const TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 28,
-                            fontWeight: FontWeight.w800,
-                            color: AppTheme.darkCharcoal,
-                            height: 1.2,
+                        _buildCopyable(
+                          Text(
+                            recipe.title,
+                            style: const TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 28,
+                              fontWeight: FontWeight.w800,
+                              color: AppTheme.darkCharcoal,
+                              height: 1.2,
+                            ),
                           ),
+                          recipe.title, // Що копіювати
+                          "Title", // Назва для повідомлення
                         ),
                         const SizedBox(height: 16),
 
@@ -182,14 +205,20 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                             ),
                             const SizedBox(width: 14),
                             Expanded(
-                              child: SelectableText(
-                                AppLocalizations.of(context)!.byAuthor(recipe.authorName),
-                                style: const TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppTheme.darkCharcoal,
+                              child: _buildCopyable(
+                                Text(
+                                  AppLocalizations.of(context)!
+                                      .byAuthor(recipe.authorName),
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppTheme.darkCharcoal,
+                                  ),
                                 ),
+                                recipe.authorName, // Копіюємо тільки ім'я
+                                "Author name",
                               ),
                             ),
                           ],
@@ -207,14 +236,20 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
                               size: 20,
                             ),
                             const SizedBox(width: 8),
-                            SelectableText(
-                              DurationHelper.format(context, recipe.timeMinutes),
-                              style: const TextStyle(
-                                fontFamily: 'Inter',
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: AppTheme.darkCharcoal,
+                            _buildCopyable(
+                              Text(
+                                DurationHelper.format(
+                                    context, recipe.timeMinutes),
+                                style: const TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppTheme.darkCharcoal,
+                                ),
                               ),
+                              DurationHelper.format(
+                                  context, recipe.timeMinutes),
+                              "Time",
                             ),
                           ],
                         ),

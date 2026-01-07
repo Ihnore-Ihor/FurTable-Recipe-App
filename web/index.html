@@ -58,43 +58,28 @@
       overflow: hidden;
     }
 
-    /* 1. ГЛОБАЛЬНА ЗАБОРОНА ВИДІЛЕННЯ */
-    /* Це зробить додаток схожим на нативний: текст не світиться синім, коли скролиш */
+    /* 1. ВИМИКАЄМО ВИДІЛЕННЯ ТЕКСТУ НА САЙТІ (щоб не було синього в Деталях) */
     body {
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none !important;
+      user-select: none !important;
+      -webkit-tap-highlight-color: transparent !important;
     }
 
-    /* 2. ДОЗВІЛ ДЛЯ ПОЛІВ ВВОДУ ТА ВИБРАНИХ ЕЛЕМЕНТІВ */
-    /* Тільки в Input, Textarea та спеціальних платформах (для SelectableText) можна виділяти текст */
+    /* 2. ДОЗВОЛЯЄМО ТІЛЬКИ В ПОЛЯХ ВВОДУ */
     input,
-    textarea,
-    flt-platform-view {
+    textarea {
       -webkit-user-select: text !important;
-      -moz-user-select: text !important;
-      -ms-user-select: text !important;
       user-select: text !important;
-
-      /* Наш фірмовий стиль для браузерного курсора */
       caret-color: #2C2C2C !important;
+      /* ЧОРНИЙ КУРСОР */
     }
 
-    /* 3. КОЛІР ВИДІЛЕННЯ (Тільки для Input/Textarea/Selectable) */
-    /* Браузер намалює це ідеально рівно поверх тексту */
+    /* 3. КОЛІР ВИДІЛЕННЯ В ПОЛЯХ (Чорний замість синього) */
     ::selection {
       background-color: #2C2C2C !important;
       color: #FFFFFF !important;
     }
 
-    ::-moz-selection {
-      background-color: #2C2C2C !important;
-      color: #FFFFFF !important;
-    }
-
-    /* iOS Fix */
     input::selection,
     textarea::selection {
       background-color: #2C2C2C !important;
