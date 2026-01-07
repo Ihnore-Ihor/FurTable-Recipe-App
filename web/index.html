@@ -29,7 +29,12 @@
       height: 100vh;
       width: 100vw;
       overflow: hidden;
-      font-family: 'Inter', 'Courier New', Courier, monospace;
+      font-family: 'Courier New', Courier, monospace;
+      /* Забороняємо виділення інтерфейсу (кнопок, картинок), 
+         але НЕ чіпаємо input/textarea */
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
     #splash-container {
@@ -124,38 +129,10 @@
       }
     }
 
-
-    /* --- 2. ПРИХОВАННЯ НАТИВНОГО ВИДІЛЕННЯ (Фікс "кривого" курсора) --- */
-
-    /* Робимо нативний курсор і виділення ПРОЗОРИМИ.
-       Ми будемо бачити тільки те, що малює Flutter. */
-    input,
-    textarea {
-      caret-color: transparent !important;
-    }
-
-    ::selection {
-      background: transparent !important;
-      color: transparent !important;
-    }
-
-    ::-moz-selection {
-      background: transparent !important;
-      color: transparent !important;
-    }
-
-    input::selection,
-    textarea::selection {
-      background: transparent !important;
-      color: transparent !important;
-      -webkit-text-fill-color: transparent !important;
-    }
-
-    /* Прибираємо синю підсвітку тапу на Android/iOS */
-    * {
-      -webkit-tap-highlight-color: transparent !important;
-      outline: none !important;
-    }
+    /* --- 2. ОЧИЩЕННЯ КОНФЛІКТІВ --- */
+    /* ВАЖЛИВО: Ми ПРИБРАЛИ всі правила для input і textarea. 
+       Нехай Flutter сам малює курсор, а браузер керує вводом. 
+       Це виправить "хаотичне введення" на Android. */
   </style>
 </head>
 
@@ -195,7 +172,6 @@
     window.copyToClipboard = function (text) {
       if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(text).catch(err => {
-          console.error('Async copy failed', err);
           fallbackCopyTextToClipboard(text);
         });
       } else {
@@ -206,12 +182,24 @@
     function fallbackCopyTextToClipboard(text) {
       var textArea = document.createElement("textarea");
       textArea.value = text;
-      textArea.style.top = "0";
-      textArea.style.left = "0";
-      textArea.style.position = "fixed";
+
+      // ВАЖЛИВО ДЛЯ iOS: Робимо елемент редагованим, щоб клавіатура не стрибала,
+      // але ховаємо його
+      textArea.contentEditable = true;
+      textArea.readOnly = false;
+      textArea.style.position = "absolute";
+      textArea.style.left = "-9999px";
+
       document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
+
+      // Специфічне виділення для iOS
+      var range = document.createRange();
+      range.selectNodeContents(textArea);
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      textArea.setSelectionRange(0, 999999);
+
       try {
         document.execCommand('copy');
       } catch (err) {

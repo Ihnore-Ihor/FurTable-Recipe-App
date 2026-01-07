@@ -72,8 +72,11 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
 
   Widget _buildCopyable(Widget child, String textToCopy, String label) {
     return GestureDetector(
-      onLongPress: () => _copyToClipboard(textToCopy, label),
-      child: child,
+      onTap: () => _copyToClipboard(textToCopy, label),
+      child: Tooltip(
+        message: 'Tap to copy',
+        child: child,
+      ),
     );
   }
 
