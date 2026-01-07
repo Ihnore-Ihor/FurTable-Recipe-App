@@ -52,11 +52,10 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
   }
 
   void _copyToClipboard(String content, String label) {
-    // Викликаємо JS функцію
     try {
+      // Виклик JS функції, яку ми додали в index.html
       js.context.callMethod('copyToClipboard', [content]);
 
-      // Показуємо повідомлення
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('$label ${AppLocalizations.of(context)!.copied}'),
@@ -65,7 +64,9 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
         ),
       );
     } catch (e) {
-      debugPrint("Copy error: $e");
+      // Якщо JS не спрацював (наприклад, не Web), пробуємо Flutter метод
+      Clipboard.setData(ClipboardData(text: content));
+      debugPrint("Copy error context JS failed: $e");
     }
   }
 

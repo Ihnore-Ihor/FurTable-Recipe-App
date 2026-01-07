@@ -39,10 +39,10 @@ class AppTheme {
       splashColor: Colors.transparent,
       highlightColor: Colors.transparent,
 
-      textSelectionTheme: const TextSelectionThemeData(
-        cursorColor: Colors.transparent,
-        selectionColor: Colors.transparent,
-        selectionHandleColor: Colors.transparent,
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: darkCharcoal,
+        selectionColor: darkCharcoal.withValues(alpha: 0.3),
+        selectionHandleColor: darkCharcoal,
       ),
 
       // Styles the Flutter text selection menu (toolbar).
